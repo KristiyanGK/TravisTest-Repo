@@ -23,8 +23,6 @@ function EnsureLicenseInFile {
     }
 }
 
-Write-Host ('________________________PS VERSION IS:' + $PSVersionTable['psversion'])
-
 <#
 # enable invoke-dscresource feature for build process
 if ($PSVersionTable['PsEdition'] -eq 'Core') {

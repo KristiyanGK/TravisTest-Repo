@@ -12,15 +12,20 @@ matrix:
       addons:
         apt:
           sources:
-            - sourceline: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/16.04/prod trusty main"
+            - sourceline: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod trusty main"
               key_url: "https://packages.microsoft.com/keys/microsoft.asc"
-          packages:
-            - powershell
   fast_finish: true
 
 before_install:
+  - wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
+  - sudo dpkg -i packages-microsoft-prod.deb
+  - sudo apt-get update
+  - sudo add-apt-repository universe
+  - sudo apt-get install -y powershell
+
   - chmod +x Build/travis-push.sh
 script:
+  - pwsh -File './Build/enableExperimentalFeature.ps1'
   - pwsh -File './Build/build.ps1'
 after_success:
   - '[ "${TRAVIS_EVENT_TYPE}" = "push" ] && [ "${TRAVIS_BRANCH}" = "master" ] && Build/travis-push.sh'
