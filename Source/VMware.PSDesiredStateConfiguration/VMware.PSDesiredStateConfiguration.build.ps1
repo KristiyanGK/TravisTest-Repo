@@ -22,20 +22,3 @@ function EnsureLicenseInFile {
         throw "$($file.FullName) does not contain the required license"
     }
 }
-
-# paths to all scripts
-$scriptPaths = @(
-    (Join-Path $PSScriptRoot 'Classes')
-    (Join-Path $PSScriptRoot 'Functions')
-    (Join-Path $PSScriptRoot 'Tests')
-)
-
-# license with comment brackets
-$license = Get-Content (Join-Path $PSScriptRoot 'license.txt') -Raw
-$license = $license.Trim()
-$license = "<`#" + [System.Environment]::NewLine + $license + [System.Environment]::NewLine + "`#>"
-
-Get-ChildItem -Filter '*.ps1' -Path $scriptPaths -Recurse | ForEach-Object {
-    # check if all files have their license
-    EnsureLicenseInFile $_ $license
-}
