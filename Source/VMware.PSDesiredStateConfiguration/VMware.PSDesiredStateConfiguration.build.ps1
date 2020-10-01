@@ -22,7 +22,7 @@ function EnsureLicenseInFile {
         throw "$($file.FullName) does not contain the required license"
     }
 }
-
+<#
 # enable invoke-dscresource feature for build process
 if ($PSVersionTable['PsEdition'] -eq 'Core') {
     # check if the Invoke-DscResource emperimental feature is enabled
@@ -30,3 +30,4 @@ if ($PSVersionTable['PsEdition'] -eq 'Core') {
         Enable-ExperimentalFeature PSDesiredStateConfiguration.InvokeDscResource
     }
 }
+#>
