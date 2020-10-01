@@ -344,6 +344,8 @@ Register-PSRepository -Default -ErrorAction SilentlyContinue
 # Installs Pester.
 Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
 
+Write-Host ("____________________________Env:moduepath is " + $env:PSModulePath)
+
 # Runs all unit tests in the module.
 $script:ModuleFolderPath = (Get-Module $script:ModuleName -ListAvailable).ModuleBase
 $script:UnitTestsFolderPath = (Join-Path $script:ModuleFolderPath 'Tests')

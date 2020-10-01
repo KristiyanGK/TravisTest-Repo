@@ -22,3 +22,9 @@ function EnsureLicenseInFile {
         throw "$($file.FullName) does not contain the required license"
     }
 }
+
+$moduleRoot = $PSScriptRoot
+
+$configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc Resources') 'MyDscResource'
+
+$env:PSModulePath += ":$configPath"
