@@ -3,7 +3,7 @@
 #>
 Configuration Test
 {
-    Import-DscResource -ModuleName MyDscResource
+    Import-DscResource -Name 'CompositeResourceTest'
 
     CompositeResourceTest Test 
     {
