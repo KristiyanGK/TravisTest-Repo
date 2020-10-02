@@ -7,12 +7,12 @@ branches:
 matrix:
   include:
     - os: linux
-      dist: Xenial
+      dist: Bionic
       sudo: false
       addons:
         apt:
           sources:
-            - sourceline: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/16.04/prod xenial main"
+            - sourceline: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main"
               key_url: "https://packages.microsoft.com/keys/microsoft.asc"
           packages:
             - powershell
