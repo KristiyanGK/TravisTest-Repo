@@ -344,8 +344,6 @@ Register-PSRepository -Default -ErrorAction SilentlyContinue
 # Installs Pester.
 Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
 
-Write-Host ("____________________________Env:moduepath is " + $env:PSModulePath)
-
 # Runs all unit tests in the module.
 $script:ModuleFolderPath = (Get-Module $script:ModuleName -ListAvailable).ModuleBase
 $script:UnitTestsFolderPath = (Join-Path $script:ModuleFolderPath 'Tests')
@@ -365,15 +363,6 @@ Update-CodeCoveragePercentInTextFile -CodeCoveragePercent $script:CoveragePercen
 
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $changelogDocumentPath = Join-Path -Path $script:ProjectRoot -ChildPath 'CHANGELOG.md'
-
-    # Retrieving the 'RequiredModules' array from the RequiredModules file.
-    $requiredModulesFilePath = Join-Path -Path $script:ModuleRoot -ChildPath 'RequiredModules.ps1'
-    $requiredModulesContent = Get-Content -Path $requiredModulesFilePath
-    $requiredModules = Get-RequiredModules -RequiredModulesContent $requiredModulesContent
-
-    # Updating the required modules array in the psd1 file.
-    $script:PsdContent = Update-RequiredModules -ModuleManifestContent $script:PsdContent -RequiredModules $requiredModules
-    $script:PsdContent | Out-File -FilePath $script:PsdPath -Encoding Default
 
     $moduleVersion = Get-ModuleVersion -PsdPath $script:PsdPath
     $pullRequestDescription = Get-PullRequestDescription

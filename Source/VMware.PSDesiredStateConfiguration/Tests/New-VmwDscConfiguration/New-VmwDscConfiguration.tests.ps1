@@ -179,6 +179,16 @@ InModuleScope -ModuleName 'VMware.PSDesiredStateConfiguration' {
                     Script:AssertConfigurationEqual $res $Script:expectedCompiled
                 }
                 It 'Should compile composite resource correctly' {
+
+                    $os = $PSVersionTable['Platform']
+
+                    if (-not $os.Contains('Microsoft Windows')) {
+                        Write-Warning 'Composite Resources are not discoverable in non windows OS due to a bug in Powershell'
+
+                        $true | Should -Be $true
+                        return
+                    }
+
                     # arrange
                     $configToUse = 'compositeResourceConfig.ps1'
                     $configFile = Join-Path $Script:configFolder $configToUse
