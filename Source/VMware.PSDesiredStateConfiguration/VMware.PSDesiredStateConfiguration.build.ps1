@@ -23,8 +23,29 @@ function EnsureLicenseInFile {
     }
 }
 
+function Update-ModuleVersion {
+    [CmdletBinding()]
+    [OutputType([System.Object[]])]
+    param(
+        [System.Object[]] $FileContent
+    )
+
+    $moduleVersionPattern = "(?<=ModuleVersion = ')(\d*.\d*.\d*.\d*)"
+    $moduleVersionMatch = $FileContent | Select-String -Pattern $moduleVersionPattern
+    [System.Version] $currentVersion = $moduleVersionMatch.Matches[0].Value
+
+    $newVersion = (New-Object -TypeName 'System.Version' $currentVersion.Major, $currentVersion.Minor, $currentVersion.Build, ($currentVersion.Revision + 1)).ToString()
+
+    return $FileContent -Replace $moduleVersionPattern, $newVersion
+}
+
 $moduleRoot = $PSScriptRoot
 
 $configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc Resources') 'MyDscResource'
 
 $env:PSModulePath += ":$configPath"
+
+# update module version in manifest
+$psdFileContent = Get-Content -Path (Join-Path $PSScriptRoot 'VMware.PSDesiredStateConfiguration.psd1')
+
+$psdFileContent = Update-ModuleVersion -FileContent $psdFileContent
