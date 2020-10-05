@@ -52,4 +52,4 @@ The following example uses [VMHostNtpSettings Resource](https://github.com/vmwar
    ```
 ## Branches
 [![Build Status](https://travis-ci.org/KristiyanGK/TravisTest-Repo.svg?branch=master)](https://travis-ci.org/KristiyanGK/TravisTest-Repo)
-![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
+![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg?maxAge=60)
