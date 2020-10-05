@@ -55,7 +55,7 @@ function Get-PullRequestDescription {
     [CmdletBinding()]
     [OutputType([string])]
 
-    $repository = 'vmware/dscr-for-vmware'
+    $repository = 'KristiyanGK/TravisTest-Repo'
     $searchType = 'pr'
     $pullRequestState = 'closed'
 
