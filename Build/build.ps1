@@ -381,7 +381,7 @@ function Start-PsDesiredStateConfigurationBuild {
 #>
 function Start-VsphereBuild {
     # Updating the content of the psm1 and psd1 files via the build module file.
-    $moduleName = 'VMware.vSphereDsc'
+    $moduleName = 'VMware.vSphereDSC'
     $moduleRoot = Join-Path $Script:SourceRoot $moduleName
     $buildModuleFilePath = Join-Path -Path $moduleRoot -ChildPath "$moduleName.build.ps1"
     . $buildModuleFilePath
