@@ -52,5 +52,7 @@ The following example uses [VMHostNtpSettings Resource](https://github.com/vmwar
    ```
 ## Branches
 [![Build Status](https://travis-ci.org/KristiyanGK/TravisTest-Repo.svg?branch=master)](https://travis-ci.org/KristiyanGK/TravisTest-Repo)
+
 VMware.vSphereDsc ![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
+
 VMware.PSDesiredStateConfiguration ![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
