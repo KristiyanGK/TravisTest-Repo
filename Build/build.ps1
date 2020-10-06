@@ -423,6 +423,7 @@ $env:PSModulePath = $env:PSModulePath + ":$script:SourceRoot"
 # Register-PSRepository -Default -ErrorAction SilentlyContinue
 
 # Installs Pester.
+# test
 Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
 
 $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
