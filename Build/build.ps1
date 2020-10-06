@@ -427,7 +427,7 @@ Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -S
 
 $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
-$vSpheremoduleVersion = Start-VsphereBuild
+$vSpheremoduleVersion = '2.0.0.0' #Start-VsphereBuild
 
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $pullRequestDescription = Get-PullRequestDescription
