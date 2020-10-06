@@ -182,24 +182,6 @@ enum VsanDataMigrationMode {
     Unset
 }
 
-enum AccessMode {
-    ReadWrite
-    ReadOnly
-}
-
-enum AuthenticationMethod {
-    AUTH_SYS
-    Kerberos
-}
-
-enum NicTeamingPolicy {
-    Loadbalance_ip
-    Loadbalance_srcmac
-    Loadbalance_srcid
-    Failover_explicit
-    Unset
-}
-
 enum DrsAutomationLevel {
     FullyAutomated
     Manual
@@ -220,6 +202,24 @@ enum HARestartPriority {
     Low
     Medium
     High
+    Unset
+}
+
+enum AccessMode {
+    ReadWrite
+    ReadOnly
+}
+
+enum AuthenticationMethod {
+    AUTH_SYS
+    Kerberos
+}
+
+enum NicTeamingPolicy {
+    Loadbalance_ip
+    Loadbalance_srcmac
+    Loadbalance_srcid
+    Failover_explicit
     Unset
 }
 
@@ -11481,6 +11481,1597 @@ class VMHostTpsSettings : VMHostBaseDSC {
 }
 
 [DscResource()]
+class VMHostVss : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The maximum transmission unit (MTU) associated with this virtual switch in bytes.
+    #>
+    [DscProperty()]
+    [nullable[int]] $Mtu
+
+    <#
+    .DESCRIPTION
+
+    The virtual switch key.
+    #>
+    [DscProperty(NotConfigurable)]
+    [string] $Key
+
+    <#
+    .DESCRIPTION
+
+    The number of ports that this virtual switch currently has.
+    #>
+    [DscProperty(NotConfigurable)]
+    [int] $NumPorts
+
+    <#
+    .DESCRIPTION
+
+    The number of ports that are available on this virtual switch.
+    #>
+    [DscProperty(NotConfigurable)]
+    [int] $NumPortsAvailable
+
+    <#
+    .DESCRIPTION
+
+    The set of physical network adapters associated with this bridge.
+    #>
+    [DscProperty(NotConfigurable)]
+    [string[]] $Pnic
+
+    <#
+    .DESCRIPTION
+
+    The list of port groups configured for this virtual switch.
+    #>
+    [DscProperty(NotConfigurable)]
+    [string[]] $PortGroup
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVss($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $result = ($null -eq $vss)
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVss] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $result = [VMHostVss]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.Key) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVss should be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssTest = @(
+            $this.ShouldUpdateDscResourceSetting('VssName', $vss.Name, $this.VssName),
+            $this.ShouldUpdateDscResourceSetting('Mtu', $vss.Mtu, $this.Mtu)
+        )
+
+        return ($vssTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVss($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssConfigArgs = @{
+            Name = $this.VssName
+            Mtu = $this.Mtu
+        }
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($null -ne $vss) {
+                if ($this.Equals($vss)) {
+                    return
+                }
+                $vssConfigArgs.Add('Operation', 'edit')
+            }
+            else {
+                $vssConfigArgs.Add('Operation', 'add')
+            }
+        }
+        else {
+            if ($null -eq $vss) {
+                return
+            }
+            $vssConfigArgs.Add('Operation', 'remove')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssConfig $vssConfigArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the virtual switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSS) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSS.Key = $currentVss.Key
+            $vmHostVSS.Mtu = $currentVss.Mtu
+            $vmHostVSS.VssName = $currentVss.Name
+            $vmHostVSS.NumPortsAvailable = $currentVss.NumPortsAvailable
+            $vmHostVSS.Pnic = $currentVss.Pnic
+            $vmHostVSS.PortGroup = $currentVss.PortGroup
+        }
+        else{
+            $vmHostVSS.Key = [string]::Empty
+            $vmHostVSS.Mtu = $this.Mtu
+            $vmHostVSS.VssName = $this.VssName
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVssBridge : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The list of keys of the physical network adapters to be bridged.
+    #>
+    [DscProperty()]
+    [string[]] $NicDevice
+
+    <#
+    .DESCRIPTION
+
+    The beacon configuration to probe for the validity of a link.
+    If this is set, beacon probing is configured and will be used.
+    If this is not set, beacon probing is disabled.
+    Determines how often, in seconds, a beacon should be sent.
+    #>
+    [DscProperty()]
+    [nullable[int]] $BeaconInterval
+
+    <#
+    .DESCRIPTION
+
+    The link discovery protocol, whether to advertise or listen.
+    #>
+    [DscProperty()]
+    [LinkDiscoveryProtocolOperation] $LinkDiscoveryProtocolOperation = [LinkDiscoveryProtocolOperation]::Unset
+
+    <#
+    .DESCRIPTION
+
+    The link discovery protocol type.
+    #>
+    [DscProperty()]
+    [LinkDiscoveryProtocolProtocol] $LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssBridge($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.NicDevice = @()
+                $this.BeaconInterval = 0
+                $this.LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssBridge] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $result = [VMHostVssBridge]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVssBridge should to be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssBridgeTest = @(
+            $this.ShouldUpdateArraySetting('NicDevice', $vss.Spec.Bridge.NicDevice, $this.NicDevice),
+            $this.ShouldUpdateDscResourceSetting('BeaconInterval', $vss.Spec.Bridge.Beacon.Interval, $this.BeaconInterval),
+            $this.ShouldUpdateDscResourceSetting(
+                'LinkDiscoveryProtocolProtocol',
+                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol,
+                $this.LinkDiscoveryProtocolProtocol.ToString()
+            ),
+            $this.ShouldUpdateDscResourceSetting(
+                'LinkDiscoveryProtocolOperation',
+                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation,
+                $this.LinkDiscoveryProtocolOperation.ToString()
+            )
+        )
+
+        return ($vssBridgeTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the Bridge configuration of the virtual switch.
+    #>
+    [void] UpdateVssBridge($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssBridgeArgs = @{
+            Name = $this.VssName
+            NicDevice = $this.NicDevice
+        }
+
+        # The Bridge configuration of the Standard Switch should be populated only when the Nic devices are passed.
+        if ($this.NicDevice.Count -gt 0) {
+            if ($null -ne $this.BeaconInterval) { $vssBridgeArgs.BeaconInterval = $this.BeaconInterval }
+            if ($this.LinkDiscoveryProtocolProtocol -ne [LinkDiscoveryProtocolProtocol]::Unset) {
+                $vssBridgeArgs.Add('LinkDiscoveryProtocolProtocol', $this.LinkDiscoveryProtocolProtocol.ToString())
+                $vssBridgeArgs.Add('LinkDiscoveryProtocolOperation', $this.LinkDiscoveryProtocolOperation.ToString())
+            }
+        }
+
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+        }
+        else {
+            $vssBridgeArgs.NicDevice = @()
+        }
+        $vssBridgeArgs.Add('Operation', 'edit')
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssBridgeConfig $vssBridgeArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Bridge Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Bridge settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSBridge) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSBridge.VssName = $currentVss.Name
+            $vmHostVSSBridge.NicDevice = $currentVss.Spec.Bridge.NicDevice
+            $vmHostVSSBridge.BeaconInterval = $currentVss.Spec.Bridge.Beacon.Interval
+
+            if ($null -ne $currentVss.Spec.Bridge.linkDiscoveryProtocolConfig) {
+                $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation.ToString()
+                $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol.ToString()
+            }
+        }
+        else {
+            $vmHostVSSBridge.VssName = $this.VssName
+            $vmHostVSSBridge.NicDevice = $this.NicDevice
+            $vmHostVSSBridge.BeaconInterval = $this.BeaconInterval
+            $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $this.LinkDiscoveryProtocolOperation
+            $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $this.LinkDiscoveryProtocolProtocol
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVssSecurity : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not all traffic is seen on the port.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $AllowPromiscuous
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not the virtual network adapter should be
+    allowed to send network traffic with a different MAC address than that of
+    the virtual network adapter.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $ForgedTransmits
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not the Media Access Control (MAC) address
+    can be changed.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $MacChanges
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssSecurity($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.AllowPromiscuous = $false
+                $this.ForgedTransmits = $true
+                $this.MacChanges = $true
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssSecurity] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $result = [VMHostVssSecurity]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVssSecurity should to be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssSecurityTest = @(
+            $this.ShouldUpdateDscResourceSetting('AllowPromiscuous', $vss.Spec.Policy.Security.AllowPromiscuous, $this.AllowPromiscuous),
+            $this.ShouldUpdateDscResourceSetting('ForgedTransmits', $vss.Spec.Policy.Security.ForgedTransmits, $this.ForgedTransmits),
+            $this.ShouldUpdateDscResourceSetting('MacChanges', $vss.Spec.Policy.Security.MacChanges, $this.MacChanges)
+        )
+
+        return ($vssSecurityTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVssSecurity($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssSecurityArgs = @{
+            Name = $this.VssName
+            AllowPromiscuous = $this.AllowPromiscuous
+            ForgedTransmits = $this.ForgedTransmits
+            MacChanges = $this.MacChanges
+        }
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+            $vssSecurityArgs.Add('Operation', 'edit')
+        }
+        else {
+            $vssSecurityArgs.AllowPromiscuous = $false
+            $vssSecurityArgs.ForgedTransmits = $true
+            $vssSecurityArgs.MacChanges = $true
+            $vssSecurityArgs.Add('Operation', 'edit')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssSecurityConfig $vssSecurityArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Security Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSSecurity) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSSecurity.VssName = $currentVss.Name
+            $vmHostVSSSecurity.AllowPromiscuous = $currentVss.Spec.Policy.Security.AllowPromiscuous
+            $vmHostVSSSecurity.ForgedTransmits = $currentVss.Spec.Policy.Security.ForgedTransmits
+            $vmHostVSSSecurity.MacChanges = $currentVss.Spec.Policy.Security.MacChanges
+        }
+        else {
+            $vmHostVSSSecurity.VssName = $this.VssName
+            $vmHostVSSSecurity.AllowPromiscuous = $this.AllowPromiscuous
+            $vmHostVSSSecurity.ForgedTransmits = $this.ForgedTransmits
+            $vmHostVSSSecurity.MacChanges = $this.MacChanges
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVssShaping : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The average bandwidth in bits per second if shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $AverageBandwidth
+
+    <#
+    .DESCRIPTION
+
+    The maximum burst size allowed in bytes if shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $BurstSize
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not traffic shaper is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Enabled
+
+    <#
+    .DESCRIPTION
+
+    The peak bandwidth during bursts in bits per second if traffic shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $PeakBandwidth
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssShaping($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.AverageBandwidth = 100000
+                $this.BurstSize = 100000
+                $this.Enabled = $false
+                $this.PeakBandwidth = 100000
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssShaping] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $result = [VMHostVssShaping]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVssShaping should to be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssShapingTest = @(
+            $this.ShouldUpdateDscResourceSetting('AverageBandwidth', $vss.Spec.Policy.ShapingPolicy.AverageBandwidth, $this.AverageBandwidth),
+            $this.ShouldUpdateDscResourceSetting('BurstSize', $vss.Spec.Policy.ShapingPolicy.BurstSize, $this.BurstSize),
+            $this.ShouldUpdateDscResourceSetting('Enabled', $vss.Spec.Policy.ShapingPolicy.Enabled, $this.Enabled),
+            $this.ShouldUpdateDscResourceSetting('PeakBandwidth', $vss.Spec.Policy.ShapingPolicy.PeakBandwidth, $this.PeakBandwidth)
+        )
+
+        return ($vssShapingTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVssShaping($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssShapingArgs = @{
+            Name = $this.VssName
+            AverageBandwidth = $this.AverageBandwidth
+            BurstSize = $this.BurstSize
+            Enabled = $this.Enabled
+            PeakBandwidth = $this.PeakBandwidth
+        }
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+            $vssShapingArgs.Add('Operation', 'edit')
+        }
+        else {
+            $vssShapingArgs.AverageBandwidth = 100000
+            $vssShapingArgs.BurstSize = 100000
+            $vssShapingArgs.Enabled = $false
+            $vssShapingArgs.PeakBandwidth = 100000
+            $vssShapingArgs.Add('Operation', 'edit')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssShapingConfig $vssShapingArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Shaping Policy Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSShaping) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSShaping.VssName = $currentVss.Name
+            $vmHostVSSShaping.AverageBandwidth = $currentVss.Spec.Policy.ShapingPolicy.AverageBandwidth
+            $vmHostVSSShaping.BurstSize = $currentVss.Spec.Policy.ShapingPolicy.BurstSize
+            $vmHostVSSShaping.Enabled = $currentVss.Spec.Policy.ShapingPolicy.Enabled
+            $vmHostVSSShaping.PeakBandwidth = $currentVss.Spec.Policy.ShapingPolicy.PeakBandwidth
+        }
+        else {
+            $vmHostVSSShaping.VssName = $this.Name
+            $vmHostVSSShaping.AverageBandwidth = $this.AverageBandwidth
+            $vmHostVSSShaping.BurstSize = $this.BurstSize
+            $vmHostVSSShaping.Enabled = $this.Enabled
+            $vmHostVSSShaping.PeakBandwidth = $this.PeakBandwidth
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVssTeaming : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not to enable beacon probing
+    as a method to validate the link status of a physical network adapter.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $CheckBeacon
+
+    <#
+    .DESCRIPTION
+
+    List of active network adapters used for load balancing.
+    #>
+    [DscProperty()]
+    [string[]] $ActiveNic
+
+    <#
+    .DESCRIPTION
+
+    Standby network adapters used for failover.
+    #>
+    [DscProperty()]
+    [string[]] $StandbyNic
+
+    <#
+    .DESCRIPTION
+
+    Flag to specify whether or not to notify the physical switch if a link fails.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $NotifySwitches
+
+    <#
+    .DESCRIPTION
+
+    Network adapter teaming policy.
+    #>
+    [DscProperty()]
+    [NicTeamingPolicy] $Policy = [NicTeamingPolicy]::Unset
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not to use a rolling policy when restoring links.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $RollingOrder
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssTeaming($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.CheckBeacon = $false
+                $this.ActiveNic = @()
+                $this.StandbyNic = @()
+                $this.NotifySwitches = $true
+                $this.Policy = [NicTeamingPolicy]::Loadbalance_srcid
+                $this.RollingOrder = $false
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssTeaming] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $result = [VMHostVssTeaming]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVssTeaming should to be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssTeamingTest = @(
+            $this.ShouldUpdateDscResourceSetting('CheckBeacon', $vss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon, $this.CheckBeacon),
+            $this.ShouldUpdateDscResourceSetting('NotifySwitches', $vss.Spec.Policy.NicTeaming.NotifySwitches, $this.NotifySwitches),
+            $this.ShouldUpdateDscResourceSetting('RollingOrder', $vss.Spec.Policy.NicTeaming.RollingOrder, $this.RollingOrder),
+            $this.ShouldUpdateDscResourceSetting('Policy', [string] $vss.Spec.Policy.NicTeaming.Policy, $this.Policy.ToString().ToLower()),
+            $this.ShouldUpdateArraySetting('ActiveNic', $vss.Spec.Policy.NicTeaming.NicOrder.ActiveNic, $this.ActiveNic),
+            $this.ShouldUpdateArraySetting('StandbyNic', $vss.Spec.Policy.NicTeaming.NicOrder.StandbyNic, $this.StandbyNic)
+        )
+
+        return ($vssTeamingTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVssTeaming($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $vssTeamingArgs = @{
+            Name = $this.VssName
+            ActiveNic = $this.ActiveNic
+            StandbyNic = $this.StandbyNic
+            NotifySwitches = $this.NotifySwitches
+            RollingOrder = $this.RollingOrder
+        }
+
+        if ($null -ne $this.CheckBeacon) { $vssTeamingArgs.CheckBeacon = $this.CheckBeacon }
+        if ($this.Policy -ne [NicTeamingPolicy]::Unset) { $vssTeamingArgs.Policy = $this.Policy.ToString().ToLower() }
+
+        $vss = $this.GetVss()
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+            $vssTeamingArgs.Add('Operation', 'edit')
+        }
+        else {
+            $vssTeamingArgs.CheckBeacon = $false
+            $vssTeamingArgs.ActiveNic = @()
+            $vssTeamingArgs.StandbyNic = @()
+            $vssTeamingArgs.NotifySwitches = $true
+            $vssTeamingArgs.Policy = ([NicTeamingPolicy]::Loadbalance_srcid).ToString().ToLower()
+            $vssTeamingArgs.RollingOrder = $false
+            $vssTeamingArgs.Add('Operation', 'edit')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssTeamingConfig $vssTeamingArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Teaming Policy Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSTeaming) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSTeaming.VssName = $currentVss.Name
+            $vmHostVSSTeaming.CheckBeacon = $currentVss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon
+            $vmHostVSSTeaming.ActiveNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.ActiveNic
+            $vmHostVSSTeaming.StandbyNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.StandbyNic
+            $vmHostVSSTeaming.NotifySwitches = $currentVss.Spec.Policy.NicTeaming.NotifySwitches
+            $vmHostVSSTeaming.Policy = [NicTeamingPolicy]$currentVss.Spec.Policy.NicTeaming.Policy
+            $vmHostVSSTeaming.RollingOrder = $currentVss.Spec.Policy.NicTeaming.RollingOrder
+        }
+        else {
+            $vmHostVSSTeaming.VssName = $this.Name
+            $vmHostVSSTeaming.CheckBeacon = $this.CheckBeacon
+            $vmHostVSSTeaming.ActiveNic = $this.ActiveNic
+            $vmHostVSSTeaming.StandbyNic = $this.StandbyNic
+            $vmHostVSSTeaming.NotifySwitches = $this.NotifySwitches
+            $vmHostVSSTeaming.Policy = $this.Policy
+            $vmHostVSSTeaming.RollingOrder = $this.RollingOrder
+        }
+    }
+}
+
+[DscResource()]
+class DrsCluster : DatacenterInventoryBaseDSC {
+    DrsCluster() {
+        $this.InventoryItemFolderType = [FolderType]::Host
+    }
+
+    <#
+    .DESCRIPTION
+
+    Indicates that VMware DRS (Distributed Resource Scheduler) is enabled.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $DrsEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies a DRS (Distributed Resource Scheduler) automation level. The valid values are FullyAutomated, Manual, PartiallyAutomated, Disabled and Unset.
+    #>
+    [DscProperty()]
+    [DrsAutomationLevel] $DrsAutomationLevel = [DrsAutomationLevel]::Unset
+
+    <#
+    .DESCRIPTION
+
+    Threshold for generated ClusterRecommendations. DRS generates only those recommendations that are above the specified vmotionRate. Ratings vary from 1 to 5.
+    This setting applies to Manual, PartiallyAutomated, and FullyAutomated DRS Clusters.
+    #>
+    [DscProperty()]
+    [nullable[int]] $DrsMigrationThreshold
+
+    <#
+    .DESCRIPTION
+
+    For availability, distributes a more even number of virtual machines across hosts.
+    #>
+    [DscProperty()]
+    [nullable[int]] $DrsDistribution
+
+    <#
+    .DESCRIPTION
+
+    Load balance based on consumed memory of virtual machines rather than active memory.
+    This setting is recommended for clusters where host memory is not over-committed.
+    #>
+    [DscProperty()]
+    [nullable[int]] $MemoryLoadBalancing
+
+    <#
+    .DESCRIPTION
+
+    Controls CPU over-commitment in the cluster.
+    Min value is 0 and Max value is 500.
+    #>
+    [DscProperty()]
+    [nullable[int]] $CPUOverCommitment
+
+    hidden [string] $DrsEnabledConfigPropertyName = 'Enabled'
+    hidden [string] $DrsAutomationLevelConfigPropertyName = 'DefaultVmBehavior'
+    hidden [string] $DrsMigrationThresholdConfigPropertyName = 'VmotionRate'
+    hidden [string] $DrsDistributionSettingName = 'LimitVMsPerESXHostPercent'
+    hidden [string] $MemoryLoadBalancingSettingName = 'PercentIdleMBInMemDemand'
+    hidden [string] $CPUOverCommitmentSettingName = 'MaxVcpusPerClusterPct'
+
+    [void] Set() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $this.AddCluster($clusterLocation)
+                }
+                else {
+                    $this.UpdateCluster($cluster)
+                }
+            }
+            else {
+                if ($null -ne $cluster) {
+                    $this.RemoveCluster($cluster)
+                }
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $result = $false
+                }
+                else {
+                    $result = !$this.ShouldUpdateCluster($cluster)
+                }
+            }
+            else {
+                $result = ($null -eq $cluster)
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [DrsCluster] Get() {
+        try {
+            $result = [DrsCluster]::new()
+            $result.Server = $this.Server
+            $result.Location = $this.Location
+            $result.DatacenterName = $this.DatacenterName
+            $result.DatacenterLocation = $this.DatacenterLocation
+
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $this.PopulateResult($cluster, $result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Cluster should be updated.
+    #>
+    [bool] ShouldUpdateCluster($cluster) {
+        $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
+
+        $currentDrsDistributionOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.DrsDistributionSettingName }).Value
+        $currentMemoryLoadBalancingOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
+        $currentCPUOverCommitmentOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
+
+        $shouldUpdateCluster = @(
+            $this.ShouldUpdateDscResourceSetting('DrsEnabled', $drsConfig.Enabled, $this.DrsEnabled),
+            $this.ShouldUpdateDscResourceSetting('DrsAutomationLevel', [string] $drsConfig.DefaultVmBehavior, $this.DrsAutomationLevel.ToString()),
+            $this.ShouldUpdateDscResourceSetting('DrsMigrationThreshold', $drsConfig.VmotionRate, $this.DrsMigrationThreshold),
+            $this.ShouldUpdateDscResourceSetting('DrsDistribution', $currentDrsDistributionOption, $this.DrsDistribution),
+            $this.ShouldUpdateDscResourceSetting('MemoryLoadBalancing', $currentMemoryLoadBalancingOption, $this.MemoryLoadBalancing),
+            $this.ShouldUpdateDscResourceSetting('CPUOverCommitment', $currentCPUOverCommitmentOption, $this.CPUOverCommitment)
+        )
+
+        return ($shouldUpdateCluster -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the DrsConfig property with the desired value.
+    #>
+    [void] PopulateDrsConfigProperty($drsConfig, $propertyName, $propertyValue) {
+        <#
+            Special case where the passed property value is enum type. These type of properties
+            should be populated only when their value is not equal to Unset.
+            Unset means that the property was not specified in the Configuration.
+        #>
+        if ($propertyValue -is [DrsAutomationLevel]) {
+            if ($propertyValue -ne [DrsAutomationLevel]::Unset) {
+                $drsConfig.$propertyName = $propertyValue.ToString()
+            }
+        }
+        elseif ($null -ne $propertyValue) {
+            $drsConfig.$propertyName = $propertyValue
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the Option array for the DrsConfig with the specified options in the Configuration.
+    #>
+    [PSObject] GetOptionsForDrsConfig($allOptions) {
+        $drsConfigOptions = @()
+
+        foreach ($key in $allOptions.Keys) {
+            if ($null -ne $allOptions.$key) {
+                $option = New-Object VMware.Vim.OptionValue
+
+                $option.Key = $key
+                $option.Value = $allOptions.$key.ToString()
+
+                $drsConfigOptions += $option
+            }
+        }
+
+        return $drsConfigOptions
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the populated Cluster Spec with the specified values in the Configuration.
+    #>
+    [PSObject] GetPopulatedClusterSpec() {
+        $clusterSpec = New-Object VMware.Vim.ClusterConfigSpecEx
+        $clusterSpec.DrsConfig = New-Object VMware.Vim.ClusterDrsConfigInfo
+
+        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsEnabledConfigPropertyName, $this.DrsEnabled)
+        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsAutomationLevelConfigPropertyName, $this.DrsAutomationLevel)
+        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsMigrationThresholdConfigPropertyName, $this.DrsMigrationThreshold)
+
+        $allOptions = [ordered] @{
+            $this.DrsDistributionSettingName = $this.DrsDistribution
+            $this.MemoryLoadBalancingSettingName = $this.MemoryLoadBalancing
+            $this.CPUOverCommitmentSettingName = $this.CPUOverCommitment
+        }
+
+        $clusterSpec.DrsConfig.Option = $this.GetOptionsForDrsConfig($allOptions)
+
+        return $clusterSpec
+    }
+
+    <#
+    .DESCRIPTION
+
+    Creates a new Cluster with the specified properties at the specified location.
+    #>
+    [void] AddCluster($clusterLocation) {
+        $clusterSpec = $this.GetPopulatedClusterSpec()
+
+        try {
+            Add-Cluster -Folder $clusterLocation.ExtensionData -Name $this.Name -Spec $clusterSpec
+        }
+        catch {
+            throw "Server operation failed with the following error: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the Cluster with the specified properties.
+    #>
+    [void] UpdateCluster($cluster) {
+        $clusterSpec = $this.GetPopulatedClusterSpec()
+
+        try {
+            Update-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData -Spec $clusterSpec
+        }
+        catch {
+            throw "Server operation failed with the following error: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Removes the Cluster from the specified Datacenter.
+    #>
+    [void] RemoveCluster($cluster) {
+        try {
+            Remove-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData
+        }
+        catch {
+            throw "Server operation failed with the following error: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Cluster from the server.
+    #>
+    [void] PopulateResult($cluster, $result) {
+        if ($null -ne $cluster) {
+            $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
+
+            $result.Name = $cluster.Name
+            $result.Ensure = [Ensure]::Present
+            $result.DrsEnabled = $drsConfig.Enabled
+
+            if ($null -eq $drsConfig.DefaultVmBehavior) {
+                $result.DrsAutomationLevel = [DrsAutomationLevel]::Unset
+            }
+            else {
+                $result.DrsAutomationLevel = $drsConfig.DefaultVmBehavior.ToString()
+            }
+
+            $result.DrsMigrationThreshold = $drsConfig.VmotionRate
+
+            if ($null -ne $drsConfig.Option) {
+                $options = $drsConfig.Option
+
+                $result.DrsDistribution = ($options | Where-Object { $_.Key -eq $this.DrsDistributionSettingName }).Value
+                $result.MemoryLoadBalancing = ($options | Where-Object { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
+                $result.CPUOverCommitment = ($options | Where-Object { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
+            }
+            else {
+                $result.DrsDistribution = $null
+                $result.MemoryLoadBalancing = $null
+                $result.CPUOverCommitment = $null
+            }
+        }
+        else {
+            $result.Name = $this.Name
+            $result.Ensure = [Ensure]::Absent
+            $result.DrsEnabled = $this.DrsEnabled
+            $result.DrsAutomationLevel = $this.DrsAutomationLevel
+            $result.DrsMigrationThreshold = $this.DrsMigrationThreshold
+            $result.DrsDistribution = $this.DrsDistribution
+            $result.MemoryLoadBalancing = $this.MemoryLoadBalancing
+            $result.CPUOverCommitment = $this.CPUOverCommitment
+        }
+    }
+}
+
+[DscResource()]
+class HACluster : DatacenterInventoryBaseDSC {
+    HACluster() {
+        $this.InventoryItemFolderType = [FolderType]::Host
+    }
+
+    <#
+    .DESCRIPTION
+
+    Indicates that VMware HA (High Availability) is enabled.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $HAEnabled
+
+    <#
+    .DESCRIPTION
+
+    Indicates that virtual machines cannot be powered on if they violate availability constraints.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $HAAdmissionControlEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies a configured failover level.
+    This is the number of physical host failures that can be tolerated without impacting the ability to meet minimum thresholds for all running virtual machines.
+    The valid values range from 1 to 4.
+    #>
+    [DscProperty()]
+    [nullable[int]] $HAFailoverLevel
+
+    <#
+    .DESCRIPTION
+
+    Indicates that the virtual machine should be powered off if a host determines that it is isolated from the rest of the compute resource.
+    The valid values are PowerOff, DoNothing, Shutdown and Unset.
+    #>
+    [DscProperty()]
+    [HAIsolationResponse] $HAIsolationResponse = [HAIsolationResponse]::Unset
+
+    <#
+    .DESCRIPTION
+
+    Specifies the cluster HA restart priority. The valid values are Disabled, Low, Medium, High and Unset.
+    VMware HA is a feature that detects failed virtual machines and automatically restarts them on alternative ESX hosts.
+    #>
+    [DscProperty()]
+    [HARestartPriority] $HARestartPriority = [HARestartPriority]::Unset
+
+    hidden [string] $HAEnabledParameterName = 'HAEnabled'
+    hidden [string] $HAAdmissionControlEnabledParameterName = 'HAAdmissionControlEnabled'
+    hidden [string] $HAFailoverLevelParameterName = 'HAFailoverLevel'
+    hidden [string] $HAIsolationResponseParameterName = 'HAIsolationResponse'
+    hidden [string] $HARestartPriorityParemeterName = 'HARestartPriority'
+
+    [void] Set() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $this.AddCluster($clusterLocation)
+                }
+                else {
+                    $this.UpdateCluster($cluster)
+                }
+            }
+            else {
+                if ($null -ne $cluster) {
+                    $this.RemoveCluster($cluster)
+                }
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $result = $false
+                }
+                else {
+                    $result = !$this.ShouldUpdateCluster($cluster)
+                }
+            }
+            else {
+                $result = ($null -eq $cluster)
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [HACluster] Get() {
+        try {
+            $result = [HACluster]::new()
+            $result.Server = $this.Server
+            $result.Location = $this.Location
+            $result.DatacenterName = $this.DatacenterName
+            $result.DatacenterLocation = $this.DatacenterLocation
+
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $this.PopulateResult($cluster, $result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Cluster should be updated.
+    #>
+    [bool] ShouldUpdateCluster($cluster) {
+        $shouldUpdateCluster = @(
+            $this.ShouldUpdateDscResourceSetting('HAEnabled', $cluster.HAEnabled, $this.HAEnabled),
+            $this.ShouldUpdateDscResourceSetting('HAAdmissionControlEnabled', $cluster.HAAdmissionControlEnabled, $this.HAAdmissionControlEnabled),
+            $this.ShouldUpdateDscResourceSetting('HAFailoverLevel', $cluster.HAFailoverLevel, $this.HAFailoverLevel),
+            $this.ShouldUpdateDscResourceSetting('HAIsolationResponse', [string] $cluster.HAIsolationResponse, $this.HAIsolationResponse.ToString()),
+            $this.ShouldUpdateDscResourceSetting('HARestartPriority', [string] $cluster.HARestartPriority, $this.HARestartPriority.ToString())
+        )
+
+        return ($shouldUpdateCluster -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the parameters for the New-Cluster and Set-Cluster cmdlets.
+    #>
+    [void] PopulateClusterParams($clusterParams, $parameter, $desiredValue) {
+        <#
+            Special case where the desired value is enum type. These type of properties
+            should be added as parameters to the cmdlet only when their value is not equal to Unset.
+            Unset means that the property was not specified in the Configuration.
+        #>
+        if ($desiredValue -is [HAIsolationResponse] -or $desiredValue -is [HARestartPriority]) {
+            if ($desiredValue -ne 'Unset') {
+                $clusterParams.$parameter = $desiredValue.ToString()
+            }
+
+            return
+        }
+
+        if ($null -ne $desiredValue) {
+            $clusterParams.$parameter = $desiredValue
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the populated Cluster parameters.
+    #>
+    [hashtable] GetClusterParams() {
+        $clusterParams = @{}
+
+        $clusterParams.Server = $this.Connection
+        $clusterParams.Confirm = $false
+        $clusterParams.ErrorAction = 'Stop'
+
+        $this.PopulateClusterParams($clusterParams, $this.HAEnabledParameterName, $this.HAEnabled)
+
+        # High Availability settings cannot be passed to the cmdlets if 'HAEnabled' is $false.
+        if ($null -eq $this.HAEnabled -or $this.HAEnabled) {
+            $this.PopulateClusterParams($clusterParams, $this.HAAdmissionControlEnabledParameterName, $this.HAAdmissionControlEnabled)
+            $this.PopulateClusterParams($clusterParams, $this.HAFailoverLevelParameterName, $this.HAFailoverLevel)
+            $this.PopulateClusterParams($clusterParams, $this.HAIsolationResponseParameterName, $this.HAIsolationResponse)
+            $this.PopulateClusterParams($clusterParams, $this.HARestartPriorityParemeterName, $this.HARestartPriority)
+        }
+
+        return $clusterParams
+    }
+
+    <#
+    .DESCRIPTION
+
+    Creates a new Cluster with the specified properties at the specified location.
+    #>
+    [void] AddCluster($clusterLocation) {
+        $clusterParams = $this.GetClusterParams()
+        $clusterParams.Name = $this.Name
+        $clusterParams.Location = $clusterLocation
+
+        try {
+            New-Cluster @clusterParams
+        }
+        catch {
+            throw "Cannot create Cluster $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the Cluster with the specified properties.
+    #>
+    [void] UpdateCluster($cluster) {
+        $clusterParams = $this.GetClusterParams()
+
+        try {
+            $cluster | Set-Cluster @clusterParams
+        }
+        catch {
+            throw "Cannot update Cluster $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Removes the Cluster from the specified Datacenter.
+    #>
+    [void] RemoveCluster($cluster) {
+        try {
+            $cluster | Remove-Cluster -Server $this.Connection -Confirm:$false -ErrorAction Stop
+        }
+        catch {
+            throw "Cannot remove Cluster $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Cluster from the server.
+    #>
+    [void] PopulateResult($cluster, $result) {
+        if ($null -ne $cluster) {
+            $result.Name = $cluster.Name
+            $result.Ensure = [Ensure]::Present
+            $result.HAEnabled = $cluster.HAEnabled
+            $result.HAAdmissionControlEnabled = $cluster.HAAdmissionControlEnabled
+            $result.HAFailoverLevel = $cluster.HAFailoverLevel
+            $result.HAIsolationResponse = $cluster.HAIsolationResponse.ToString()
+            $result.HARestartPriority = $cluster.HARestartPriority.ToString()
+        }
+        else {
+            $result.Name = $this.Name
+            $result.Ensure = [Ensure]::Absent
+            $result.HAEnabled = $this.HAEnabled
+            $result.HAAdmissionControlEnabled = $this.HAAdmissionControlEnabled
+            $result.HAFailoverLevel = $this.HAFailoverLevel
+            $result.HAIsolationResponse = $this.HAIsolationResponse
+            $result.HARestartPriority = $this.HARestartPriority
+        }
+    }
+}
+
+[DscResource()]
 class NfsDatastore : DatastoreBaseDSC {
     <#
     .DESCRIPTION
@@ -11747,931 +13338,6 @@ class VmfsDatastore : DatastoreBaseDSC {
         }
 
         $this.PopulateResult($result, $datastore)
-    }
-}
-
-[DscResource()]
-class VMHostVssPortGroup : VMHostVssPortGroupBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies the Name of the Virtual Switch associated with the Port Group.
-    The Virtual Switch must be a Standard Virtual Switch.
-    #>
-    [DscProperty(Mandatory)]
-    [string] $VssName
-
-    <#
-    .DESCRIPTION
-
-    Specifies the VLAN ID for ports using this Port Group. The following values are valid:
-    0 - specifies that you do not want to associate the Port Group with a VLAN.
-    1 to 4094 - specifies a VLAN ID for the Port Group.
-    4095 - specifies that the Port Group should use trunk mode, which allows the guest operating system to manage its own VLAN tags.
-    #>
-    [DscProperty()]
-    [nullable[int]] $VLanId
-
-    hidden [int] $VLanIdMaxValue = 4095
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualSwitch = $this.GetVirtualSwitch()
-            $portGroup = $this.GetVirtualPortGroup($virtualSwitch)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $portGroup) {
-                    $this.AddVirtualPortGroup($virtualSwitch)
-                }
-                else {
-                    $this.UpdateVirtualPortGroup($portGroup)
-                }
-            }
-            else {
-                if ($null -ne $portGroup) {
-                    $this.RemoveVirtualPortGroup($portGroup)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualSwitch = $this.GetVirtualSwitch()
-            $portGroup = $this.GetVirtualPortGroup($virtualSwitch)
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $portGroup) {
-                    $result = $false
-                }
-                else {
-                    $result = !$this.ShouldUpdateDscResourceSetting('VLanId', $portGroup.VLanId, $this.VLanId)
-                }
-            }
-            else {
-                $result = ($null -eq $portGroup)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssPortGroup] Get() {
-        try {
-            $result = [VMHostVssPortGroup]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualSwitch = $this.GetVirtualSwitch()
-            $portGroup = $this.GetVirtualPortGroup($virtualSwitch)
-
-            $result.VMHostName = $this.VMHost.Name
-            $this.PopulateResult($portGroup, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Virtual Switch with the specified name from the server if it exists.
-    The Virtual Switch must be a Standard Virtual Switch. If the Virtual Switch does not exist and Ensure is set to 'Absent', $null is returned.
-    Otherwise it throws an exception.
-    #>
-    [PSObject] GetVirtualSwitch() {
-        if ($this.Ensure -eq [Ensure]::Absent) {
-            return Get-VirtualSwitch -Server $this.Connection -Name $this.VssName -VMHost $this.VMHost -Standard -ErrorAction SilentlyContinue
-        }
-        else {
-            try {
-                $virtualSwitch = Get-VirtualSwitch -Server $this.Connection -Name $this.VssName -VMHost $this.VMHost -Standard -ErrorAction Stop
-                return $virtualSwitch
-            }
-            catch {
-                throw "Could not retrieve Virtual Switch $($this.VssName) of VMHost $($this.VMHost.Name). For more information: $($_.Exception.Message)"
-            }
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Virtual Port Group with the specified Name, available on the specified Virtual Switch and VMHost from the server if it exists,
-    otherwise returns $null.
-    #>
-    [PSObject] GetVirtualPortGroup($virtualSwitch) {
-        if ($null -eq $virtualSwitch) {
-            <#
-            If the Virtual Switch is $null, it means that Ensure was set to 'Absent' and
-            the Port Group does not exist for the specified Virtual Switch.
-            #>
-            return $null
-        }
-
-        return Get-VirtualPortGroup -Server $this.Connection -Name $this.Name -VirtualSwitch $virtualSwitch -VMHost $this.VMHost -ErrorAction SilentlyContinue
-    }
-
-    <#
-    .DESCRIPTION
-
-    Ensures that the passed VLanId value is in the range [0, 4095].
-    #>
-    [void] EnsureVLanIdValueIsValid() {
-        if ($this.VLanId -lt 0 -or $this.VLanId -gt $this.VLanIdMaxValue) {
-            throw "The passed VLanId value $($this.VLanId) is not valid. The valid values are in the following range: [0, $($this.VLanIdMaxValue)]."
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the populated Port Group parameters.
-    #>
-    [hashtable] GetPortGroupParams() {
-        $portGroupParams = @{}
-
-        $portGroupParams.Confirm = $false
-        $portGroupParams.ErrorAction = 'Stop'
-
-        if ($null -ne $this.VLanId) {
-            $this.EnsureVLanIdValueIsValid()
-            $portGroupParams.VLanId = $this.VLanId
-        }
-
-        return $portGroupParams
-    }
-
-    <#
-    .DESCRIPTION
-
-    Creates a new Port Group available on the specified Virtual Switch.
-    #>
-    [void] AddVirtualPortGroup($virtualSwitch) {
-        $portGroupParams = $this.GetPortGroupParams()
-
-        $portGroupParams.Server = $this.Connection
-        $portGroupParams.Name = $this.Name
-        $portGroupParams.VirtualSwitch = $virtualSwitch
-
-        try {
-            New-VirtualPortGroup @portGroupParams
-        }
-        catch {
-            throw "Cannot create Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the Port Group by changing its VLanId value.
-    #>
-    [void] UpdateVirtualPortGroup($portGroup) {
-        $portGroupParams = $this.GetPortGroupParams()
-
-        try {
-            $portGroup | Set-VirtualPortGroup @portGroupParams
-        }
-        catch {
-            throw "Cannot update Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Removes the specified Port Group available on the Virtual Switch. All VMs connected to the Port Group must be PoweredOff to successfully remove the Port Group.
-    If one or more of the VMs are PoweredOn, the removal would not be successful because the Port Group is used by the VMs.
-    #>
-    [void] RemoveVirtualPortGroup($portGroup) {
-        try {
-            $portGroup | Remove-VirtualPortGroup -Confirm:$false -ErrorAction Stop
-        }
-        catch {
-            throw "Cannot remove Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Port Group from the server.
-    #>
-    [void] PopulateResult($portGroup, $result) {
-        if ($null -ne $portGroup) {
-            $result.Name = $portGroup.Name
-            $result.VssName = $portGroup.VirtualSwitchName
-            $result.Ensure = [Ensure]::Present
-            $result.VLanId = $portGroup.VLanId
-        }
-        else {
-            $result.Name = $this.Name
-            $result.VssName = $this.VssName
-            $result.Ensure = [Ensure]::Absent
-            $result.VLanId = $this.VLanId
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVssPortGroupSecurity : VMHostVssPortGroupBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies whether promiscuous mode is enabled for the corresponding Virtual Port Group.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $AllowPromiscuous
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the AllowPromiscuous setting is inherited from the parent Standard Virtual Switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $AllowPromiscuousInherited
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether forged transmits are enabled for the corresponding Virtual Port Group.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $ForgedTransmits
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the ForgedTransmits setting is inherited from the parent Standard Virtual Switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $ForgedTransmitsInherited
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether MAC address changes are enabled for the corresponding Virtual Port Group.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $MacChanges
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the MacChanges setting is inherited from the parent Standard Virtual Switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $MacChangesInherited
-
-    hidden [string] $AllowPromiscuousSettingName = 'AllowPromiscuous'
-    hidden [string] $AllowPromiscuousInheritedSettingName = 'AllowPromiscuousInherited'
-    hidden [string] $ForgedTransmitsSettingName = 'ForgedTransmits'
-    hidden [string] $ForgedTransmitsInheritedSettingName = 'ForgedTransmitsInherited'
-    hidden [string] $MacChangesSettingName = 'MacChanges'
-    hidden [string] $MacChangesInheritedSettingName = 'MacChangesInherited'
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-            $virtualPortGroupSecurityPolicy = $this.GetVirtualPortGroupSecurityPolicy($virtualPortGroup)
-
-            $this.UpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-
-            $result = $null
-            if ($null -eq $virtualPortGroup) {
-                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
-                $result = $true
-            }
-            else {
-                $virtualPortGroupSecurityPolicy = $this.GetVirtualPortGroupSecurityPolicy($virtualPortGroup)
-                $result = !$this.ShouldUpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssPortGroupSecurity] Get() {
-        try {
-            $result = [VMHostVssPortGroupSecurity]::new()
-            $result.Server = $this.Server
-            $result.Ensure = $this.Ensure
-
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $result.VMHostName = $this.VMHost.Name
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-            if ($null -eq $virtualPortGroup) {
-                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
-                $result.Name = $this.Name
-                return $result
-            }
-
-            $virtualPortGroupSecurityPolicy = $this.GetVirtualPortGroupSecurityPolicy($virtualPortGroup)
-            $result.Name = $virtualPortGroup.Name
-
-            $this.PopulateResult($virtualPortGroupSecurityPolicy, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Virtual Port Group Security Policy from the server.
-    #>
-    [PSObject] GetVirtualPortGroupSecurityPolicy($virtualPortGroup) {
-        try {
-            $virtualPortGroupSecurityPolicy = Get-SecurityPolicy -Server $this.Connection -VirtualPortGroup $virtualPortGroup -ErrorAction Stop
-            return $virtualPortGroupSecurityPolicy
-        }
-        catch {
-            throw "Could not retrieve Virtual Port Group $($this.PortGroup) Security Policy. For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Security Policy of the specified Virtual Port Group should be updated.
-    #>
-    [bool] ShouldUpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy) {
-        $shouldUpdateVirtualPortGroupSecurityPolicy = @(
-            $this.ShouldUpdateDscResourceSetting('AllowPromiscuous', $virtualPortGroupSecurityPolicy.AllowPromiscuous, $this.AllowPromiscuous),
-            $this.ShouldUpdateDscResourceSetting('AllowPromiscuousInherited', $virtualPortGroupSecurityPolicy.AllowPromiscuousInherited, $this.AllowPromiscuousInherited),
-            $this.ShouldUpdateDscResourceSetting('ForgedTransmits', $virtualPortGroupSecurityPolicy.ForgedTransmits, $this.ForgedTransmits),
-            $this.ShouldUpdateDscResourceSetting('ForgedTransmitsInherited', $virtualPortGroupSecurityPolicy.ForgedTransmitsInherited, $this.ForgedTransmitsInherited),
-            $this.ShouldUpdateDscResourceSetting('MacChanges', $virtualPortGroupSecurityPolicy.MacChanges, $this.MacChanges),
-            $this.ShouldUpdateDscResourceSetting('MacChangesInherited', $virtualPortGroupSecurityPolicy.MacChangesInherited, $this.MacChangesInherited)
-        )
-
-        return ($shouldUpdateVirtualPortGroupSecurityPolicy -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Security Policy of the specified Virtual Port Group.
-    #>
-    [void] UpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy) {
-        $securityPolicyParams = @{}
-        $securityPolicyParams.VirtualPortGroupPolicy = $virtualPortGroupSecurityPolicy
-
-        $this.PopulatePolicySetting($securityPolicyParams, $this.AllowPromiscuousSettingName, $this.AllowPromiscuous, $this.AllowPromiscuousInheritedSettingName, $this.AllowPromiscuousInherited)
-        $this.PopulatePolicySetting($securityPolicyParams, $this.ForgedTransmitsSettingName, $this.ForgedTransmits, $this.ForgedTransmitsInheritedSettingName, $this.ForgedTransmitsInherited)
-        $this.PopulatePolicySetting($securityPolicyParams, $this.MacChangesSettingName, $this.MacChanges, $this.MacChangesInheritedSettingName, $this.MacChangesInherited)
-
-        try {
-            Set-SecurityPolicy @securityPolicyParams
-        }
-        catch {
-            throw "Cannot update Security Policy of Virtual Port Group $($this.PortGroup). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Security Policy of the specified Virtual Port Group from the server.
-    #>
-    [void] PopulateResult($virtualPortGroupSecurityPolicy, $result) {
-        $result.AllowPromiscuous = $virtualPortGroupSecurityPolicy.AllowPromiscuous
-        $result.AllowPromiscuousInherited = $virtualPortGroupSecurityPolicy.AllowPromiscuousInherited
-        $result.ForgedTransmits = $virtualPortGroupSecurityPolicy.ForgedTransmits
-        $result.ForgedTransmitsInherited = $virtualPortGroupSecurityPolicy.ForgedTransmitsInherited
-        $result.MacChanges = $virtualPortGroupSecurityPolicy.MacChanges
-        $result.MacChangesInherited = $virtualPortGroupSecurityPolicy.MacChangesInherited
-    }
-}
-
-[DscResource()]
-class VMHostVssPortGroupShaping : VMHostVssPortGroupBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not traffic shaper is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Enabled
-
-    <#
-    .DESCRIPTION
-
-    The average bandwidth in bits per second if shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $AverageBandwidth
-
-    <#
-    .DESCRIPTION
-
-    The peak bandwidth during bursts in bits per second if traffic shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $PeakBandwidth
-
-    <#
-    .DESCRIPTION
-
-    The maximum burst size allowed in bytes if shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $BurstSize
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $this.GetVMHostNetworkSystem()
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-
-            $this.UpdateVirtualPortGroupShapingPolicy($virtualPortGroup)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-
-            $result = $null
-            if ($null -eq $virtualPortGroup) {
-                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
-                $result = $true
-            }
-            else {
-                $result = !$this.ShouldUpdateVirtualPortGroupShapingPolicy($virtualPortGroup)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssPortGroupShaping] Get() {
-        try {
-            $result = [VMHostVssPortGroupShaping]::new()
-            $result.Server = $this.Server
-            $result.Ensure = $this.Ensure
-
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $result.VMHostName = $this.VMHost.Name
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-            if ($null -eq $virtualPortGroup) {
-                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
-                $result.Name = $this.Name
-                return $result
-            }
-
-            $result.Name = $virtualPortGroup.Name
-            $this.PopulateResult($virtualPortGroup, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Shaping Policy of the specified Virtual Port Group should be updated.
-    #>
-    [bool] ShouldUpdateVirtualPortGroupShapingPolicy($virtualPortGroup) {
-        $shapingPolicy = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy
-
-        $shouldUpdateVirtualPortGroupShapingPolicy = @(
-            $this.ShouldUpdateDscResourceSetting('Enabled', $shapingPolicy.Enabled, $this.Enabled),
-            $this.ShouldUpdateDscResourceSetting('AverageBandwidth', $shapingPolicy.AverageBandwidth, $this.AverageBandwidth),
-            $this.ShouldUpdateDscResourceSetting('PeakBandwidth', $shapingPolicy.PeakBandwidth, $this.PeakBandwidth),
-            $this.ShouldUpdateDscResourceSetting('BurstSize', $shapingPolicy.BurstSize, $this.BurstSize)
-        )
-
-        return ($shouldUpdateVirtualPortGroupShapingPolicy -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Shaping Policy of the specified Virtual Port Group.
-    #>
-    [void] UpdateVirtualPortGroupShapingPolicy($virtualPortGroup) {
-        $virtualPortGroupSpec = New-Object VMware.Vim.HostPortGroupSpec
-
-        $virtualPortGroupSpec.Name = $virtualPortGroup.Name
-        $virtualPortGroupSpec.VswitchName = $virtualPortGroup.VirtualSwitchName
-        $virtualPortGroupSpec.VlanId = $virtualPortGroup.VLanId
-
-        $virtualPortGroupSpec.Policy = New-Object VMware.Vim.HostNetworkPolicy
-        $virtualPortGroupSpec.Policy.ShapingPolicy = New-Object VMware.Vim.HostNetworkTrafficShapingPolicy
-
-        if ($null -ne $this.Enabled) { $virtualPortGroupSpec.Policy.ShapingPolicy.Enabled = $this.Enabled }
-        if ($null -ne $this.AverageBandwidth) { $virtualPortGroupSpec.Policy.ShapingPolicy.AverageBandwidth = $this.AverageBandwidth }
-        if ($null -ne $this.PeakBandwidth) { $virtualPortGroupSpec.Policy.ShapingPolicy.PeakBandwidth = $this.PeakBandwidth }
-        if ($null -ne $this.BurstSize) { $virtualPortGroupSpec.Policy.ShapingPolicy.BurstSize = $this.BurstSize }
-
-        try {
-            Update-VirtualPortGroup -VMHostNetworkSystem $this.VMHostNetworkSystem -VirtualPortGroupName $virtualPortGroup.Name -Spec $virtualPortGroupSpec
-        }
-        catch {
-            throw "Cannot update Shaping Policy of Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Shaping Policy of the specified Virtual Port Group from the server.
-    #>
-    [void] PopulateResult($virtualPortGroup, $result) {
-        $result.Enabled = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.Enabled
-        $result.AverageBandwidth = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.AverageBandwidth
-        $result.PeakBandwidth = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.PeakBandwidth
-        $result.BurstSize = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.BurstSize
-    }
-}
-
-[DscResource()]
-class VMHostVssPortGroupTeaming : VMHostVssPortGroupBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies how a physical adapter is returned to active duty after recovering from a failure.
-    If the value is $true, the adapter is returned to active duty immediately on recovery, displacing the standby adapter that took over its slot, if any.
-    If the value is $false, a failed adapter is left inactive even after recovery until another active adapter fails, requiring its replacement.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $FailbackEnabled
-
-    <#
-    .DESCRIPTION
-
-    Determines how network traffic is distributed between the network adapters assigned to a switch. The following values are valid:
-    LoadBalanceIP - Route based on IP hash. Choose an uplink based on a hash of the source and destination IP addresses of each packet.
-    For non-IP packets, whatever is at those offsets is used to compute the hash.
-    LoadBalanceSrcMac - Route based on source MAC hash. Choose an uplink based on a hash of the source Ethernet.
-    LoadBalanceSrcId - Route based on the originating port ID. Choose an uplink based on the virtual port where the traffic entered the virtual switch.
-    ExplicitFailover - Always use the highest order uplink from the list of Active adapters that passes failover detection criteria.
-    #>
-    [DscProperty()]
-    [LoadBalancingPolicy] $LoadBalancingPolicy = [LoadBalancingPolicy]::Unset
-
-    <#
-    .DESCRIPTION
-
-    Specifies the adapters you want to continue to use when the network adapter connectivity is available and active.
-    #>
-    [DscProperty()]
-    [string[]] $ActiveNic
-
-    <#
-    .DESCRIPTION
-
-    Specifies the adapters you want to use if one of the active adapter's connectivity is unavailable.
-    #>
-    [DscProperty()]
-    [string[]] $StandbyNic
-
-    <#
-    .DESCRIPTION
-
-    Specifies the adapters you do not want to use.
-    #>
-    [DscProperty()]
-    [string[]] $UnusedNic
-
-    <#
-    .DESCRIPTION
-
-    Specifies how to reroute traffic in the event of an adapter failure. The following values are valid:
-    LinkStatus - Relies solely on the link status that the network adapter provides. This option detects failures, such as cable pulls and physical switch power failures,
-    but not configuration errors, such as a physical switch port being blocked by spanning tree or misconfigured to the wrong VLAN or cable pulls on the other side of a physical switch.
-    BeaconProbing - Sends out and listens for beacon probes on all NICs in the team and uses this information, in addition to link status, to determine link failure.
-    This option detects many of the failures mentioned above that are not detected by link status alone.
-    #>
-    [DscProperty()]
-    [NetworkFailoverDetectionPolicy] $NetworkFailoverDetectionPolicy = [NetworkFailoverDetectionPolicy]::Unset
-
-    <#
-    .DESCRIPTION
-
-    Indicates that whenever a virtual NIC is connected to the virtual switch or whenever that virtual NIC's traffic is routed over a different physical NIC in the team because of a
-    failover event, a notification is sent over the network to update the lookup tables on the physical switches.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $NotifySwitches
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the value of the FailbackEnabled parameter is inherited from the virtual switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $InheritFailback
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the values of the ActiveNic, StandbyNic, and UnusedNic parameters are inherited from the virtual switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $InheritFailoverOrder
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the value of the LoadBalancingPolicy parameter is inherited from the virtual switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $InheritLoadBalancingPolicy
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the value of the NetworkFailoverDetectionPolicy parameter is inherited from the virtual switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $InheritNetworkFailoverDetectionPolicy
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the value of the NotifySwitches parameter is inherited from the virtual switch.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $InheritNotifySwitches
-
-    hidden [string] $FailbackEnabledSettingName = 'FailbackEnabled'
-    hidden [string] $InheritFailbackSettingName = 'InheritFailback'
-    hidden [string] $LoadBalancingPolicySettingName = 'LoadBalancingPolicy'
-    hidden [string] $InheritLoadBalancingPolicySettingName = 'InheritLoadBalancingPolicy'
-    hidden [string] $NetworkFailoverDetectionPolicySettingName = 'NetworkFailoverDetectionPolicy'
-    hidden [string] $InheritNetworkFailoverDetectionPolicySettingName = 'InheritNetworkFailoverDetectionPolicy'
-    hidden [string] $NotifySwitchesSettingName = 'NotifySwitches'
-    hidden [string] $InheritNotifySwitchesSettingName = 'InheritNotifySwitches'
-    hidden [string] $MakeNicActiveSettingName = 'MakeNicActive'
-    hidden [string] $MakeNicStandbySettingName = 'MakeNicStandby'
-    hidden [string] $MakeNicUnusedSettingName = 'MakeNicUnused'
-    hidden [string] $InheritFailoverOrderSettingName = 'InheritFailoverOrder'
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-            $virtualPortGroupTeamingPolicy = $this.GetVirtualPortGroupTeamingPolicy($virtualPortGroup)
-
-            $this.UpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-
-            $result = $null
-            if ($null -eq $virtualPortGroup) {
-                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
-                $result = $true
-            }
-            else {
-                $virtualPortGroupTeamingPolicy = $this.GetVirtualPortGroupTeamingPolicy($virtualPortGroup)
-                $result = !$this.ShouldUpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssPortGroupTeaming] Get() {
-        try {
-            $result = [VMHostVssPortGroupTeaming]::new()
-            $result.Server = $this.Server
-            $result.Ensure = $this.Ensure
-
-            $this.ConnectVIServer()
-            $this.RetrieveVMHost()
-
-            $result.VMHostName = $this.VMHost.Name
-
-            $virtualPortGroup = $this.GetVirtualPortGroup()
-            if ($null -eq $virtualPortGroup) {
-                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
-                $result.Name = $this.Name
-                return $result
-            }
-
-            $virtualPortGroupTeamingPolicy = $this.GetVirtualPortGroupTeamingPolicy($virtualPortGroup)
-            $result.Name = $virtualPortGroup.Name
-
-            $this.PopulateResult($virtualPortGroupTeamingPolicy, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Virtual Port Group Teaming Policy from the server.
-    #>
-    [PSObject] GetVirtualPortGroupTeamingPolicy($virtualPortGroup) {
-        try {
-            $virtualPortGroupTeamingPolicy = Get-NicTeamingPolicy -Server $this.Connection -VirtualPortGroup $virtualPortGroup -ErrorAction Stop
-            return $virtualPortGroupTeamingPolicy
-        }
-        catch {
-            throw "Could not retrieve Virtual Port Group $($this.Name) Teaming Policy. For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Teaming Policy of the specified Virtual Port Group should be updated.
-    #>
-    [bool] ShouldUpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy) {
-        $shouldUpdateVirtualPortGroupTeamingPolicy = @(
-            $this.ShouldUpdateDscResourceSetting('FailbackEnabled', $virtualPortGroupTeamingPolicy.FailbackEnabled, $this.FailbackEnabled),
-            $this.ShouldUpdateDscResourceSetting('NotifySwitches', $virtualPortGroupTeamingPolicy.NotifySwitches, $this.NotifySwitches),
-            $this.ShouldUpdateDscResourceSetting('InheritFailback', $virtualPortGroupTeamingPolicy.IsFailbackInherited, $this.InheritFailback),
-            $this.ShouldUpdateDscResourceSetting('InheritFailoverOrder', $virtualPortGroupTeamingPolicy.IsFailoverOrderInherited, $this.InheritFailoverOrder),
-            $this.ShouldUpdateDscResourceSetting('InheritLoadBalancingPolicy', $virtualPortGroupTeamingPolicy.IsLoadBalancingInherited, $this.InheritLoadBalancingPolicy),
-            $this.ShouldUpdateDscResourceSetting(
-                'InheritNetworkFailoverDetectionPolicy',
-                $virtualPortGroupTeamingPolicy.IsNetworkFailoverDetectionInherited,
-                $this.InheritNetworkFailoverDetectionPolicy
-            ),
-            $this.ShouldUpdateDscResourceSetting('InheritNotifySwitches', $virtualPortGroupTeamingPolicy.IsNotifySwitchesInherited, $this.InheritNotifySwitches),
-            $this.ShouldUpdateDscResourceSetting('LoadBalancingPolicy', [string] $virtualPortGroupTeamingPolicy.LoadBalancingPolicy, $this.LoadBalancingPolicy.ToString()),
-            $this.ShouldUpdateDscResourceSetting(
-                'NetworkFailoverDetectionPolicy',
-                [string] $virtualPortGroupTeamingPolicy.NetworkFailoverDetectionPolicy,
-                $this.NetworkFailoverDetectionPolicy.ToString()
-            ),
-            $this.ShouldUpdateArraySetting('ActiveNic', $virtualPortGroupTeamingPolicy.ActiveNic, $this.ActiveNic),
-            $this.ShouldUpdateArraySetting('StandbyNic', $virtualPortGroupTeamingPolicy.StandbyNic, $this.StandbyNic),
-            $this.ShouldUpdateArraySetting('UnusedNic', $virtualPortGroupTeamingPolicy.UnusedNic, $this.UnusedNic)
-        )
-
-        return ($shouldUpdateVirtualPortGroupTeamingPolicy -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the specified Enum Policy Setting. If the Inherited Setting is passed and set to $true,
-    the Policy Setting should not be populated because "Parameters of the form "XXX" and "InheritXXX" are mutually exclusive."
-    If the Inherited Setting is set to $false, both parameters can be populated.
-    #>
-    [void] PopulateEnumPolicySetting($policyParams, $policySettingName, $policySetting, $policySettingInheritedName, $policySettingInherited) {
-        if ($policySetting -ne 'Unset') {
-            if ($null -eq $policySettingInherited -or !$policySettingInherited) {
-                $policyParams.$policySettingName = $policySetting
-            }
-        }
-
-        if ($null -ne $policySettingInherited) { $policyParams.$policySettingInheritedName = $policySettingInherited }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the specified Array Policy Setting. If the Inherited Setting is passed and set to $true,
-    the Policy Setting should not be populated because "Parameters of the form "XXX" and "InheritXXX" are mutually exclusive."
-    If the Inherited Setting is set to $false, both parameters can be populated.
-    #>
-    [void] PopulateArrayPolicySetting($policyParams, $policySettingName, $policySetting, $policySettingInheritedName, $policySettingInherited) {
-        if ($null -ne $policySetting -and $policySetting.Length -gt 0) {
-            if ($null -eq $policySettingInherited -or !$policySettingInherited) {
-                $policyParams.$policySettingName = $policySetting
-            }
-        }
-
-        if ($null -ne $policySettingInherited) { $policyParams.$policySettingInheritedName = $policySettingInherited }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Teaming Policy of the specified Virtual Port Group.
-    #>
-    [void] UpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy) {
-        $teamingPolicyParams = @{}
-        $teamingPolicyParams.VirtualPortGroupPolicy = $virtualPortGroupTeamingPolicy
-
-        $this.PopulatePolicySetting($teamingPolicyParams, $this.FailbackEnabledSettingName, $this.FailbackEnabled, $this.InheritFailbackSettingName, $this.InheritFailback)
-        $this.PopulatePolicySetting($teamingPolicyParams, $this.NotifySwitchesSettingName, $this.NotifySwitches, $this.InheritNotifySwitchesSettingName, $this.InheritNotifySwitches)
-
-        $this.PopulateEnumPolicySetting($teamingPolicyParams, $this.LoadBalancingPolicySettingName, $this.LoadBalancingPolicy.ToString(), $this.InheritLoadBalancingPolicySettingName, $this.InheritLoadBalancingPolicy)
-        $this.PopulateEnumPolicySetting($teamingPolicyParams, $this.NetworkFailoverDetectionPolicySettingName, $this.NetworkFailoverDetectionPolicy.ToString(), $this.InheritNetworkFailoverDetectionPolicySettingName, $this.InheritNetworkFailoverDetectionPolicy)
-
-        $this.PopulateArrayPolicySetting($teamingPolicyParams, $this.MakeNicActiveSettingName, $this.ActiveNic, $this.InheritFailoverOrderSettingName, $this.InheritFailoverOrder)
-        $this.PopulateArrayPolicySetting($teamingPolicyParams, $this.MakeNicStandbySettingName, $this.StandbyNic, $this.InheritFailoverOrderSettingName, $this.InheritFailoverOrder)
-        $this.PopulateArrayPolicySetting($teamingPolicyParams, $this.MakeNicUnusedSettingName, $this.UnusedNic, $this.InheritFailoverOrderSettingName, $this.InheritFailoverOrder)
-
-        try {
-            Set-NicTeamingPolicy @teamingPolicyParams
-        }
-        catch {
-            throw "Cannot update Teaming Policy of Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Teaming Policy of the specified Virtual Port Group from the server.
-    #>
-    [void] PopulateResult($virtualPortGroupTeamingPolicy, $result) {
-        $result.FailbackEnabled = $virtualPortGroupTeamingPolicy.FailbackEnabled
-        $result.NotifySwitches = $virtualPortGroupTeamingPolicy.NotifySwitches
-        $result.LoadBalancingPolicy = $virtualPortGroupTeamingPolicy.LoadBalancingPolicy.ToString()
-        $result.NetworkFailoverDetectionPolicy = $virtualPortGroupTeamingPolicy.NetworkFailoverDetectionPolicy.ToString()
-        $result.ActiveNic = $virtualPortGroupTeamingPolicy.ActiveNic
-        $result.StandbyNic = $virtualPortGroupTeamingPolicy.StandbyNic
-        $result.UnusedNic = $virtualPortGroupTeamingPolicy.UnusedNic
-        $result.InheritFailback = $virtualPortGroupTeamingPolicy.IsFailbackInherited
-        $result.InheritNotifySwitches = $virtualPortGroupTeamingPolicy.IsNotifySwitchesInherited
-        $result.InheritLoadBalancingPolicy = $virtualPortGroupTeamingPolicy.IsLoadBalancingInherited
-        $result.InheritNetworkFailoverDetectionPolicy = $virtualPortGroupTeamingPolicy.IsNetworkFailoverDetectionInherited
-        $result.InheritFailoverOrder = $virtualPortGroupTeamingPolicy.IsFailoverOrderInherited
     }
 }
 
@@ -14432,6 +15098,234 @@ class VMHostvSANNetworkConfiguration : EsxCliBaseDSC {
 }
 
 [DscResource()]
+class VMHostGraphics : VMHostGraphicsBaseDSC {
+    <#
+    .DESCRIPTION
+
+    Specifies the default graphics type for the specified VMHost.
+    #>
+    [DscProperty(Mandatory)]
+    [GraphicsType] $GraphicsType
+
+    <#
+    .DESCRIPTION
+
+    Specifies the policy for assigning shared passthrough VMs to a host graphics device.
+    #>
+    [DscProperty(Mandatory)]
+    [SharedPassthruAssignmentPolicy] $SharedPassthruAssignmentPolicy
+
+    [void] Set() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
+            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
+            $this.RestartVMHost($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            return !$this.ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostGraphics] Get() {
+        try {
+            $result = [VMHostGraphics]::new()
+            $result.Server = $this.Server
+            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            $result.Name = $vmHost.Name
+            $result.GraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
+            $result.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Graphics Configuration needs to be updated with the desired values.
+    #>
+    [bool] ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager) {
+        $shouldUpdateGraphicsConfiguration = @(
+            $this.ShouldUpdateDscResourceSetting(
+                'GraphicsType',
+                [string] $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType,
+                $this.GraphicsType.ToString()
+            ),
+            $this.ShouldUpdateDscResourceSetting(
+                'SharedPassthruAssignmentPolicy',
+                [string] $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy,
+                $this.SharedPassthruAssignmentPolicy.ToString()
+            )
+        )
+
+        return ($shouldUpdateGraphicsConfiguration -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Performs an update on the Graphics Configuration of the specified VMHost.
+    #>
+    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
+        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
+
+        $vmHostGraphicsConfig.HostDefaultGraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
+        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $this.ConvertEnumValueToServerValue($this.SharedPassthruAssignmentPolicy)
+
+        try {
+            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
+        }
+        catch {
+            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
+        }
+    }
+}
+
+[DscResource()]
+class VMHostGraphicsDevice : VMHostGraphicsBaseDSC {
+    <#
+    .DESCRIPTION
+
+    Specifies the Graphics device identifier (ex. PCI ID).
+    #>
+    [DscProperty(Key)]
+    [string] $Id
+
+    <#
+    .DESCRIPTION
+
+    Specifies the graphics type for the specified Device in 'Id' property.
+    #>
+    [DscProperty(Mandatory)]
+    [GraphicsType] $GraphicsType
+
+    [void] Set() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
+            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
+            $this.RestartVMHost($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
+
+            $result = !$this.ShouldUpdateDscResourceSetting(
+                'GraphicsType',
+                [string] $foundDevice.GraphicsType,
+                $this.GraphicsType.ToString()
+            )
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostGraphicsDevice] Get() {
+        try {
+            $result = [VMHostGraphicsDevice]::new()
+            $result.Server = $this.Server
+            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
+
+            $result.Name = $vmHost.Name
+            $result.Id = $foundDevice.DeviceId
+            $result.GraphicsType = $foundDevice.GraphicsType
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Retrieves the Graphics Device with the specified Id from the server.
+    #>
+    [PSObject] GetGraphicsDevice($vmHostGraphicsManager) {
+        $foundDevice = $vmHostGraphicsManager.GraphicsConfig.DeviceType | Where-Object { $_.DeviceId -eq $this.Id }
+        if ($null -eq $foundDevice) {
+            throw "Device $($this.Id) was not found in the available Graphics devices."
+        }
+
+        return $foundDevice
+    }
+
+    <#
+    .DESCRIPTION
+
+    Performs an update on the Graphics Configuration of the specified VMHost by changing the Graphics Type for the
+    specified Device.
+    #>
+    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
+        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
+
+        $vmHostGraphicsConfig.HostDefaultGraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
+        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
+        $vmHostGraphicsConfig.DeviceType = @()
+
+        $vmHostGraphicsConfigDeviceType = New-Object VMware.Vim.HostGraphicsConfigDeviceType
+        $vmHostGraphicsConfigDeviceType.DeviceId = $this.Id
+        $vmHostGraphicsConfigDeviceType.GraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
+
+        $vmHostGraphicsConfig.DeviceType += $vmHostGraphicsConfigDeviceType
+
+        try {
+            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
+        }
+        catch {
+            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
+        }
+    }
+}
+
+[DscResource()]
 class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
     <#
     .DESCRIPTION
@@ -15905,475 +16799,50 @@ class VMHostIPRoute : VMHostBaseDSC {
 }
 
 [DscResource()]
-class VMHostGraphics : VMHostGraphicsBaseDSC {
+class VMHostVssPortGroup : VMHostVssPortGroupBaseDSC {
     <#
     .DESCRIPTION
 
-    Specifies the default graphics type for the specified VMHost.
+    Specifies the Name of the Virtual Switch associated with the Port Group.
+    The Virtual Switch must be a Standard Virtual Switch.
     #>
     [DscProperty(Mandatory)]
-    [GraphicsType] $GraphicsType
+    [string] $VssName
 
     <#
     .DESCRIPTION
 
-    Specifies the policy for assigning shared passthrough VMs to a host graphics device.
-    #>
-    [DscProperty(Mandatory)]
-    [SharedPassthruAssignmentPolicy] $SharedPassthruAssignmentPolicy
-
-    [void] Set() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
-            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
-            $this.RestartVMHost($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            return !$this.ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostGraphics] Get() {
-        try {
-            $result = [VMHostGraphics]::new()
-            $result.Server = $this.Server
-            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            $result.Name = $vmHost.Name
-            $result.GraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
-            $result.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Graphics Configuration needs to be updated with the desired values.
-    #>
-    [bool] ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager) {
-        $shouldUpdateGraphicsConfiguration = @(
-            $this.ShouldUpdateDscResourceSetting(
-                'GraphicsType',
-                [string] $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType,
-                $this.GraphicsType.ToString()
-            ),
-            $this.ShouldUpdateDscResourceSetting(
-                'SharedPassthruAssignmentPolicy',
-                [string] $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy,
-                $this.SharedPassthruAssignmentPolicy.ToString()
-            )
-        )
-
-        return ($shouldUpdateGraphicsConfiguration -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Graphics Configuration of the specified VMHost.
-    #>
-    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
-        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
-
-        $vmHostGraphicsConfig.HostDefaultGraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
-        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $this.ConvertEnumValueToServerValue($this.SharedPassthruAssignmentPolicy)
-
-        try {
-            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
-        }
-        catch {
-            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
-        }
-    }
-}
-
-[DscResource()]
-class VMHostGraphicsDevice : VMHostGraphicsBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies the Graphics device identifier (ex. PCI ID).
-    #>
-    [DscProperty(Key)]
-    [string] $Id
-
-    <#
-    .DESCRIPTION
-
-    Specifies the graphics type for the specified Device in 'Id' property.
-    #>
-    [DscProperty(Mandatory)]
-    [GraphicsType] $GraphicsType
-
-    [void] Set() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
-            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
-            $this.RestartVMHost($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
-
-            $result = !$this.ShouldUpdateDscResourceSetting(
-                'GraphicsType',
-                [string] $foundDevice.GraphicsType,
-                $this.GraphicsType.ToString()
-            )
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostGraphicsDevice] Get() {
-        try {
-            $result = [VMHostGraphicsDevice]::new()
-            $result.Server = $this.Server
-            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
-
-            $result.Name = $vmHost.Name
-            $result.Id = $foundDevice.DeviceId
-            $result.GraphicsType = $foundDevice.GraphicsType
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Graphics Device with the specified Id from the server.
-    #>
-    [PSObject] GetGraphicsDevice($vmHostGraphicsManager) {
-        $foundDevice = $vmHostGraphicsManager.GraphicsConfig.DeviceType | Where-Object { $_.DeviceId -eq $this.Id }
-        if ($null -eq $foundDevice) {
-            throw "Device $($this.Id) was not found in the available Graphics devices."
-        }
-
-        return $foundDevice
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Graphics Configuration of the specified VMHost by changing the Graphics Type for the
-    specified Device.
-    #>
-    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
-        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
-
-        $vmHostGraphicsConfig.HostDefaultGraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
-        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
-        $vmHostGraphicsConfig.DeviceType = @()
-
-        $vmHostGraphicsConfigDeviceType = New-Object VMware.Vim.HostGraphicsConfigDeviceType
-        $vmHostGraphicsConfigDeviceType.DeviceId = $this.Id
-        $vmHostGraphicsConfigDeviceType.GraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
-
-        $vmHostGraphicsConfig.DeviceType += $vmHostGraphicsConfigDeviceType
-
-        try {
-            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
-        }
-        catch {
-            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVss : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The maximum transmission unit (MTU) associated with this virtual switch in bytes.
+    Specifies the VLAN ID for ports using this Port Group. The following values are valid:
+    0 - specifies that you do not want to associate the Port Group with a VLAN.
+    1 to 4094 - specifies a VLAN ID for the Port Group.
+    4095 - specifies that the Port Group should use trunk mode, which allows the guest operating system to manage its own VLAN tags.
     #>
     [DscProperty()]
-    [nullable[int]] $Mtu
+    [nullable[int]] $VLanId
 
-    <#
-    .DESCRIPTION
-
-    The virtual switch key.
-    #>
-    [DscProperty(NotConfigurable)]
-    [string] $Key
-
-    <#
-    .DESCRIPTION
-
-    The number of ports that this virtual switch currently has.
-    #>
-    [DscProperty(NotConfigurable)]
-    [int] $NumPorts
-
-    <#
-    .DESCRIPTION
-
-    The number of ports that are available on this virtual switch.
-    #>
-    [DscProperty(NotConfigurable)]
-    [int] $NumPortsAvailable
-
-    <#
-    .DESCRIPTION
-
-    The set of physical network adapters associated with this bridge.
-    #>
-    [DscProperty(NotConfigurable)]
-    [string[]] $Pnic
-
-    <#
-    .DESCRIPTION
-
-    The list of port groups configured for this virtual switch.
-    #>
-    [DscProperty(NotConfigurable)]
-    [string[]] $PortGroup
+    hidden [int] $VLanIdMaxValue = 4095
 
     [void] Set() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $this.UpdateVss($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
+            $virtualSwitch = $this.GetVirtualSwitch()
+            $portGroup = $this.GetVirtualPortGroup($virtualSwitch)
 
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
-
-            $result = $null
             if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
-            }
-            else {
-                $result = ($null -eq $vss)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVss] Get() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVss]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
-
-            $result.Ensure = if ([string]::Empty -ne $result.Key) { 'Present' } else { 'Absent' }
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns a boolean value indicating if the VMHostVss should be updated.
-    #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssTest = @(
-            $this.ShouldUpdateDscResourceSetting('VssName', $vss.Name, $this.VssName),
-            $this.ShouldUpdateDscResourceSetting('Mtu', $vss.Mtu, $this.Mtu)
-        )
-
-        return ($vssTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the configuration of the virtual switch.
-    #>
-    [void] UpdateVss($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssConfigArgs = @{
-            Name = $this.VssName
-            Mtu = $this.Mtu
-        }
-        $vss = $this.GetVss()
-
-        if ($this.Ensure -eq 'Present') {
-            if ($null -ne $vss) {
-                if ($this.Equals($vss)) {
-                    return
+                if ($null -eq $portGroup) {
+                    $this.AddVirtualPortGroup($virtualSwitch)
                 }
-                $vssConfigArgs.Add('Operation', 'edit')
+                else {
+                    $this.UpdateVirtualPortGroup($portGroup)
+                }
             }
             else {
-                $vssConfigArgs.Add('Operation', 'add')
+                if ($null -ne $portGroup) {
+                    $this.RemoveVirtualPortGroup($portGroup)
+                }
             }
-        }
-        else {
-            if ($null -eq $vss) {
-                return
-            }
-            $vssConfigArgs.Add('Operation', 'remove')
-        }
-
-        try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssConfig $vssConfigArgs -ErrorAction Stop
-        }
-        catch {
-            throw "The Virtual Switch Config could not be updated: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the virtual switch.
-    #>
-    [void] PopulateResult($vmHost, $vmHostVSS) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSS.Key = $currentVss.Key
-            $vmHostVSS.Mtu = $currentVss.Mtu
-            $vmHostVSS.VssName = $currentVss.Name
-            $vmHostVSS.NumPortsAvailable = $currentVss.NumPortsAvailable
-            $vmHostVSS.Pnic = $currentVss.Pnic
-            $vmHostVSS.PortGroup = $currentVss.PortGroup
-        }
-        else{
-            $vmHostVSS.Key = [string]::Empty
-            $vmHostVSS.Mtu = $this.Mtu
-            $vmHostVSS.VssName = $this.VssName
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVssBridge : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The list of keys of the physical network adapters to be bridged.
-    #>
-    [DscProperty()]
-    [string[]] $NicDevice
-
-    <#
-    .DESCRIPTION
-
-    The beacon configuration to probe for the validity of a link.
-    If this is set, beacon probing is configured and will be used.
-    If this is not set, beacon probing is disabled.
-    Determines how often, in seconds, a beacon should be sent.
-    #>
-    [DscProperty()]
-    [nullable[int]] $BeaconInterval
-
-    <#
-    .DESCRIPTION
-
-    The link discovery protocol, whether to advertise or listen.
-    #>
-    [DscProperty()]
-    [LinkDiscoveryProtocolOperation] $LinkDiscoveryProtocolOperation = [LinkDiscoveryProtocolOperation]::Unset
-
-    <#
-    .DESCRIPTION
-
-    The link discovery protocol type.
-    #>
-    [DscProperty()]
-    [LinkDiscoveryProtocolProtocol] $LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $this.UpdateVssBridge($vmHost)
         }
         finally {
             $this.DisconnectVIServer()
@@ -16382,23 +16851,23 @@ class VMHostVssBridge : VMHostVssBaseDSC {
 
     [bool] Test() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
+            $this.RetrieveVMHost()
+
+            $virtualSwitch = $this.GetVirtualSwitch()
+            $portGroup = $this.GetVirtualPortGroup($virtualSwitch)
 
             $result = $null
             if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
+                if ($null -eq $portGroup) {
+                    $result = $false
+                }
+                else {
+                    $result = !$this.ShouldUpdateDscResourceSetting('VLanId', $portGroup.VLanId, $this.VLanId)
+                }
             }
             else {
-                $this.NicDevice = @()
-                $this.BeaconInterval = 0
-                $this.LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
+                $result = ($null -eq $portGroup)
             }
 
             $this.WriteDscResourceState($result)
@@ -16410,21 +16879,19 @@ class VMHostVssBridge : VMHostVssBaseDSC {
         }
     }
 
-    [VMHostVssBridge] Get() {
+    [VMHostVssPortGroup] Get() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssBridge]::new()
+            $result = [VMHostVssPortGroup]::new()
             $result.Server = $this.Server
 
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
+            $virtualSwitch = $this.GetVirtualSwitch()
+            $portGroup = $this.GetVirtualPortGroup($virtualSwitch)
 
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+            $result.VMHostName = $this.VMHost.Name
+            $this.PopulateResult($portGroup, $result)
 
             return $result
         }
@@ -16436,107 +16903,151 @@ class VMHostVssBridge : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Returns a boolean value indicating if the VMHostVssBridge should to be updated.
+    Retrieves the Virtual Switch with the specified name from the server if it exists.
+    The Virtual Switch must be a Standard Virtual Switch. If the Virtual Switch does not exist and Ensure is set to 'Absent', $null is returned.
+    Otherwise it throws an exception.
     #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssBridgeTest = @(
-            $this.ShouldUpdateArraySetting('NicDevice', $vss.Spec.Bridge.NicDevice, $this.NicDevice),
-            $this.ShouldUpdateDscResourceSetting('BeaconInterval', $vss.Spec.Bridge.Beacon.Interval, $this.BeaconInterval),
-            $this.ShouldUpdateDscResourceSetting(
-                'LinkDiscoveryProtocolProtocol',
-                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol,
-                $this.LinkDiscoveryProtocolProtocol.ToString()
-            ),
-            $this.ShouldUpdateDscResourceSetting(
-                'LinkDiscoveryProtocolOperation',
-                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation,
-                $this.LinkDiscoveryProtocolOperation.ToString()
-            )
-        )
-
-        return ($vssBridgeTest -NotContains $true)
+    [PSObject] GetVirtualSwitch() {
+        if ($this.Ensure -eq [Ensure]::Absent) {
+            return Get-VirtualSwitch -Server $this.Connection -Name $this.VssName -VMHost $this.VMHost -Standard -ErrorAction SilentlyContinue
+        }
+        else {
+            try {
+                $virtualSwitch = Get-VirtualSwitch -Server $this.Connection -Name $this.VssName -VMHost $this.VMHost -Standard -ErrorAction Stop
+                return $virtualSwitch
+            }
+            catch {
+                throw "Could not retrieve Virtual Switch $($this.VssName) of VMHost $($this.VMHost.Name). For more information: $($_.Exception.Message)"
+            }
+        }
     }
 
     <#
     .DESCRIPTION
 
-    Updates the Bridge configuration of the virtual switch.
+    Retrieves the Virtual Port Group with the specified Name, available on the specified Virtual Switch and VMHost from the server if it exists,
+    otherwise returns $null.
     #>
-    [void] UpdateVssBridge($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssBridgeArgs = @{
-            Name = $this.VssName
-            NicDevice = $this.NicDevice
+    [PSObject] GetVirtualPortGroup($virtualSwitch) {
+        if ($null -eq $virtualSwitch) {
+            <#
+            If the Virtual Switch is $null, it means that Ensure was set to 'Absent' and
+            the Port Group does not exist for the specified Virtual Switch.
+            #>
+            return $null
         }
 
-        # The Bridge configuration of the Standard Switch should be populated only when the Nic devices are passed.
-        if ($this.NicDevice.Count -gt 0) {
-            if ($null -ne $this.BeaconInterval) { $vssBridgeArgs.BeaconInterval = $this.BeaconInterval }
-            if ($this.LinkDiscoveryProtocolProtocol -ne [LinkDiscoveryProtocolProtocol]::Unset) {
-                $vssBridgeArgs.Add('LinkDiscoveryProtocolProtocol', $this.LinkDiscoveryProtocolProtocol.ToString())
-                $vssBridgeArgs.Add('LinkDiscoveryProtocolOperation', $this.LinkDiscoveryProtocolOperation.ToString())
-            }
+        return Get-VirtualPortGroup -Server $this.Connection -Name $this.Name -VirtualSwitch $virtualSwitch -VMHost $this.VMHost -ErrorAction SilentlyContinue
+    }
+
+    <#
+    .DESCRIPTION
+
+    Ensures that the passed VLanId value is in the range [0, 4095].
+    #>
+    [void] EnsureVLanIdValueIsValid() {
+        if ($this.VLanId -lt 0 -or $this.VLanId -gt $this.VLanIdMaxValue) {
+            throw "The passed VLanId value $($this.VLanId) is not valid. The valid values are in the following range: [0, $($this.VLanIdMaxValue)]."
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the populated Port Group parameters.
+    #>
+    [hashtable] GetPortGroupParams() {
+        $portGroupParams = @{}
+
+        $portGroupParams.Confirm = $false
+        $portGroupParams.ErrorAction = 'Stop'
+
+        if ($null -ne $this.VLanId) {
+            $this.EnsureVLanIdValueIsValid()
+            $portGroupParams.VLanId = $this.VLanId
         }
 
-        $vss = $this.GetVss()
+        return $portGroupParams
+    }
 
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-        }
-        else {
-            $vssBridgeArgs.NicDevice = @()
-        }
-        $vssBridgeArgs.Add('Operation', 'edit')
+    <#
+    .DESCRIPTION
+
+    Creates a new Port Group available on the specified Virtual Switch.
+    #>
+    [void] AddVirtualPortGroup($virtualSwitch) {
+        $portGroupParams = $this.GetPortGroupParams()
+
+        $portGroupParams.Server = $this.Connection
+        $portGroupParams.Name = $this.Name
+        $portGroupParams.VirtualSwitch = $virtualSwitch
 
         try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssBridgeConfig $vssBridgeArgs -ErrorAction Stop
+            New-VirtualPortGroup @portGroupParams
         }
         catch {
-            throw "The Virtual Switch Bridge Config could not be updated: $($_.Exception.Message)"
+            throw "Cannot create Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
         }
     }
 
     <#
     .DESCRIPTION
 
-    Populates the result returned from the Get() method with the values of the Bridge settings of the Virtual Switch.
+    Updates the Port Group by changing its VLanId value.
     #>
-    [void] PopulateResult($vmHost, $vmHostVSSBridge) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    [void] UpdateVirtualPortGroup($portGroup) {
+        $portGroupParams = $this.GetPortGroupParams()
 
-        $currentVss = $this.GetVss()
+        try {
+            $portGroup | Set-VirtualPortGroup @portGroupParams
+        }
+        catch {
+            throw "Cannot update Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
 
-        if ($null -ne $currentVss) {
-            $vmHostVSSBridge.VssName = $currentVss.Name
-            $vmHostVSSBridge.NicDevice = $currentVss.Spec.Bridge.NicDevice
-            $vmHostVSSBridge.BeaconInterval = $currentVss.Spec.Bridge.Beacon.Interval
+    <#
+    .DESCRIPTION
 
-            if ($null -ne $currentVss.Spec.Bridge.linkDiscoveryProtocolConfig) {
-                $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation.ToString()
-                $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol.ToString()
-            }
+    Removes the specified Port Group available on the Virtual Switch. All VMs connected to the Port Group must be PoweredOff to successfully remove the Port Group.
+    If one or more of the VMs are PoweredOn, the removal would not be successful because the Port Group is used by the VMs.
+    #>
+    [void] RemoveVirtualPortGroup($portGroup) {
+        try {
+            $portGroup | Remove-VirtualPortGroup -Confirm:$false -ErrorAction Stop
+        }
+        catch {
+            throw "Cannot remove Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Port Group from the server.
+    #>
+    [void] PopulateResult($portGroup, $result) {
+        if ($null -ne $portGroup) {
+            $result.Name = $portGroup.Name
+            $result.VssName = $portGroup.VirtualSwitchName
+            $result.Ensure = [Ensure]::Present
+            $result.VLanId = $portGroup.VLanId
         }
         else {
-            $vmHostVSSBridge.VssName = $this.VssName
-            $vmHostVSSBridge.NicDevice = $this.NicDevice
-            $vmHostVSSBridge.BeaconInterval = $this.BeaconInterval
-            $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $this.LinkDiscoveryProtocolOperation
-            $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $this.LinkDiscoveryProtocolProtocol
+            $result.Name = $this.Name
+            $result.VssName = $this.VssName
+            $result.Ensure = [Ensure]::Absent
+            $result.VLanId = $this.VLanId
         }
     }
 }
 
 [DscResource()]
-class VMHostVssSecurity : VMHostVssBaseDSC {
+class VMHostVssPortGroupSecurity : VMHostVssPortGroupBaseDSC {
     <#
     .DESCRIPTION
 
-    The flag to indicate whether or not all traffic is seen on the port.
+    Specifies whether promiscuous mode is enabled for the corresponding Virtual Port Group.
     #>
     [DscProperty()]
     [nullable[bool]] $AllowPromiscuous
@@ -16544,9 +17055,15 @@ class VMHostVssSecurity : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    The flag to indicate whether or not the virtual network adapter should be
-    allowed to send network traffic with a different MAC address than that of
-    the virtual network adapter.
+    Specifies whether the AllowPromiscuous setting is inherited from the parent Standard Virtual Switch.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $AllowPromiscuousInherited
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether forged transmits are enabled for the corresponding Virtual Port Group.
     #>
     [DscProperty()]
     [nullable[bool]] $ForgedTransmits
@@ -16554,21 +17071,43 @@ class VMHostVssSecurity : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    The flag to indicate whether or not the Media Access Control (MAC) address
-    can be changed.
+    Specifies whether the ForgedTransmits setting is inherited from the parent Standard Virtual Switch.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $ForgedTransmitsInherited
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether MAC address changes are enabled for the corresponding Virtual Port Group.
     #>
     [DscProperty()]
     [nullable[bool]] $MacChanges
 
+    <#
+    .DESCRIPTION
+
+    Specifies whether the MacChanges setting is inherited from the parent Standard Virtual Switch.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $MacChangesInherited
+
+    hidden [string] $AllowPromiscuousSettingName = 'AllowPromiscuous'
+    hidden [string] $AllowPromiscuousInheritedSettingName = 'AllowPromiscuousInherited'
+    hidden [string] $ForgedTransmitsSettingName = 'ForgedTransmits'
+    hidden [string] $ForgedTransmitsInheritedSettingName = 'ForgedTransmitsInherited'
+    hidden [string] $MacChangesSettingName = 'MacChanges'
+    hidden [string] $MacChangesInheritedSettingName = 'MacChangesInherited'
+
     [void] Set() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $this.UpdateVssSecurity($vmHost)
+            $virtualPortGroup = $this.GetVirtualPortGroup()
+            $virtualPortGroupSecurityPolicy = $this.GetVirtualPortGroupSecurityPolicy($virtualPortGroup)
+
+            $this.UpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy)
         }
         finally {
             $this.DisconnectVIServer()
@@ -16577,23 +17116,19 @@ class VMHostVssSecurity : VMHostVssBaseDSC {
 
     [bool] Test() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
+            $this.RetrieveVMHost()
+
+            $virtualPortGroup = $this.GetVirtualPortGroup()
 
             $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
+            if ($null -eq $virtualPortGroup) {
+                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
+                $result = $true
             }
             else {
-                $this.AllowPromiscuous = $false
-                $this.ForgedTransmits = $true
-                $this.MacChanges = $true
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
+                $virtualPortGroupSecurityPolicy = $this.GetVirtualPortGroupSecurityPolicy($virtualPortGroup)
+                $result = !$this.ShouldUpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy)
             }
 
             $this.WriteDscResourceState($result)
@@ -16605,21 +17140,28 @@ class VMHostVssSecurity : VMHostVssBaseDSC {
         }
     }
 
-    [VMHostVssSecurity] Get() {
+    [VMHostVssPortGroupSecurity] Get() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssSecurity]::new()
+            $result = [VMHostVssPortGroupSecurity]::new()
             $result.Server = $this.Server
+            $result.Ensure = $this.Ensure
 
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
+            $result.VMHostName = $this.VMHost.Name
 
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+            $virtualPortGroup = $this.GetVirtualPortGroup()
+            if ($null -eq $virtualPortGroup) {
+                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
+                $result.Name = $this.Name
+                return $result
+            }
+
+            $virtualPortGroupSecurityPolicy = $this.GetVirtualPortGroupSecurityPolicy($virtualPortGroup)
+            $result.Name = $virtualPortGroup.Name
+
+            $this.PopulateResult($virtualPortGroupSecurityPolicy, $result)
 
             return $result
         }
@@ -16631,100 +17173,74 @@ class VMHostVssSecurity : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Returns a boolean value indicating if the VMHostVssSecurity should to be updated.
+    Retrieves the Virtual Port Group Security Policy from the server.
     #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssSecurityTest = @(
-            $this.ShouldUpdateDscResourceSetting('AllowPromiscuous', $vss.Spec.Policy.Security.AllowPromiscuous, $this.AllowPromiscuous),
-            $this.ShouldUpdateDscResourceSetting('ForgedTransmits', $vss.Spec.Policy.Security.ForgedTransmits, $this.ForgedTransmits),
-            $this.ShouldUpdateDscResourceSetting('MacChanges', $vss.Spec.Policy.Security.MacChanges, $this.MacChanges)
-        )
-
-        return ($vssSecurityTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the configuration of the virtual switch.
-    #>
-    [void] UpdateVssSecurity($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssSecurityArgs = @{
-            Name = $this.VssName
-            AllowPromiscuous = $this.AllowPromiscuous
-            ForgedTransmits = $this.ForgedTransmits
-            MacChanges = $this.MacChanges
-        }
-        $vss = $this.GetVss()
-
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-            $vssSecurityArgs.Add('Operation', 'edit')
-        }
-        else {
-            $vssSecurityArgs.AllowPromiscuous = $false
-            $vssSecurityArgs.ForgedTransmits = $true
-            $vssSecurityArgs.MacChanges = $true
-            $vssSecurityArgs.Add('Operation', 'edit')
-        }
-
+    [PSObject] GetVirtualPortGroupSecurityPolicy($virtualPortGroup) {
         try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssSecurityConfig $vssSecurityArgs -ErrorAction Stop
+            $virtualPortGroupSecurityPolicy = Get-SecurityPolicy -Server $this.Connection -VirtualPortGroup $virtualPortGroup -ErrorAction Stop
+            return $virtualPortGroupSecurityPolicy
         }
         catch {
-            throw "The Virtual Switch Security Config could not be updated: $($_.Exception.Message)"
+            throw "Could not retrieve Virtual Port Group $($this.PortGroup) Security Policy. For more information: $($_.Exception.Message)"
         }
     }
 
     <#
     .DESCRIPTION
 
-    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    Checks if the Security Policy of the specified Virtual Port Group should be updated.
     #>
-    [void] PopulateResult($vmHost, $vmHostVSSSecurity) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    [bool] ShouldUpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy) {
+        $shouldUpdateVirtualPortGroupSecurityPolicy = @(
+            $this.ShouldUpdateDscResourceSetting('AllowPromiscuous', $virtualPortGroupSecurityPolicy.AllowPromiscuous, $this.AllowPromiscuous),
+            $this.ShouldUpdateDscResourceSetting('AllowPromiscuousInherited', $virtualPortGroupSecurityPolicy.AllowPromiscuousInherited, $this.AllowPromiscuousInherited),
+            $this.ShouldUpdateDscResourceSetting('ForgedTransmits', $virtualPortGroupSecurityPolicy.ForgedTransmits, $this.ForgedTransmits),
+            $this.ShouldUpdateDscResourceSetting('ForgedTransmitsInherited', $virtualPortGroupSecurityPolicy.ForgedTransmitsInherited, $this.ForgedTransmitsInherited),
+            $this.ShouldUpdateDscResourceSetting('MacChanges', $virtualPortGroupSecurityPolicy.MacChanges, $this.MacChanges),
+            $this.ShouldUpdateDscResourceSetting('MacChangesInherited', $virtualPortGroupSecurityPolicy.MacChangesInherited, $this.MacChangesInherited)
+        )
 
-        $currentVss = $this.GetVss()
+        return ($shouldUpdateVirtualPortGroupSecurityPolicy -Contains $true)
+    }
 
-        if ($null -ne $currentVss) {
-            $vmHostVSSSecurity.VssName = $currentVss.Name
-            $vmHostVSSSecurity.AllowPromiscuous = $currentVss.Spec.Policy.Security.AllowPromiscuous
-            $vmHostVSSSecurity.ForgedTransmits = $currentVss.Spec.Policy.Security.ForgedTransmits
-            $vmHostVSSSecurity.MacChanges = $currentVss.Spec.Policy.Security.MacChanges
+    <#
+    .DESCRIPTION
+
+    Performs an update on the Security Policy of the specified Virtual Port Group.
+    #>
+    [void] UpdateVirtualPortGroupSecurityPolicy($virtualPortGroupSecurityPolicy) {
+        $securityPolicyParams = @{}
+        $securityPolicyParams.VirtualPortGroupPolicy = $virtualPortGroupSecurityPolicy
+
+        $this.PopulatePolicySetting($securityPolicyParams, $this.AllowPromiscuousSettingName, $this.AllowPromiscuous, $this.AllowPromiscuousInheritedSettingName, $this.AllowPromiscuousInherited)
+        $this.PopulatePolicySetting($securityPolicyParams, $this.ForgedTransmitsSettingName, $this.ForgedTransmits, $this.ForgedTransmitsInheritedSettingName, $this.ForgedTransmitsInherited)
+        $this.PopulatePolicySetting($securityPolicyParams, $this.MacChangesSettingName, $this.MacChanges, $this.MacChangesInheritedSettingName, $this.MacChangesInherited)
+
+        try {
+            Set-SecurityPolicy @securityPolicyParams
         }
-        else {
-            $vmHostVSSSecurity.VssName = $this.VssName
-            $vmHostVSSSecurity.AllowPromiscuous = $this.AllowPromiscuous
-            $vmHostVSSSecurity.ForgedTransmits = $this.ForgedTransmits
-            $vmHostVSSSecurity.MacChanges = $this.MacChanges
+        catch {
+            throw "Cannot update Security Policy of Virtual Port Group $($this.PortGroup). For more information: $($_.Exception.Message)"
         }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security Policy of the specified Virtual Port Group from the server.
+    #>
+    [void] PopulateResult($virtualPortGroupSecurityPolicy, $result) {
+        $result.AllowPromiscuous = $virtualPortGroupSecurityPolicy.AllowPromiscuous
+        $result.AllowPromiscuousInherited = $virtualPortGroupSecurityPolicy.AllowPromiscuousInherited
+        $result.ForgedTransmits = $virtualPortGroupSecurityPolicy.ForgedTransmits
+        $result.ForgedTransmitsInherited = $virtualPortGroupSecurityPolicy.ForgedTransmitsInherited
+        $result.MacChanges = $virtualPortGroupSecurityPolicy.MacChanges
+        $result.MacChangesInherited = $virtualPortGroupSecurityPolicy.MacChangesInherited
     }
 }
 
 [DscResource()]
-class VMHostVssShaping : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The average bandwidth in bits per second if shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $AverageBandwidth
-
-    <#
-    .DESCRIPTION
-
-    The maximum burst size allowed in bytes if shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $BurstSize
-
+class VMHostVssPortGroupShaping : VMHostVssPortGroupBaseDSC {
     <#
     .DESCRIPTION
 
@@ -16736,20 +17252,36 @@ class VMHostVssShaping : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
+    The average bandwidth in bits per second if shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $AverageBandwidth
+
+    <#
+    .DESCRIPTION
+
     The peak bandwidth during bursts in bits per second if traffic shaping is enabled on the port.
     #>
     [DscProperty()]
     [nullable[long]] $PeakBandwidth
 
+    <#
+    .DESCRIPTION
+
+    The maximum burst size allowed in bytes if shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $BurstSize
+
     [void] Set() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $this.UpdateVssShaping($vmHost)
+            $this.GetVMHostNetworkSystem()
+            $virtualPortGroup = $this.GetVirtualPortGroup()
+
+            $this.UpdateVirtualPortGroupShapingPolicy($virtualPortGroup)
         }
         finally {
             $this.DisconnectVIServer()
@@ -16758,24 +17290,18 @@ class VMHostVssShaping : VMHostVssBaseDSC {
 
     [bool] Test() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
+            $this.RetrieveVMHost()
+
+            $virtualPortGroup = $this.GetVirtualPortGroup()
 
             $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
+            if ($null -eq $virtualPortGroup) {
+                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
+                $result = $true
             }
             else {
-                $this.AverageBandwidth = 100000
-                $this.BurstSize = 100000
-                $this.Enabled = $false
-                $this.PeakBandwidth = 100000
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
+                $result = !$this.ShouldUpdateVirtualPortGroupShapingPolicy($virtualPortGroup)
             }
 
             $this.WriteDscResourceState($result)
@@ -16787,21 +17313,26 @@ class VMHostVssShaping : VMHostVssBaseDSC {
         }
     }
 
-    [VMHostVssShaping] Get() {
+    [VMHostVssPortGroupShaping] Get() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssShaping]::new()
+            $result = [VMHostVssPortGroupShaping]::new()
             $result.Server = $this.Server
+            $result.Ensure = $this.Ensure
 
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
+            $result.VMHostName = $this.VMHost.Name
 
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+            $virtualPortGroup = $this.GetVirtualPortGroup()
+            if ($null -eq $virtualPortGroup) {
+                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
+                $result.Name = $this.Name
+                return $result
+            }
+
+            $result.Name = $virtualPortGroup.Name
+            $this.PopulateResult($virtualPortGroup, $result)
 
             return $result
         }
@@ -16813,102 +17344,91 @@ class VMHostVssShaping : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Returns a boolean value indicating if the VMHostVssShaping should to be updated.
+    Checks if the Shaping Policy of the specified Virtual Port Group should be updated.
     #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    [bool] ShouldUpdateVirtualPortGroupShapingPolicy($virtualPortGroup) {
+        $shapingPolicy = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy
 
-        $vssShapingTest = @(
-            $this.ShouldUpdateDscResourceSetting('AverageBandwidth', $vss.Spec.Policy.ShapingPolicy.AverageBandwidth, $this.AverageBandwidth),
-            $this.ShouldUpdateDscResourceSetting('BurstSize', $vss.Spec.Policy.ShapingPolicy.BurstSize, $this.BurstSize),
-            $this.ShouldUpdateDscResourceSetting('Enabled', $vss.Spec.Policy.ShapingPolicy.Enabled, $this.Enabled),
-            $this.ShouldUpdateDscResourceSetting('PeakBandwidth', $vss.Spec.Policy.ShapingPolicy.PeakBandwidth, $this.PeakBandwidth)
+        $shouldUpdateVirtualPortGroupShapingPolicy = @(
+            $this.ShouldUpdateDscResourceSetting('Enabled', $shapingPolicy.Enabled, $this.Enabled),
+            $this.ShouldUpdateDscResourceSetting('AverageBandwidth', $shapingPolicy.AverageBandwidth, $this.AverageBandwidth),
+            $this.ShouldUpdateDscResourceSetting('PeakBandwidth', $shapingPolicy.PeakBandwidth, $this.PeakBandwidth),
+            $this.ShouldUpdateDscResourceSetting('BurstSize', $shapingPolicy.BurstSize, $this.BurstSize)
         )
 
-        return ($vssShapingTest -NotContains $true)
+        return ($shouldUpdateVirtualPortGroupShapingPolicy -Contains $true)
     }
 
     <#
     .DESCRIPTION
 
-    Updates the configuration of the virtual switch.
+    Performs an update on the Shaping Policy of the specified Virtual Port Group.
     #>
-    [void] UpdateVssShaping($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    [void] UpdateVirtualPortGroupShapingPolicy($virtualPortGroup) {
+        $virtualPortGroupSpec = New-Object VMware.Vim.HostPortGroupSpec
 
-        $vssShapingArgs = @{
-            Name = $this.VssName
-            AverageBandwidth = $this.AverageBandwidth
-            BurstSize = $this.BurstSize
-            Enabled = $this.Enabled
-            PeakBandwidth = $this.PeakBandwidth
-        }
-        $vss = $this.GetVss()
+        $virtualPortGroupSpec.Name = $virtualPortGroup.Name
+        $virtualPortGroupSpec.VswitchName = $virtualPortGroup.VirtualSwitchName
+        $virtualPortGroupSpec.VlanId = $virtualPortGroup.VLanId
 
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-            $vssShapingArgs.Add('Operation', 'edit')
-        }
-        else {
-            $vssShapingArgs.AverageBandwidth = 100000
-            $vssShapingArgs.BurstSize = 100000
-            $vssShapingArgs.Enabled = $false
-            $vssShapingArgs.PeakBandwidth = 100000
-            $vssShapingArgs.Add('Operation', 'edit')
-        }
+        $virtualPortGroupSpec.Policy = New-Object VMware.Vim.HostNetworkPolicy
+        $virtualPortGroupSpec.Policy.ShapingPolicy = New-Object VMware.Vim.HostNetworkTrafficShapingPolicy
+
+        if ($null -ne $this.Enabled) { $virtualPortGroupSpec.Policy.ShapingPolicy.Enabled = $this.Enabled }
+        if ($null -ne $this.AverageBandwidth) { $virtualPortGroupSpec.Policy.ShapingPolicy.AverageBandwidth = $this.AverageBandwidth }
+        if ($null -ne $this.PeakBandwidth) { $virtualPortGroupSpec.Policy.ShapingPolicy.PeakBandwidth = $this.PeakBandwidth }
+        if ($null -ne $this.BurstSize) { $virtualPortGroupSpec.Policy.ShapingPolicy.BurstSize = $this.BurstSize }
 
         try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssShapingConfig $vssShapingArgs -ErrorAction Stop
+            Update-VirtualPortGroup -VMHostNetworkSystem $this.VMHostNetworkSystem -VirtualPortGroupName $virtualPortGroup.Name -Spec $virtualPortGroupSpec
         }
         catch {
-            throw "The Virtual Switch Shaping Policy Config could not be updated: $($_.Exception.Message)"
+            throw "Cannot update Shaping Policy of Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
         }
     }
 
     <#
     .DESCRIPTION
 
-    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    Populates the result returned from the Get() method with the values of the Shaping Policy of the specified Virtual Port Group from the server.
     #>
-    [void] PopulateResult($vmHost, $vmHostVSSShaping) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSSShaping.VssName = $currentVss.Name
-            $vmHostVSSShaping.AverageBandwidth = $currentVss.Spec.Policy.ShapingPolicy.AverageBandwidth
-            $vmHostVSSShaping.BurstSize = $currentVss.Spec.Policy.ShapingPolicy.BurstSize
-            $vmHostVSSShaping.Enabled = $currentVss.Spec.Policy.ShapingPolicy.Enabled
-            $vmHostVSSShaping.PeakBandwidth = $currentVss.Spec.Policy.ShapingPolicy.PeakBandwidth
-        }
-        else {
-            $vmHostVSSShaping.VssName = $this.Name
-            $vmHostVSSShaping.AverageBandwidth = $this.AverageBandwidth
-            $vmHostVSSShaping.BurstSize = $this.BurstSize
-            $vmHostVSSShaping.Enabled = $this.Enabled
-            $vmHostVSSShaping.PeakBandwidth = $this.PeakBandwidth
-        }
+    [void] PopulateResult($virtualPortGroup, $result) {
+        $result.Enabled = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.Enabled
+        $result.AverageBandwidth = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.AverageBandwidth
+        $result.PeakBandwidth = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.PeakBandwidth
+        $result.BurstSize = $virtualPortGroup.ExtensionData.Spec.Policy.ShapingPolicy.BurstSize
     }
 }
 
 [DscResource()]
-class VMHostVssTeaming : VMHostVssBaseDSC {
+class VMHostVssPortGroupTeaming : VMHostVssPortGroupBaseDSC {
     <#
     .DESCRIPTION
 
-    The flag to indicate whether or not to enable beacon probing
-    as a method to validate the link status of a physical network adapter.
+    Specifies how a physical adapter is returned to active duty after recovering from a failure.
+    If the value is $true, the adapter is returned to active duty immediately on recovery, displacing the standby adapter that took over its slot, if any.
+    If the value is $false, a failed adapter is left inactive even after recovery until another active adapter fails, requiring its replacement.
     #>
     [DscProperty()]
-    [nullable[bool]] $CheckBeacon
+    [nullable[bool]] $FailbackEnabled
 
     <#
     .DESCRIPTION
 
-    List of active network adapters used for load balancing.
+    Determines how network traffic is distributed between the network adapters assigned to a switch. The following values are valid:
+    LoadBalanceIP - Route based on IP hash. Choose an uplink based on a hash of the source and destination IP addresses of each packet.
+    For non-IP packets, whatever is at those offsets is used to compute the hash.
+    LoadBalanceSrcMac - Route based on source MAC hash. Choose an uplink based on a hash of the source Ethernet.
+    LoadBalanceSrcId - Route based on the originating port ID. Choose an uplink based on the virtual port where the traffic entered the virtual switch.
+    ExplicitFailover - Always use the highest order uplink from the list of Active adapters that passes failover detection criteria.
+    #>
+    [DscProperty()]
+    [LoadBalancingPolicy] $LoadBalancingPolicy = [LoadBalancingPolicy]::Unset
+
+    <#
+    .DESCRIPTION
+
+    Specifies the adapters you want to continue to use when the network adapter connectivity is available and active.
     #>
     [DscProperty()]
     [string[]] $ActiveNic
@@ -16916,7 +17436,7 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Standby network adapters used for failover.
+    Specifies the adapters you want to use if one of the active adapter's connectivity is unavailable.
     #>
     [DscProperty()]
     [string[]] $StandbyNic
@@ -16924,7 +17444,28 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Flag to specify whether or not to notify the physical switch if a link fails.
+    Specifies the adapters you do not want to use.
+    #>
+    [DscProperty()]
+    [string[]] $UnusedNic
+
+    <#
+    .DESCRIPTION
+
+    Specifies how to reroute traffic in the event of an adapter failure. The following values are valid:
+    LinkStatus - Relies solely on the link status that the network adapter provides. This option detects failures, such as cable pulls and physical switch power failures,
+    but not configuration errors, such as a physical switch port being blocked by spanning tree or misconfigured to the wrong VLAN or cable pulls on the other side of a physical switch.
+    BeaconProbing - Sends out and listens for beacon probes on all NICs in the team and uses this information, in addition to link status, to determine link failure.
+    This option detects many of the failures mentioned above that are not detected by link status alone.
+    #>
+    [DscProperty()]
+    [NetworkFailoverDetectionPolicy] $NetworkFailoverDetectionPolicy = [NetworkFailoverDetectionPolicy]::Unset
+
+    <#
+    .DESCRIPTION
+
+    Indicates that whenever a virtual NIC is connected to the virtual switch or whenever that virtual NIC's traffic is routed over a different physical NIC in the team because of a
+    failover event, a notification is sent over the network to update the lookup tables on the physical switches.
     #>
     [DscProperty()]
     [nullable[bool]] $NotifySwitches
@@ -16932,28 +17473,65 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Network adapter teaming policy.
+    Indicates that the value of the FailbackEnabled parameter is inherited from the virtual switch.
     #>
     [DscProperty()]
-    [NicTeamingPolicy] $Policy = [NicTeamingPolicy]::Unset
+    [nullable[bool]] $InheritFailback
 
     <#
     .DESCRIPTION
 
-    The flag to indicate whether or not to use a rolling policy when restoring links.
+    Indicates that the values of the ActiveNic, StandbyNic, and UnusedNic parameters are inherited from the virtual switch.
     #>
     [DscProperty()]
-    [nullable[bool]] $RollingOrder
+    [nullable[bool]] $InheritFailoverOrder
+
+    <#
+    .DESCRIPTION
+
+    Indicates that the value of the LoadBalancingPolicy parameter is inherited from the virtual switch.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $InheritLoadBalancingPolicy
+
+    <#
+    .DESCRIPTION
+
+    Indicates that the value of the NetworkFailoverDetectionPolicy parameter is inherited from the virtual switch.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $InheritNetworkFailoverDetectionPolicy
+
+    <#
+    .DESCRIPTION
+
+    Indicates that the value of the NotifySwitches parameter is inherited from the virtual switch.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $InheritNotifySwitches
+
+    hidden [string] $FailbackEnabledSettingName = 'FailbackEnabled'
+    hidden [string] $InheritFailbackSettingName = 'InheritFailback'
+    hidden [string] $LoadBalancingPolicySettingName = 'LoadBalancingPolicy'
+    hidden [string] $InheritLoadBalancingPolicySettingName = 'InheritLoadBalancingPolicy'
+    hidden [string] $NetworkFailoverDetectionPolicySettingName = 'NetworkFailoverDetectionPolicy'
+    hidden [string] $InheritNetworkFailoverDetectionPolicySettingName = 'InheritNetworkFailoverDetectionPolicy'
+    hidden [string] $NotifySwitchesSettingName = 'NotifySwitches'
+    hidden [string] $InheritNotifySwitchesSettingName = 'InheritNotifySwitches'
+    hidden [string] $MakeNicActiveSettingName = 'MakeNicActive'
+    hidden [string] $MakeNicStandbySettingName = 'MakeNicStandby'
+    hidden [string] $MakeNicUnusedSettingName = 'MakeNicUnused'
+    hidden [string] $InheritFailoverOrderSettingName = 'InheritFailoverOrder'
 
     [void] Set() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $this.UpdateVssTeaming($vmHost)
+            $virtualPortGroup = $this.GetVirtualPortGroup()
+            $virtualPortGroupTeamingPolicy = $this.GetVirtualPortGroupTeamingPolicy($virtualPortGroup)
+
+            $this.UpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy)
         }
         finally {
             $this.DisconnectVIServer()
@@ -16962,26 +17540,19 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
 
     [bool] Test() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
+            $this.RetrieveVMHost()
+
+            $virtualPortGroup = $this.GetVirtualPortGroup()
 
             $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
+            if ($null -eq $virtualPortGroup) {
+                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
+                $result = $true
             }
             else {
-                $this.CheckBeacon = $false
-                $this.ActiveNic = @()
-                $this.StandbyNic = @()
-                $this.NotifySwitches = $true
-                $this.Policy = [NicTeamingPolicy]::Loadbalance_srcid
-                $this.RollingOrder = $false
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
+                $virtualPortGroupTeamingPolicy = $this.GetVirtualPortGroupTeamingPolicy($virtualPortGroup)
+                $result = !$this.ShouldUpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy)
             }
 
             $this.WriteDscResourceState($result)
@@ -16993,21 +17564,28 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
         }
     }
 
-    [VMHostVssTeaming] Get() {
+    [VMHostVssPortGroupTeaming] Get() {
         try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssTeaming]::new()
+            $result = [VMHostVssPortGroupTeaming]::new()
             $result.Server = $this.Server
+            $result.Ensure = $this.Ensure
 
             $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
+            $this.RetrieveVMHost()
 
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
+            $result.VMHostName = $this.VMHost.Name
 
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+            $virtualPortGroup = $this.GetVirtualPortGroup()
+            if ($null -eq $virtualPortGroup) {
+                # If the Port Group is $null, it means that Ensure is 'Absent' and the Port Group does not exist.
+                $result.Name = $this.Name
+                return $result
+            }
+
+            $virtualPortGroupTeamingPolicy = $this.GetVirtualPortGroupTeamingPolicy($virtualPortGroup)
+            $result.Name = $virtualPortGroup.Name
+
+            $this.PopulateResult($virtualPortGroupTeamingPolicy, $result)
 
             return $result
         }
@@ -17019,706 +17597,128 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Returns a boolean value indicating if the VMHostVssTeaming should to be updated.
+    Retrieves the Virtual Port Group Teaming Policy from the server.
     #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    [PSObject] GetVirtualPortGroupTeamingPolicy($virtualPortGroup) {
+        try {
+            $virtualPortGroupTeamingPolicy = Get-NicTeamingPolicy -Server $this.Connection -VirtualPortGroup $virtualPortGroup -ErrorAction Stop
+            return $virtualPortGroupTeamingPolicy
+        }
+        catch {
+            throw "Could not retrieve Virtual Port Group $($this.Name) Teaming Policy. For more information: $($_.Exception.Message)"
+        }
+    }
 
-        $vssTeamingTest = @(
-            $this.ShouldUpdateDscResourceSetting('CheckBeacon', $vss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon, $this.CheckBeacon),
-            $this.ShouldUpdateDscResourceSetting('NotifySwitches', $vss.Spec.Policy.NicTeaming.NotifySwitches, $this.NotifySwitches),
-            $this.ShouldUpdateDscResourceSetting('RollingOrder', $vss.Spec.Policy.NicTeaming.RollingOrder, $this.RollingOrder),
-            $this.ShouldUpdateDscResourceSetting('Policy', [string] $vss.Spec.Policy.NicTeaming.Policy, $this.Policy.ToString().ToLower()),
-            $this.ShouldUpdateArraySetting('ActiveNic', $vss.Spec.Policy.NicTeaming.NicOrder.ActiveNic, $this.ActiveNic),
-            $this.ShouldUpdateArraySetting('StandbyNic', $vss.Spec.Policy.NicTeaming.NicOrder.StandbyNic, $this.StandbyNic)
+    <#
+    .DESCRIPTION
+
+    Checks if the Teaming Policy of the specified Virtual Port Group should be updated.
+    #>
+    [bool] ShouldUpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy) {
+        $shouldUpdateVirtualPortGroupTeamingPolicy = @(
+            $this.ShouldUpdateDscResourceSetting('FailbackEnabled', $virtualPortGroupTeamingPolicy.FailbackEnabled, $this.FailbackEnabled),
+            $this.ShouldUpdateDscResourceSetting('NotifySwitches', $virtualPortGroupTeamingPolicy.NotifySwitches, $this.NotifySwitches),
+            $this.ShouldUpdateDscResourceSetting('InheritFailback', $virtualPortGroupTeamingPolicy.IsFailbackInherited, $this.InheritFailback),
+            $this.ShouldUpdateDscResourceSetting('InheritFailoverOrder', $virtualPortGroupTeamingPolicy.IsFailoverOrderInherited, $this.InheritFailoverOrder),
+            $this.ShouldUpdateDscResourceSetting('InheritLoadBalancingPolicy', $virtualPortGroupTeamingPolicy.IsLoadBalancingInherited, $this.InheritLoadBalancingPolicy),
+            $this.ShouldUpdateDscResourceSetting(
+                'InheritNetworkFailoverDetectionPolicy',
+                $virtualPortGroupTeamingPolicy.IsNetworkFailoverDetectionInherited,
+                $this.InheritNetworkFailoverDetectionPolicy
+            ),
+            $this.ShouldUpdateDscResourceSetting('InheritNotifySwitches', $virtualPortGroupTeamingPolicy.IsNotifySwitchesInherited, $this.InheritNotifySwitches),
+            $this.ShouldUpdateDscResourceSetting('LoadBalancingPolicy', [string] $virtualPortGroupTeamingPolicy.LoadBalancingPolicy, $this.LoadBalancingPolicy.ToString()),
+            $this.ShouldUpdateDscResourceSetting(
+                'NetworkFailoverDetectionPolicy',
+                [string] $virtualPortGroupTeamingPolicy.NetworkFailoverDetectionPolicy,
+                $this.NetworkFailoverDetectionPolicy.ToString()
+            ),
+            $this.ShouldUpdateArraySetting('ActiveNic', $virtualPortGroupTeamingPolicy.ActiveNic, $this.ActiveNic),
+            $this.ShouldUpdateArraySetting('StandbyNic', $virtualPortGroupTeamingPolicy.StandbyNic, $this.StandbyNic),
+            $this.ShouldUpdateArraySetting('UnusedNic', $virtualPortGroupTeamingPolicy.UnusedNic, $this.UnusedNic)
         )
 
-        return ($vssTeamingTest -NotContains $true)
+        return ($shouldUpdateVirtualPortGroupTeamingPolicy -Contains $true)
     }
 
     <#
     .DESCRIPTION
 
-    Updates the configuration of the virtual switch.
+    Populates the specified Enum Policy Setting. If the Inherited Setting is passed and set to $true,
+    the Policy Setting should not be populated because "Parameters of the form "XXX" and "InheritXXX" are mutually exclusive."
+    If the Inherited Setting is set to $false, both parameters can be populated.
     #>
-    [void] UpdateVssTeaming($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssTeamingArgs = @{
-            Name = $this.VssName
-            ActiveNic = $this.ActiveNic
-            StandbyNic = $this.StandbyNic
-            NotifySwitches = $this.NotifySwitches
-            RollingOrder = $this.RollingOrder
-        }
-
-        if ($null -ne $this.CheckBeacon) { $vssTeamingArgs.CheckBeacon = $this.CheckBeacon }
-        if ($this.Policy -ne [NicTeamingPolicy]::Unset) { $vssTeamingArgs.Policy = $this.Policy.ToString().ToLower() }
-
-        $vss = $this.GetVss()
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
+    [void] PopulateEnumPolicySetting($policyParams, $policySettingName, $policySetting, $policySettingInheritedName, $policySettingInherited) {
+        if ($policySetting -ne 'Unset') {
+            if ($null -eq $policySettingInherited -or !$policySettingInherited) {
+                $policyParams.$policySettingName = $policySetting
             }
-            $vssTeamingArgs.Add('Operation', 'edit')
         }
-        else {
-            $vssTeamingArgs.CheckBeacon = $false
-            $vssTeamingArgs.ActiveNic = @()
-            $vssTeamingArgs.StandbyNic = @()
-            $vssTeamingArgs.NotifySwitches = $true
-            $vssTeamingArgs.Policy = ([NicTeamingPolicy]::Loadbalance_srcid).ToString().ToLower()
-            $vssTeamingArgs.RollingOrder = $false
-            $vssTeamingArgs.Add('Operation', 'edit')
+
+        if ($null -ne $policySettingInherited) { $policyParams.$policySettingInheritedName = $policySettingInherited }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the specified Array Policy Setting. If the Inherited Setting is passed and set to $true,
+    the Policy Setting should not be populated because "Parameters of the form "XXX" and "InheritXXX" are mutually exclusive."
+    If the Inherited Setting is set to $false, both parameters can be populated.
+    #>
+    [void] PopulateArrayPolicySetting($policyParams, $policySettingName, $policySetting, $policySettingInheritedName, $policySettingInherited) {
+        if ($null -ne $policySetting -and $policySetting.Length -gt 0) {
+            if ($null -eq $policySettingInherited -or !$policySettingInherited) {
+                $policyParams.$policySettingName = $policySetting
+            }
         }
+
+        if ($null -ne $policySettingInherited) { $policyParams.$policySettingInheritedName = $policySettingInherited }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Performs an update on the Teaming Policy of the specified Virtual Port Group.
+    #>
+    [void] UpdateVirtualPortGroupTeamingPolicy($virtualPortGroupTeamingPolicy) {
+        $teamingPolicyParams = @{}
+        $teamingPolicyParams.VirtualPortGroupPolicy = $virtualPortGroupTeamingPolicy
+
+        $this.PopulatePolicySetting($teamingPolicyParams, $this.FailbackEnabledSettingName, $this.FailbackEnabled, $this.InheritFailbackSettingName, $this.InheritFailback)
+        $this.PopulatePolicySetting($teamingPolicyParams, $this.NotifySwitchesSettingName, $this.NotifySwitches, $this.InheritNotifySwitchesSettingName, $this.InheritNotifySwitches)
+
+        $this.PopulateEnumPolicySetting($teamingPolicyParams, $this.LoadBalancingPolicySettingName, $this.LoadBalancingPolicy.ToString(), $this.InheritLoadBalancingPolicySettingName, $this.InheritLoadBalancingPolicy)
+        $this.PopulateEnumPolicySetting($teamingPolicyParams, $this.NetworkFailoverDetectionPolicySettingName, $this.NetworkFailoverDetectionPolicy.ToString(), $this.InheritNetworkFailoverDetectionPolicySettingName, $this.InheritNetworkFailoverDetectionPolicy)
+
+        $this.PopulateArrayPolicySetting($teamingPolicyParams, $this.MakeNicActiveSettingName, $this.ActiveNic, $this.InheritFailoverOrderSettingName, $this.InheritFailoverOrder)
+        $this.PopulateArrayPolicySetting($teamingPolicyParams, $this.MakeNicStandbySettingName, $this.StandbyNic, $this.InheritFailoverOrderSettingName, $this.InheritFailoverOrder)
+        $this.PopulateArrayPolicySetting($teamingPolicyParams, $this.MakeNicUnusedSettingName, $this.UnusedNic, $this.InheritFailoverOrderSettingName, $this.InheritFailoverOrder)
 
         try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssTeamingConfig $vssTeamingArgs -ErrorAction Stop
+            Set-NicTeamingPolicy @teamingPolicyParams
         }
         catch {
-            throw "The Virtual Switch Teaming Policy Config could not be updated: $($_.Exception.Message)"
+            throw "Cannot update Teaming Policy of Virtual Port Group $($this.Name). For more information: $($_.Exception.Message)"
         }
     }
 
     <#
     .DESCRIPTION
 
-    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    Populates the result returned from the Get() method with the values of the Teaming Policy of the specified Virtual Port Group from the server.
     #>
-    [void] PopulateResult($vmHost, $vmHostVSSTeaming) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSSTeaming.VssName = $currentVss.Name
-            $vmHostVSSTeaming.CheckBeacon = $currentVss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon
-            $vmHostVSSTeaming.ActiveNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.ActiveNic
-            $vmHostVSSTeaming.StandbyNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.StandbyNic
-            $vmHostVSSTeaming.NotifySwitches = $currentVss.Spec.Policy.NicTeaming.NotifySwitches
-            $vmHostVSSTeaming.Policy = [NicTeamingPolicy]$currentVss.Spec.Policy.NicTeaming.Policy
-            $vmHostVSSTeaming.RollingOrder = $currentVss.Spec.Policy.NicTeaming.RollingOrder
-        }
-        else {
-            $vmHostVSSTeaming.VssName = $this.Name
-            $vmHostVSSTeaming.CheckBeacon = $this.CheckBeacon
-            $vmHostVSSTeaming.ActiveNic = $this.ActiveNic
-            $vmHostVSSTeaming.StandbyNic = $this.StandbyNic
-            $vmHostVSSTeaming.NotifySwitches = $this.NotifySwitches
-            $vmHostVSSTeaming.Policy = $this.Policy
-            $vmHostVSSTeaming.RollingOrder = $this.RollingOrder
-        }
-    }
-}
-
-[DscResource()]
-class DrsCluster : DatacenterInventoryBaseDSC {
-    DrsCluster() {
-        $this.InventoryItemFolderType = [FolderType]::Host
-    }
-
-    <#
-    .DESCRIPTION
-
-    Indicates that VMware DRS (Distributed Resource Scheduler) is enabled.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $DrsEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies a DRS (Distributed Resource Scheduler) automation level. The valid values are FullyAutomated, Manual, PartiallyAutomated, Disabled and Unset.
-    #>
-    [DscProperty()]
-    [DrsAutomationLevel] $DrsAutomationLevel = [DrsAutomationLevel]::Unset
-
-    <#
-    .DESCRIPTION
-
-    Threshold for generated ClusterRecommendations. DRS generates only those recommendations that are above the specified vmotionRate. Ratings vary from 1 to 5.
-    This setting applies to Manual, PartiallyAutomated, and FullyAutomated DRS Clusters.
-    #>
-    [DscProperty()]
-    [nullable[int]] $DrsMigrationThreshold
-
-    <#
-    .DESCRIPTION
-
-    For availability, distributes a more even number of virtual machines across hosts.
-    #>
-    [DscProperty()]
-    [nullable[int]] $DrsDistribution
-
-    <#
-    .DESCRIPTION
-
-    Load balance based on consumed memory of virtual machines rather than active memory.
-    This setting is recommended for clusters where host memory is not over-committed.
-    #>
-    [DscProperty()]
-    [nullable[int]] $MemoryLoadBalancing
-
-    <#
-    .DESCRIPTION
-
-    Controls CPU over-commitment in the cluster.
-    Min value is 0 and Max value is 500.
-    #>
-    [DscProperty()]
-    [nullable[int]] $CPUOverCommitment
-
-    hidden [string] $DrsEnabledConfigPropertyName = 'Enabled'
-    hidden [string] $DrsAutomationLevelConfigPropertyName = 'DefaultVmBehavior'
-    hidden [string] $DrsMigrationThresholdConfigPropertyName = 'VmotionRate'
-    hidden [string] $DrsDistributionSettingName = 'LimitVMsPerESXHostPercent'
-    hidden [string] $MemoryLoadBalancingSettingName = 'PercentIdleMBInMemDemand'
-    hidden [string] $CPUOverCommitmentSettingName = 'MaxVcpusPerClusterPct'
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $this.AddCluster($clusterLocation)
-                }
-                else {
-                    $this.UpdateCluster($cluster)
-                }
-            }
-            else {
-                if ($null -ne $cluster) {
-                    $this.RemoveCluster($cluster)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $result = $false
-                }
-                else {
-                    $result = !$this.ShouldUpdateCluster($cluster)
-                }
-            }
-            else {
-                $result = ($null -eq $cluster)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [DrsCluster] Get() {
-        try {
-            $result = [DrsCluster]::new()
-            $result.Server = $this.Server
-            $result.Location = $this.Location
-            $result.DatacenterName = $this.DatacenterName
-            $result.DatacenterLocation = $this.DatacenterLocation
-
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $this.PopulateResult($cluster, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Cluster should be updated.
-    #>
-    [bool] ShouldUpdateCluster($cluster) {
-        $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
-
-        $currentDrsDistributionOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.DrsDistributionSettingName }).Value
-        $currentMemoryLoadBalancingOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
-        $currentCPUOverCommitmentOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
-
-        $shouldUpdateCluster = @(
-            $this.ShouldUpdateDscResourceSetting('DrsEnabled', $drsConfig.Enabled, $this.DrsEnabled),
-            $this.ShouldUpdateDscResourceSetting('DrsAutomationLevel', [string] $drsConfig.DefaultVmBehavior, $this.DrsAutomationLevel.ToString()),
-            $this.ShouldUpdateDscResourceSetting('DrsMigrationThreshold', $drsConfig.VmotionRate, $this.DrsMigrationThreshold),
-            $this.ShouldUpdateDscResourceSetting('DrsDistribution', $currentDrsDistributionOption, $this.DrsDistribution),
-            $this.ShouldUpdateDscResourceSetting('MemoryLoadBalancing', $currentMemoryLoadBalancingOption, $this.MemoryLoadBalancing),
-            $this.ShouldUpdateDscResourceSetting('CPUOverCommitment', $currentCPUOverCommitmentOption, $this.CPUOverCommitment)
-        )
-
-        return ($shouldUpdateCluster -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the DrsConfig property with the desired value.
-    #>
-    [void] PopulateDrsConfigProperty($drsConfig, $propertyName, $propertyValue) {
-        <#
-            Special case where the passed property value is enum type. These type of properties
-            should be populated only when their value is not equal to Unset.
-            Unset means that the property was not specified in the Configuration.
-        #>
-        if ($propertyValue -is [DrsAutomationLevel]) {
-            if ($propertyValue -ne [DrsAutomationLevel]::Unset) {
-                $drsConfig.$propertyName = $propertyValue.ToString()
-            }
-        }
-        elseif ($null -ne $propertyValue) {
-            $drsConfig.$propertyName = $propertyValue
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the Option array for the DrsConfig with the specified options in the Configuration.
-    #>
-    [PSObject] GetOptionsForDrsConfig($allOptions) {
-        $drsConfigOptions = @()
-
-        foreach ($key in $allOptions.Keys) {
-            if ($null -ne $allOptions.$key) {
-                $option = New-Object VMware.Vim.OptionValue
-
-                $option.Key = $key
-                $option.Value = $allOptions.$key.ToString()
-
-                $drsConfigOptions += $option
-            }
-        }
-
-        return $drsConfigOptions
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the populated Cluster Spec with the specified values in the Configuration.
-    #>
-    [PSObject] GetPopulatedClusterSpec() {
-        $clusterSpec = New-Object VMware.Vim.ClusterConfigSpecEx
-        $clusterSpec.DrsConfig = New-Object VMware.Vim.ClusterDrsConfigInfo
-
-        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsEnabledConfigPropertyName, $this.DrsEnabled)
-        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsAutomationLevelConfigPropertyName, $this.DrsAutomationLevel)
-        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsMigrationThresholdConfigPropertyName, $this.DrsMigrationThreshold)
-
-        $allOptions = [ordered] @{
-            $this.DrsDistributionSettingName = $this.DrsDistribution
-            $this.MemoryLoadBalancingSettingName = $this.MemoryLoadBalancing
-            $this.CPUOverCommitmentSettingName = $this.CPUOverCommitment
-        }
-
-        $clusterSpec.DrsConfig.Option = $this.GetOptionsForDrsConfig($allOptions)
-
-        return $clusterSpec
-    }
-
-    <#
-    .DESCRIPTION
-
-    Creates a new Cluster with the specified properties at the specified location.
-    #>
-    [void] AddCluster($clusterLocation) {
-        $clusterSpec = $this.GetPopulatedClusterSpec()
-
-        try {
-            Add-Cluster -Folder $clusterLocation.ExtensionData -Name $this.Name -Spec $clusterSpec
-        }
-        catch {
-            throw "Server operation failed with the following error: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the Cluster with the specified properties.
-    #>
-    [void] UpdateCluster($cluster) {
-        $clusterSpec = $this.GetPopulatedClusterSpec()
-
-        try {
-            Update-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData -Spec $clusterSpec
-        }
-        catch {
-            throw "Server operation failed with the following error: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Removes the Cluster from the specified Datacenter.
-    #>
-    [void] RemoveCluster($cluster) {
-        try {
-            Remove-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData
-        }
-        catch {
-            throw "Server operation failed with the following error: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Cluster from the server.
-    #>
-    [void] PopulateResult($cluster, $result) {
-        if ($null -ne $cluster) {
-            $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
-
-            $result.Name = $cluster.Name
-            $result.Ensure = [Ensure]::Present
-            $result.DrsEnabled = $drsConfig.Enabled
-
-            if ($null -eq $drsConfig.DefaultVmBehavior) {
-                $result.DrsAutomationLevel = [DrsAutomationLevel]::Unset
-            }
-            else {
-                $result.DrsAutomationLevel = $drsConfig.DefaultVmBehavior.ToString()
-            }
-
-            $result.DrsMigrationThreshold = $drsConfig.VmotionRate
-
-            if ($null -ne $drsConfig.Option) {
-                $options = $drsConfig.Option
-
-                $result.DrsDistribution = ($options | Where-Object { $_.Key -eq $this.DrsDistributionSettingName }).Value
-                $result.MemoryLoadBalancing = ($options | Where-Object { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
-                $result.CPUOverCommitment = ($options | Where-Object { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
-            }
-            else {
-                $result.DrsDistribution = $null
-                $result.MemoryLoadBalancing = $null
-                $result.CPUOverCommitment = $null
-            }
-        }
-        else {
-            $result.Name = $this.Name
-            $result.Ensure = [Ensure]::Absent
-            $result.DrsEnabled = $this.DrsEnabled
-            $result.DrsAutomationLevel = $this.DrsAutomationLevel
-            $result.DrsMigrationThreshold = $this.DrsMigrationThreshold
-            $result.DrsDistribution = $this.DrsDistribution
-            $result.MemoryLoadBalancing = $this.MemoryLoadBalancing
-            $result.CPUOverCommitment = $this.CPUOverCommitment
-        }
-    }
-}
-
-[DscResource()]
-class HACluster : DatacenterInventoryBaseDSC {
-    HACluster() {
-        $this.InventoryItemFolderType = [FolderType]::Host
-    }
-
-    <#
-    .DESCRIPTION
-
-    Indicates that VMware HA (High Availability) is enabled.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $HAEnabled
-
-    <#
-    .DESCRIPTION
-
-    Indicates that virtual machines cannot be powered on if they violate availability constraints.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $HAAdmissionControlEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies a configured failover level.
-    This is the number of physical host failures that can be tolerated without impacting the ability to meet minimum thresholds for all running virtual machines.
-    The valid values range from 1 to 4.
-    #>
-    [DscProperty()]
-    [nullable[int]] $HAFailoverLevel
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the virtual machine should be powered off if a host determines that it is isolated from the rest of the compute resource.
-    The valid values are PowerOff, DoNothing, Shutdown and Unset.
-    #>
-    [DscProperty()]
-    [HAIsolationResponse] $HAIsolationResponse = [HAIsolationResponse]::Unset
-
-    <#
-    .DESCRIPTION
-
-    Specifies the cluster HA restart priority. The valid values are Disabled, Low, Medium, High and Unset.
-    VMware HA is a feature that detects failed virtual machines and automatically restarts them on alternative ESX hosts.
-    #>
-    [DscProperty()]
-    [HARestartPriority] $HARestartPriority = [HARestartPriority]::Unset
-
-    hidden [string] $HAEnabledParameterName = 'HAEnabled'
-    hidden [string] $HAAdmissionControlEnabledParameterName = 'HAAdmissionControlEnabled'
-    hidden [string] $HAFailoverLevelParameterName = 'HAFailoverLevel'
-    hidden [string] $HAIsolationResponseParameterName = 'HAIsolationResponse'
-    hidden [string] $HARestartPriorityParemeterName = 'HARestartPriority'
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $this.AddCluster($clusterLocation)
-                }
-                else {
-                    $this.UpdateCluster($cluster)
-                }
-            }
-            else {
-                if ($null -ne $cluster) {
-                    $this.RemoveCluster($cluster)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $result = $false
-                }
-                else {
-                    $result = !$this.ShouldUpdateCluster($cluster)
-                }
-            }
-            else {
-                $result = ($null -eq $cluster)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [HACluster] Get() {
-        try {
-            $result = [HACluster]::new()
-            $result.Server = $this.Server
-            $result.Location = $this.Location
-            $result.DatacenterName = $this.DatacenterName
-            $result.DatacenterLocation = $this.DatacenterLocation
-
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $this.PopulateResult($cluster, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Cluster should be updated.
-    #>
-    [bool] ShouldUpdateCluster($cluster) {
-        $shouldUpdateCluster = @(
-            $this.ShouldUpdateDscResourceSetting('HAEnabled', $cluster.HAEnabled, $this.HAEnabled),
-            $this.ShouldUpdateDscResourceSetting('HAAdmissionControlEnabled', $cluster.HAAdmissionControlEnabled, $this.HAAdmissionControlEnabled),
-            $this.ShouldUpdateDscResourceSetting('HAFailoverLevel', $cluster.HAFailoverLevel, $this.HAFailoverLevel),
-            $this.ShouldUpdateDscResourceSetting('HAIsolationResponse', [string] $cluster.HAIsolationResponse, $this.HAIsolationResponse.ToString()),
-            $this.ShouldUpdateDscResourceSetting('HARestartPriority', [string] $cluster.HARestartPriority, $this.HARestartPriority.ToString())
-        )
-
-        return ($shouldUpdateCluster -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the parameters for the New-Cluster and Set-Cluster cmdlets.
-    #>
-    [void] PopulateClusterParams($clusterParams, $parameter, $desiredValue) {
-        <#
-            Special case where the desired value is enum type. These type of properties
-            should be added as parameters to the cmdlet only when their value is not equal to Unset.
-            Unset means that the property was not specified in the Configuration.
-        #>
-        if ($desiredValue -is [HAIsolationResponse] -or $desiredValue -is [HARestartPriority]) {
-            if ($desiredValue -ne 'Unset') {
-                $clusterParams.$parameter = $desiredValue.ToString()
-            }
-
-            return
-        }
-
-        if ($null -ne $desiredValue) {
-            $clusterParams.$parameter = $desiredValue
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the populated Cluster parameters.
-    #>
-    [hashtable] GetClusterParams() {
-        $clusterParams = @{}
-
-        $clusterParams.Server = $this.Connection
-        $clusterParams.Confirm = $false
-        $clusterParams.ErrorAction = 'Stop'
-
-        $this.PopulateClusterParams($clusterParams, $this.HAEnabledParameterName, $this.HAEnabled)
-
-        # High Availability settings cannot be passed to the cmdlets if 'HAEnabled' is $false.
-        if ($null -eq $this.HAEnabled -or $this.HAEnabled) {
-            $this.PopulateClusterParams($clusterParams, $this.HAAdmissionControlEnabledParameterName, $this.HAAdmissionControlEnabled)
-            $this.PopulateClusterParams($clusterParams, $this.HAFailoverLevelParameterName, $this.HAFailoverLevel)
-            $this.PopulateClusterParams($clusterParams, $this.HAIsolationResponseParameterName, $this.HAIsolationResponse)
-            $this.PopulateClusterParams($clusterParams, $this.HARestartPriorityParemeterName, $this.HARestartPriority)
-        }
-
-        return $clusterParams
-    }
-
-    <#
-    .DESCRIPTION
-
-    Creates a new Cluster with the specified properties at the specified location.
-    #>
-    [void] AddCluster($clusterLocation) {
-        $clusterParams = $this.GetClusterParams()
-        $clusterParams.Name = $this.Name
-        $clusterParams.Location = $clusterLocation
-
-        try {
-            New-Cluster @clusterParams
-        }
-        catch {
-            throw "Cannot create Cluster $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the Cluster with the specified properties.
-    #>
-    [void] UpdateCluster($cluster) {
-        $clusterParams = $this.GetClusterParams()
-
-        try {
-            $cluster | Set-Cluster @clusterParams
-        }
-        catch {
-            throw "Cannot update Cluster $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Removes the Cluster from the specified Datacenter.
-    #>
-    [void] RemoveCluster($cluster) {
-        try {
-            $cluster | Remove-Cluster -Server $this.Connection -Confirm:$false -ErrorAction Stop
-        }
-        catch {
-            throw "Cannot remove Cluster $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Cluster from the server.
-    #>
-    [void] PopulateResult($cluster, $result) {
-        if ($null -ne $cluster) {
-            $result.Name = $cluster.Name
-            $result.Ensure = [Ensure]::Present
-            $result.HAEnabled = $cluster.HAEnabled
-            $result.HAAdmissionControlEnabled = $cluster.HAAdmissionControlEnabled
-            $result.HAFailoverLevel = $cluster.HAFailoverLevel
-            $result.HAIsolationResponse = $cluster.HAIsolationResponse.ToString()
-            $result.HARestartPriority = $cluster.HARestartPriority.ToString()
-        }
-        else {
-            $result.Name = $this.Name
-            $result.Ensure = [Ensure]::Absent
-            $result.HAEnabled = $this.HAEnabled
-            $result.HAAdmissionControlEnabled = $this.HAAdmissionControlEnabled
-            $result.HAFailoverLevel = $this.HAFailoverLevel
-            $result.HAIsolationResponse = $this.HAIsolationResponse
-            $result.HARestartPriority = $this.HARestartPriority
-        }
+    [void] PopulateResult($virtualPortGroupTeamingPolicy, $result) {
+        $result.FailbackEnabled = $virtualPortGroupTeamingPolicy.FailbackEnabled
+        $result.NotifySwitches = $virtualPortGroupTeamingPolicy.NotifySwitches
+        $result.LoadBalancingPolicy = $virtualPortGroupTeamingPolicy.LoadBalancingPolicy.ToString()
+        $result.NetworkFailoverDetectionPolicy = $virtualPortGroupTeamingPolicy.NetworkFailoverDetectionPolicy.ToString()
+        $result.ActiveNic = $virtualPortGroupTeamingPolicy.ActiveNic
+        $result.StandbyNic = $virtualPortGroupTeamingPolicy.StandbyNic
+        $result.UnusedNic = $virtualPortGroupTeamingPolicy.UnusedNic
+        $result.InheritFailback = $virtualPortGroupTeamingPolicy.IsFailbackInherited
+        $result.InheritNotifySwitches = $virtualPortGroupTeamingPolicy.IsNotifySwitchesInherited
+        $result.InheritLoadBalancingPolicy = $virtualPortGroupTeamingPolicy.IsLoadBalancingInherited
+        $result.InheritNetworkFailoverDetectionPolicy = $virtualPortGroupTeamingPolicy.IsNetworkFailoverDetectionInherited
+        $result.InheritFailoverOrder = $virtualPortGroupTeamingPolicy.IsFailoverOrderInherited
     }
 }
