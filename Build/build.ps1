@@ -55,7 +55,7 @@ function Get-PullRequestDescription {
     [CmdletBinding()]
     [OutputType([string])]
 
-    $repository = 'vmware/dscr-for-vmware'
+    $repository = 'KristiyanGK/TravisTest-Repo'
     $searchType = 'pr'
     $pullRequestState = 'closed'
 
@@ -419,8 +419,9 @@ $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
 $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'
 
 $env:PSModulePath = $env:PSModulePath + ":$script:SourceRoot"
+
 # Registeres default PSRepository.
-# Register-PSRepository -Default -ErrorAction SilentlyContinue
+Register-PSRepository -Default -ErrorAction SilentlyContinue
 
 # Installs Pester.
 # test
