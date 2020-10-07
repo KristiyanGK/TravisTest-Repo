@@ -25,9 +25,9 @@ function EnsureLicenseInFile {
 
 function Update-ModuleVersion {
     [CmdletBinding()]
-    [OutputType([System.Object[]])]
+    [OutputType([void])]
     param(
-        [System.Object[]] $FileContent
+        [string] $FilePath
     )
 
     $moduleVersionPattern = "(?<=ModuleVersion = ')(\d*.\d*.\d*.\d*)"
@@ -36,7 +36,9 @@ function Update-ModuleVersion {
 
     $newVersion = (New-Object -TypeName 'System.Version' $currentVersion.Major, $currentVersion.Minor, $currentVersion.Build, ($currentVersion.Revision + 1)).ToString()
 
-    return $FileContent -Replace $moduleVersionPattern, $newVersion
+    $fileContent = Get-Content $filePath -Raw
+
+    ($fileContent -replace $moduleVersionPattern, $newVersion) | Out-File $FilePath
 }
 
 $moduleRoot = $PSScriptRoot
@@ -46,6 +48,6 @@ $configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc
 $env:PSModulePath += ":$configPath"
 
 # update module version in manifest
-$psdFileContent = Get-Content -Path (Join-Path $PSScriptRoot 'VMware.PSDesiredStateConfiguration.psd1')
+$psd1Path = Join-Path $PSScriptRoot 'VMware.PSDesiredStateConfiguration.psd1'
 
-$psdFileContent = Update-ModuleVersion -FileContent $psdFileContent
+Update-ModuleVersion $psd1Path

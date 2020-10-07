@@ -187,7 +187,7 @@ function Update-CodeCoveragePercentInTextFile {
     }
 
     $readMeContent = Get-Content $TextFilePath
-    $readMeContent = $readMeContent -replace "$ModuleName !\[Coverage\].+\)", "$ModuleName ![Coverage](https://img.shields.io/badge/coverage-$CodeCoveragePercent%25-$badgeColor.svg?maxAge=60)"
+    $readMeContent = $readMeContent -replace "\*\*$ModuleName\*\* !\[Coverage\].+\)", "\*\*$ModuleName\*\* ![Coverage](https://img.shields.io/badge/coverage-$CodeCoveragePercent%25-$badgeColor.svg?maxAge=60)"
     $readMeContent | Set-Content -Path $TextFilePath
 }
 
@@ -429,7 +429,7 @@ Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -S
 
 $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
-$vSpheremoduleVersion = Start-VsphereBuild
+$vSpheremoduleVersion = '2.0.0.73'#Start-VsphereBuild
 
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $pullRequestDescription = Get-PullRequestDescription
