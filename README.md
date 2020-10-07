@@ -137,7 +137,7 @@ Examples with Chef, Puppet and Ansible can be found [here](https://github.com/vm
 
 [![Build Status](https://travis-ci.org/vmware/dscr-for-vmware.svg?branch=master)](https://travis-ci.org/vmware/dscr-for-vmware)
 **Vmware.VsphereDSC** ![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
-**Vmware.PSDesiredStateConfiguration** ![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg?maxAge=60)
+\*\*VMware.PSDesiredStateConfiguration\*\* ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg?maxAge=60)
 
 This is the branch to which contributions should be proposed by contributors as pull requests. The content of the module releases will be from the master branch.
 
