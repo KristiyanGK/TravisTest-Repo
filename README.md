@@ -18,6 +18,8 @@ For more information about all available **Resources**, please visit the **wiki*
 
 The **VMware.PSDesiredStateConfiguration** module provides an alternative in-language way to compile and execute DSC Configurations. It does not require the use of LCM and supports powershell core.
 
+For a list of known limitations read here: [Known Limitations](https://github.com/KristiyanGK/TravisTest-Repo/blob/master/LIMITATIONS.md)
+
 ## Getting Started
 
 ## Requirements
@@ -136,7 +138,9 @@ Examples with Chef, Puppet and Ansible can be found [here](https://github.com/vm
 ### master
 
 [![Build Status](https://travis-ci.org/vmware/dscr-for-vmware.svg?branch=master)](https://travis-ci.org/vmware/dscr-for-vmware)
+
 **Vmware.VsphereDSC** ![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
+
 **VMware.PSDesiredStateConfiguration** ![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg?maxAge=60)
 
 This is the branch to which contributions should be proposed by contributors as pull requests. The content of the module releases will be from the master branch.

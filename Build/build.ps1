@@ -187,7 +187,7 @@ function Update-CodeCoveragePercentInTextFile {
     }
 
     $readMeContent = Get-Content $TextFilePath
-    $readMeContent = $readMeContent -replace "**$ModuleName** !\[Coverage\].+\)", "**$ModuleName** ![Coverage](https://img.shields.io/badge/coverage-$CodeCoveragePercent%25-$badgeColor.svg?maxAge=60)"
+    $readMeContent = $readMeContent -replace "\*\*$ModuleName\*\* !\[Coverage\].+\)", "**$ModuleName** ![Coverage](https://img.shields.io/badge/coverage-$CodeCoveragePercent%25-$badgeColor.svg?maxAge=60)"
     $readMeContent | Set-Content -Path $TextFilePath
 }
 
