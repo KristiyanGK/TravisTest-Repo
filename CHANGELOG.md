@@ -4,6 +4,10 @@
 All notable changes to this project will be documented in this file.
 
 ## VsphereDsc 2.0.0.73, PSDesiredStateConfiguration 0.0.0.1 - 2020-10-07
+### Added
+- limitations list
+
+## VsphereDsc 2.0.0.73, PSDesiredStateConfiguration 0.0.0.1 - 2020-10-07
 ###Added
 - Fixes
 
