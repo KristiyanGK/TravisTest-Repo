@@ -3,6 +3,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.PSDesiredStateConfiguration 2.0.0.73 - 2020-10-09
+# Added
+Changes
+
 ## VsphereDsc 2.0.0.73, PSDesiredStateConfiguration 0.0.0.1 - 2020-10-07
 ### Added
 - limitations list
