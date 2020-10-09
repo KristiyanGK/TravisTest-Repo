@@ -142,7 +142,7 @@ function Update-ChangelogDocument {
     $changelogSections = $changelogDocument[($headerLength + 1)..$changelogDocument.Length]
 
     $currentDate = Get-Date -Format yyyy-MM-dd
-    $newSectionHeader = "## $ModuleName $VsphereModuleVersion - $currentDate"
+    $newSectionHeader = "## $ModuleName $ModuleVersion - $currentDate"
 
     $changelogDocumentNewContent = $changelogHeader + $newSectionHeader + $PullRequestDescription + $changelogSections
     $changelogDocumentNewContent | Set-Content -Path $ChangelogDocumentPath
