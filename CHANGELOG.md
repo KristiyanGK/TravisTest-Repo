@@ -3,6 +3,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.PSDesiredStateConfiguration 1.0.0.7 - 2020-10-09
+## Added
+- more fix
+## Changed
+- more stuff
+## Removed
+- nothing
+
+## VMware.vSphereDSC 2.0.0.73 - 2020-10-09
+## Added
+- more fix
+## Changed
+- more stuff
+## Removed
+- nothing
+
 ## VMware.PSDesiredStateConfiguration 1.0.0.6 - 2020-10-09
 ## Added
 - more fixes for build
