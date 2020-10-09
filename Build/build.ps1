@@ -412,6 +412,8 @@ function Start-VsphereBuild {
 }
 
 <#
+    .Description
+    Finds in what modules changes have occured
 #>
 function Find-Diff {
     Param (
@@ -502,6 +504,8 @@ if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $pullRequestDescription = Get-PullRequestDescription
 
     $changedModules = Find-Diff $moduleList
+
+    Write-Host "_______________________ Changed modules are $changedModules"
 
     foreach ($changedModule in $changedModules) {
         $updateChangeLogParams = @{
