@@ -4,6 +4,17 @@
 All notable changes to this project will be documented in this file.
 
 ## VMware.PSDesiredStateConfiguration 2.0.0.73 - 2020-10-09
+### Added
+- Added **VMHostVdsNic** DSC Resource.
+- Added Unit Tests for **VMHostVdsNic** DSC Resource.
+- Added Integration Tests for **VMHostVdsNic** DSC Resource.
+- Added Documentation and example Configurations for **VMHostVdsNic** DSC Resource.
+
+### Changed
+- Extended **InventoryUtil** class with **GetVDSwitch()**.
+- Updated the build procedure to install the latest **Pester v4** released version.
+
+## VMware.PSDesiredStateConfiguration 2.0.0.73 - 2020-10-09
 # Added
 Changes
 
