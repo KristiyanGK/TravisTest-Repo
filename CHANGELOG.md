@@ -3,6 +3,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.PSDesiredStateConfiguration 1.0.0.4 - 2020-10-09
+## Added
+- fix hopefully
+- new thingy
+
 ## VMware.PSDesiredStateConfiguration 2.0.0.73 - 2020-10-09
 ### Added
 - Added **VMHostVdsNic** DSC Resource.
