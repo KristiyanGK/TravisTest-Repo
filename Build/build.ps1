@@ -422,7 +422,7 @@ function Find-Diff {
 
     $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
 
-    $changedFiles = git diff --name-only master
+    $changedFiles = git diff --name-only HEAD~2
 
     Write-Host ("__________________________________ Changed Files here: $changedFiles")
 
