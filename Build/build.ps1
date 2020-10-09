@@ -120,10 +120,10 @@ function Update-ChangelogDocument {
         [string] $PullRequestDescription,
 
         [Parameter(Mandatory = $true)]
-        [string] $VsphereModuleVersion,
+        [string] $ModuleName,
 
         [Parameter(Mandatory = $true)]
-        [string] $PsdscModuleVersion
+        [string] $ModuleVersion
     )
 
     $changelogDocument = Get-Content -Path $ChangelogDocumentPath
@@ -142,7 +142,7 @@ function Update-ChangelogDocument {
     $changelogSections = $changelogDocument[($headerLength + 1)..$changelogDocument.Length]
 
     $currentDate = Get-Date -Format yyyy-MM-dd
-    $newSectionHeader = "## VsphereDsc $VsphereModuleVersion, PSDesiredStateConfiguration $PsdscModuleVersion - $currentDate"
+    $newSectionHeader = "## $ModuleName $VsphereModuleVersion - $currentDate"
 
     $changelogDocumentNewContent = $changelogHeader + $newSectionHeader + $PullRequestDescription + $changelogSections
     $changelogDocumentNewContent | Set-Content -Path $ChangelogDocumentPath
@@ -411,6 +411,34 @@ function Start-VsphereBuild {
     Get-ModuleVersion -psdPath $psdPath
 }
 
+<#
+#>
+function Find-Diff {
+    $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
+
+    $changedFiles = git diff --name-only master
+
+    Write-Host ("__________________________________ Changed Files here: $changedFiles")
+
+    $os = $PSVersionTable['OS']
+
+    foreach ($changedFile in $changedFiles) {
+        if ($os.Contains('Microsoft Windows')) {
+            $changedFile = $changedFile -replace '/', '\'
+        }
+        
+        $file = $projectFiles | Where-Object { $_.Contains($changedFile) }
+
+        if ($file.Contains('VMware.PSDesiredStateConfiguration')) {
+            # change made in VMware.PSDesiredStateConfiguration module
+            Write-Output 'VMware.PSDesiredStateConfiguration'
+        } elseif ($file.Contains('VMware.vSphereDsc')) {
+            # change made in VMware.vSphereDsc module
+            Write-Output 'VMware.vSphereDsc'
+        }
+    }
+}
+
 $script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
 
 # Adds the Source directory from the repository to the list of modules directories.
@@ -440,6 +468,10 @@ if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
         VsphereModuleVersion = $vSpheremoduleVersion
         PsdscModuleVersion = $psdscModuleVersion
     }
-    
-    Update-ChangelogDocument @updateChangeLogParams   
+
+    $diffs = Find-Diff
+
+    foreach ($diff in $diffs) {
+        Update-ChangelogDocument @updateChangeLogParams   
+    }
 }
