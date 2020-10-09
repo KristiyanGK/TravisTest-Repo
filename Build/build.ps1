@@ -478,23 +478,20 @@ $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath '
 
 $env:PSModulePath = $env:PSModulePath + ":$script:SourceRoot"
 
-$moduleList = @(
-    'VMware.vSphereDSC',
-    'VMware.PSDesiredStateConfiguration'
-)
-
-Write-Host (Find-Diff $moduleList)
-
 # Registeres default PSRepository.
 Register-PSRepository -Default -ErrorAction SilentlyContinue
 
 # Installs Pester.
-# test
 Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
 
 $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
 $vSpheremoduleVersion = '2.0.0.73'#Start-VsphereBuild
+
+$moduleList = @(
+    'VMware.vSphereDSC',
+    'VMware.PSDesiredStateConfiguration'
+)
 
 $moduleNameToVersion = @{
     'VMware.vSphereDSC' = $vSpheremoduleVersion
