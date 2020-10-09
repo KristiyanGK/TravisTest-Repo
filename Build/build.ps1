@@ -459,19 +459,24 @@ $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
 $vSpheremoduleVersion = '2.0.0.73'#Start-VsphereBuild
 
+$moduleNameToVersion = @{
+    'VMware.vSphereDSC' = $vSpheremoduleVersion
+    'VMware.PSDesiredStateConfiguration' = $psdscModuleVersion
+}
+
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $pullRequestDescription = Get-PullRequestDescription
 
-    $updateChangeLogParams = @{
-        ChangelogDocumentPath = $Script:ChangelogDocumentPath
-        PullRequestDescription = $pullRequestDescription
-        VsphereModuleVersion = $vSpheremoduleVersion
-        PsdscModuleVersion = $psdscModuleVersion
-    }
+    $changedModules = Find-Diff
 
-    $diffs = Find-Diff
+    foreach ($changedModule in $changedModules) {
+        $updateChangeLogParams = @{
+            ChangelogDocumentPath = $Script:ChangelogDocumentPath
+            PullRequestDescription = $pullRequestDescription
+            ModuleName = $changedModule
+            ModuleVersion = $moduleNameToVersion[$changedModule]
+        }
 
-    foreach ($diff in $diffs) {
         Update-ChangelogDocument @updateChangeLogParams   
     }
 }
