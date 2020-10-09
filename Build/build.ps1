@@ -303,7 +303,7 @@ function Update-RequiredModules {
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Object[]]
-        $ModuleManifestContent
+        $ModuleManifestContent,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
