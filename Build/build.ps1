@@ -303,7 +303,7 @@ function Update-RequiredModules {
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Object[]]
-        $ModuleManifestContent,
+        $ModuleManifestContent
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -422,7 +422,20 @@ function Find-Diff {
 
     $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
 
-    $changedFiles = git diff --name-only HEAD~2..Head~1
+    $lastTravisCommit = 1
+
+    while ($true) {
+        $commitInfo = git show Head~$lastTravisCommit
+        $author = $commitInfo[1]
+
+        if ($author.Contains('travis@travis-ci.org')) {
+            break
+        }
+
+        $lastTravisCommit += 1
+    }
+
+    $changedFiles = git diff --name-only HEAD..Head~$lastTravisCommit
 
     Write-Host ("__________________________________ Changed Files here: $changedFiles")
 
