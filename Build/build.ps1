@@ -120,10 +120,10 @@ function Update-ChangelogDocument {
         [string] $PullRequestDescription,
 
         [Parameter(Mandatory = $true)]
-        [string] $VsphereModuleVersion,
+        [string] $ModuleName,
 
         [Parameter(Mandatory = $true)]
-        [string] $PsdscModuleVersion
+        [string] $ModuleVersion
     )
 
     $changelogDocument = Get-Content -Path $ChangelogDocumentPath
@@ -142,7 +142,7 @@ function Update-ChangelogDocument {
     $changelogSections = $changelogDocument[($headerLength + 1)..$changelogDocument.Length]
 
     $currentDate = Get-Date -Format yyyy-MM-dd
-    $newSectionHeader = "## VsphereDsc $VsphereModuleVersion, PSDesiredStateConfiguration $PsdscModuleVersion - $currentDate"
+    $newSectionHeader = "## $ModuleName $VsphereModuleVersion - $currentDate"
 
     $changelogDocumentNewContent = $changelogHeader + $newSectionHeader + $PullRequestDescription + $changelogSections
     $changelogDocumentNewContent | Set-Content -Path $ChangelogDocumentPath
@@ -411,6 +411,64 @@ function Start-VsphereBuild {
     Get-ModuleVersion -psdPath $psdPath
 }
 
+<#
+#>
+function Find-Diff {
+    Param (
+        $ModuleList
+    )
+
+    $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
+
+    $changedFiles = git diff --name-only master
+
+    Write-Host ("__________________________________ Changed Files here: $changedFiles")
+
+    $result = New-Object -TypeName 'System.Collections.ArrayList'
+
+    foreach ($module in $ModuleList) {
+        $findDiffUtilParams = @{
+            ModuleName = $module
+            ProjectFiles = $projectFiles
+            ChangedFiles = $changedFiles
+        }
+
+        $isChanged = Find-DiffUtil @findDiffUtilParams
+
+        if ($isChanged) {
+            $result.Add($module) | Out-Null
+        }
+    }
+
+    if ($result.Count -eq 0) {
+        $result.AddRange($ModuleList) | Out-Null
+    }
+
+    $result.ToArray()
+}
+
+function Find-DiffUtil {
+    param (
+        $ModuleName,
+        $ProjectFiles,
+        $ChangedFiles
+    )
+
+    $os = $PSVersionTable['OS']
+    
+    foreach ($changedFile in $ChangedFiles) {
+        if ($os.Contains('Microsoft Windows')) {
+            $changedFile = $changedFile -replace '/', '\'
+        }
+        
+        $file = $ProjectFiles | Where-Object { $_.Contains($changedFile) }
+
+        if ($file.Contains($ModuleName)) {
+            return $true
+        }
+    }
+}
+
 $script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
 
 # Adds the Source directory from the repository to the list of modules directories.
@@ -419,6 +477,13 @@ $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
 $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'
 
 $env:PSModulePath = $env:PSModulePath + ":$script:SourceRoot"
+
+$moduleList = @(
+    'VMware.vSphereDSC',
+    'VMware.PSDesiredStateConfiguration'
+)
+
+Write-Host (Find-Diff $moduleList)
 
 # Registeres default PSRepository.
 Register-PSRepository -Default -ErrorAction SilentlyContinue
@@ -431,15 +496,24 @@ $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
 $vSpheremoduleVersion = '2.0.0.73'#Start-VsphereBuild
 
+$moduleNameToVersion = @{
+    'VMware.vSphereDSC' = $vSpheremoduleVersion
+    'VMware.PSDesiredStateConfiguration' = $psdscModuleVersion
+}
+
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $pullRequestDescription = Get-PullRequestDescription
 
-    $updateChangeLogParams = @{
-        ChangelogDocumentPath = $Script:ChangelogDocumentPath
-        PullRequestDescription = $pullRequestDescription
-        VsphereModuleVersion = $vSpheremoduleVersion
-        PsdscModuleVersion = $psdscModuleVersion
+    $changedModules = Find-Diff $moduleList
+
+    foreach ($changedModule in $changedModules) {
+        $updateChangeLogParams = @{
+            ChangelogDocumentPath = $Script:ChangelogDocumentPath
+            PullRequestDescription = $pullRequestDescription
+            ModuleName = $changedModule
+            ModuleVersion = $moduleNameToVersion[$changedModule]
+        }
+
+        Update-ChangelogDocument @updateChangeLogParams   
     }
-    
-    Update-ChangelogDocument @updateChangeLogParams   
 }
