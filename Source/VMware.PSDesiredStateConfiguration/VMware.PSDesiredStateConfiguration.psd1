@@ -3,7 +3,7 @@
 ModuleToProcess = 'VMware.PSDesiredStateConfiguration.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.0.1'
+ModuleVersion = '1.0.0.1'
 
 # ID used to uniquely identify this module
 GUID = '4f9a62bf-e2a6-4bd1-ac20-ccf127bc643e'
