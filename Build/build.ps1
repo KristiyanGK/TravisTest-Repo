@@ -414,27 +414,57 @@ function Start-VsphereBuild {
 <#
 #>
 function Find-Diff {
+    Param (
+        $ModuleList
+    )
+
     $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
 
     $changedFiles = git diff --name-only master
 
     Write-Host ("__________________________________ Changed Files here: $changedFiles")
 
-    $os = $PSVersionTable['OS']
+    $result = New-Object -TypeName 'System.Collections.ArrayList'
 
-    foreach ($changedFile in $changedFiles) {
+    foreach ($module in $ModuleList) {
+        $findDiffUtilParams = @{
+            ModuleName = $module
+            ProjectFiles = $projectFiles
+            ChangedFiles = $changedFiles
+        }
+
+        $isChanged = Find-DiffUtil @findDiffUtilParams
+
+        if ($isChanged) {
+            $result.Add($module) | Out-Null
+        }
+    }
+
+    if ($result.Count -eq 0) {
+        $result.AddRange($ModuleList) | Out-Null
+    }
+
+    $result.ToArray()
+}
+
+function Find-DiffUtil {
+    param (
+        $ModuleName,
+        $ProjectFiles,
+        $ChangedFiles
+    )
+
+    $os = $PSVersionTable['OS']
+    
+    foreach ($changedFile in $ChangedFiles) {
         if ($os.Contains('Microsoft Windows')) {
             $changedFile = $changedFile -replace '/', '\'
         }
         
-        $file = $projectFiles | Where-Object { $_.Contains($changedFile) }
+        $file = $ProjectFiles | Where-Object { $_.Contains($changedFile) }
 
-        if ($file.Contains('VMware.PSDesiredStateConfiguration')) {
-            # change made in VMware.PSDesiredStateConfiguration module
-            Write-Output 'VMware.PSDesiredStateConfiguration'
-        } elseif ($file.Contains('VMware.vSphereDsc')) {
-            # change made in VMware.vSphereDsc module
-            Write-Output 'VMware.vSphereDsc'
+        if ($file.Contains($ModuleName)) {
+            return $true
         }
     }
 }
@@ -447,6 +477,13 @@ $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
 $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'
 
 $env:PSModulePath = $env:PSModulePath + ":$script:SourceRoot"
+
+$moduleList = @(
+    'VMware.vSphereDSC',
+    'VMware.PSDesiredStateConfiguration'
+)
+
+Write-Host (Find-Diff $moduleList)
 
 # Registeres default PSRepository.
 Register-PSRepository -Default -ErrorAction SilentlyContinue
@@ -467,7 +504,7 @@ $moduleNameToVersion = @{
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     $pullRequestDescription = Get-PullRequestDescription
 
-    $changedModules = Find-Diff
+    $changedModules = Find-Diff $moduleList
 
     foreach ($changedModule in $changedModules) {
         $updateChangeLogParams = @{
