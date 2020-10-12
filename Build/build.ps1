@@ -425,7 +425,7 @@ function Find-Diff {
     $lastTravisCommit = 1
 
     while ($true) {
-        $commitInfo = git show Head~$lastTravisCommit
+        $commitInfo = git show HEAD~$lastTravisCommit
         $author = $commitInfo[1]
 
         if ($author.Contains('travis@travis-ci.org')) {
@@ -435,7 +435,7 @@ function Find-Diff {
         $lastTravisCommit += 1
     }
 
-    $changedFiles = git diff --name-only HEAD..Head~$lastTravisCommit
+    $changedFiles = git diff --name-only HEAD..HEAD~$lastTravisCommit
 
     Write-Host ("__________________________________ Changed Files here: $changedFiles")
 
@@ -482,6 +482,8 @@ function Find-DiffUtil {
             return $true
         }
     }
+
+    return $false
 }
 
 $script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
