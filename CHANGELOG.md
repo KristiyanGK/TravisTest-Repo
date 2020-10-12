@@ -3,6 +3,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.vSphereDSC 1.0.0.0 - 2020-10-12
+# Changed
+- how changed file searching works
+
+## VMware.PSDesiredStateConfiguration 1.0.0.10 - 2020-10-12
+# Changed
+- how changed file searching works
+
 ## VMware.vSphereDSC 2.1.0.73 - 2020-10-12
 # Added
 - more fixes
