@@ -467,14 +467,11 @@ function Find-ChangedModules {
 
     $moduleList = Get-ChildItem $script:SourceRoot | Select-Object -ExpandProperty Name
 
-    $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
-
     $result = New-Object -TypeName 'System.Collections.ArrayList'
 
     foreach ($module in $moduleList) {
         $findDiffUtilParams = @{
             ModuleName = $module
-            ProjectFiles = $projectFiles
             ChangedFiles = $changedFiles
         }
 
@@ -507,10 +504,6 @@ function Find-ChangedModulesUtil {
 
         [Parameter(Mandatory = $true)]
         [System.String[]]
-        $ProjectFiles,
-
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
         $ChangedFiles
     )
 
@@ -520,10 +513,8 @@ function Find-ChangedModulesUtil {
         if ($os.Contains('Microsoft Windows')) {
             $changedFile = $changedFile -replace '/', '\'
         }
-        
-        $file = $ProjectFiles | Where-Object { $_.Contains($changedFile) }
 
-        if ($file.Contains($ModuleName)) {
+        if ($changedFile.Contains($ModuleName)) {
             return $true
         }
     }
@@ -548,7 +539,7 @@ Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -S
 
 $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
-$vSpheremoduleVersion = Start-VsphereBuild
+$vSpheremoduleVersion = '1.0.0.0'
 
 $moduleNameToVersion = @{
     'VMware.vSphereDSC' = $vSpheremoduleVersion
