@@ -29,7 +29,7 @@ For a list of known limitations read here: [Known Limitations](https://github.co
 
 [![Build Status](https://travis-ci.org/vmware/dscr-for-vmware.svg?branch=master)](https://travis-ci.org/vmware/dscr-for-vmware)
 
-**Vmware.VsphereDSC** ![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
+**VMware.vSphereDSC** ![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg?maxAge=60)
 
 **VMware.PSDesiredStateConfiguration** ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg?maxAge=60)
 
