@@ -329,8 +329,24 @@ function Update-RequiredModules {
     $moduleManifestUpdatedContent
 }
 
+<#
+    .Synopsis
+    Runs the unit tests of the specified module.
+
+    .Description
+    Runs the unit tests of the specified module. The tests are searched in a Tests\Unit path in the module directory.
+    The code coverage result of the tests gets updated in the ReadMe document. 
+
+    .Parameter ModuleName
+    Name of the module whose unit tests should be run
+#>
 function Start-UnitTests {
+    [CmdletBinding()]
+    [OutputType([void])]
     Param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]
         $ModuleName
     )
 
@@ -359,9 +375,14 @@ function Start-UnitTests {
 
 <#
     .Description
-    Start the building process for the VMware.PSDesiredStateConfiguration module
+    Start the building process for the VMware.PSDesiredStateConfiguration module and
+    retunrs the updated module version
 #>
 function Start-PsDesiredStateConfigurationBuild {
+    [CmdletBinding()]
+    [OutputType([string])]
+    Param()
+
     $moduleName = 'VMware.PSDesiredStateConfiguration'
     $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
     $buildModuleFilePath = Join-Path -Path $moduleRoot -ChildPath "$moduleName.build.ps1"
@@ -377,9 +398,14 @@ function Start-PsDesiredStateConfigurationBuild {
 
 <#
     .Description
-    Start the building process for the VMware.vSphereDsc module
+    Start the building process for the VMware.vSphereDsc module and
+    retunrs the updated module version
 #>
 function Start-VsphereBuild {
+    [CmdletBinding()]
+    [OutputType([string])]
+    Param()
+
     # Updating the content of the psm1 and psd1 files via the build module file.
     $moduleName = 'VMware.vSphereDSC'
     $moduleRoot = Join-Path $Script:SourceRoot $moduleName
@@ -412,18 +438,20 @@ function Start-VsphereBuild {
 }
 
 <#
-    .Description
+    .Synopsis
     Finds in what modules changes have occured
-#>
-function Find-Diff {
-    Param (
-        $ModuleList
-    )
 
-    $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
+    .Description
+    Finds in what modules changes have occured by finding the differences in commit history
+#>
+function Find-ChangedModules {
+    [CmdletBinding()]
+    [OutputType([System.String[]])]
+    Param()
 
     $lastTravisCommit = 1
 
+    # find last travis commit
     while ($true) {
         $commitInfo = git show HEAD~$lastTravisCommit
         $author = $commitInfo[1]
@@ -437,24 +465,28 @@ function Find-Diff {
 
     $changedFiles = git diff --name-only HEAD..HEAD~$lastTravisCommit
 
-    Write-Host ("__________________________________ Changed Files here: $changedFiles")
+    $moduleList = Get-ChildItem $script:SourceRoot | Select-Object -ExpandProperty Name
+
+    $projectFiles = Get-ChildItem $Script:ProjectRoot -Recurse | Select-Object -ExpandProperty FullName
 
     $result = New-Object -TypeName 'System.Collections.ArrayList'
 
-    foreach ($module in $ModuleList) {
+    foreach ($module in $moduleList) {
         $findDiffUtilParams = @{
             ModuleName = $module
             ProjectFiles = $projectFiles
             ChangedFiles = $changedFiles
         }
 
-        $isChanged = Find-DiffUtil @findDiffUtilParams
+        $isChanged = Find-ChangedModulesUtil @findDiffUtilParams
 
         if ($isChanged) {
             $result.Add($module) | Out-Null
         }
     }
 
+    # this means changes are made outside of modules
+    # and will be counted towards both
     if ($result.Count -eq 0) {
         $result.AddRange($ModuleList) | Out-Null
     }
@@ -462,10 +494,23 @@ function Find-Diff {
     $result.ToArray()
 }
 
-function Find-DiffUtil {
-    param (
+<#
+    .Description
+    Checks if the changed files are contained in the module
+#>
+function Find-ChangedModulesUtil {
+    [OutputType([bool])]
+    Param (
+        [Parameter(Mandatory = $true)]
+        [string]
         $ModuleName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
         $ProjectFiles,
+
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
         $ChangedFiles
     )
 
@@ -503,12 +548,7 @@ Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -S
 
 $psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
 
-$vSpheremoduleVersion = '2.0.0.73'#Start-VsphereBuild
-
-$moduleList = @(
-    'VMware.vSphereDSC',
-    'VMware.PSDesiredStateConfiguration'
-)
+$vSpheremoduleVersion = Start-VsphereBuild
 
 $moduleNameToVersion = @{
     'VMware.vSphereDSC' = $vSpheremoduleVersion
@@ -516,12 +556,13 @@ $moduleNameToVersion = @{
 }
 
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
+    # get request description
     $pullRequestDescription = Get-PullRequestDescription
 
-    $changedModules = Find-Diff $moduleList
+    # find in which modules changes have occurred
+    $changedModules = Find-ChangedModules
 
-    Write-Host "_______________________ Changed modules are $changedModules"
-
+    # insert new changelog entry for every changed module
     foreach ($changedModule in $changedModules) {
         $updateChangeLogParams = @{
             ChangelogDocumentPath = $Script:ChangelogDocumentPath
