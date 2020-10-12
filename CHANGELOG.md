@@ -3,6 +3,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.PSDesiredStateConfiguration 1.0.0.8 - 2020-10-12
+# Added
+Head fix which should result in fix
+
 ## VMware.PSDesiredStateConfiguration 1.0.0.7 - 2020-10-09
 ## Added
 - more fix
