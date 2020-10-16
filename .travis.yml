@@ -2,7 +2,12 @@ language: generic
 
 branches:
   only:
-  - master
+    - master
+
+env:
+  global:
+    - WORKSPACE_NAME='coverageWorkspace'
+    - PSDS_CODECOVERAGE_RESULTFILE='psdsTestsCoverage'
 
 jobs:
   include:
@@ -18,14 +23,12 @@ jobs:
             - powershell
       workspaces:
         create:
-          name: coverage
+          name: $WORKSPACE_NAME
           paths:
-            - coverage.txt
+            - $PSDS_CODECOVERAGE_RESULTFILE
       script:
         - pwsh -File './Build/enableExperimentalFeature.ps1'
         - pwsh -File './Build/VMware.PSDesiredStateConfiguration.TestRuns.ps1'
-        - PsdsCoverageResult=`cat /tmp/coverage_result.txt`
-        - echo $PsdsCoverageResult > coverage.txt
     - stage: Build
       os: linux
       dist: trusty
@@ -37,12 +40,10 @@ jobs:
           packages:
             - powershell
       workspaces:
-        use: coverage
+        use: $WORKSPACE_NAME
       before_install:
         - chmod +x Build/travis-push.sh
       script:
-        - PsdsCoverageResult=`cat coverage`
-        - echo $PsdsCoverageResult > '/tmp/coverage_result'
-        - pwsh -File './Build/build.ps1'
+        - echo $PSDS_CODECOVERAGE_RESULTFILE || true
       after_success:
         - '[ "${TRAVIS_EVENT_TYPE}" = "push" ] && [ "${TRAVIS_BRANCH}" = "master" ] && Build/travis-push.sh'
