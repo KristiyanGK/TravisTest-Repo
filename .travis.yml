@@ -6,7 +6,6 @@ branches:
 
 env:
   global:
-    - WORKSPACE_NAME='coverageWorkspace'
     - PSDS_CODECOVERAGE_RESULTFILE='psdsTestsCoverage'
 
 jobs:
@@ -23,9 +22,9 @@ jobs:
             - powershell
       workspaces:
         create:
-          name: $WORKSPACE_NAME
+          name: coverageWorkspace
           paths:
-            - $PSDS_CODECOVERAGE_RESULTFILE
+            - psdsTestsCoverage
       script:
         - pwsh -File './Build/enableExperimentalFeature.ps1'
         - pwsh -File './Build/VMware.PSDesiredStateConfiguration.TestRuns.ps1'
@@ -40,7 +39,7 @@ jobs:
           packages:
             - powershell
       workspaces:
-        use: $WORKSPACE_NAME
+        use: coverageWorkspace
       before_install:
         - chmod +x Build/travis-push.sh
       script:
