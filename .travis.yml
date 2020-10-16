@@ -44,6 +44,6 @@ jobs:
       before_install:
         - chmod +x Build/travis-push.sh
       script:
-        - echo $PSDS_CODECOVERAGE_RESULTFILE || true
+        - cat $PSDS_CODECOVERAGE_RESULTFILE || true
       after_success:
         - '[ "${TRAVIS_EVENT_TYPE}" = "push" ] && [ "${TRAVIS_BRANCH}" = "master" ] && Build/travis-push.sh'
