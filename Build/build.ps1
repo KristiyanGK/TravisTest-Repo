@@ -149,6 +149,91 @@ function Update-ChangelogDocument {
 }
 
 <#
+    .Synopsis
+    Finds in what modules changes have occured
+
+    .Description
+    Finds in what modules changes have occured by finding the differences in commit history
+#>
+function Find-ChangedModules {
+    [CmdletBinding()]
+    [OutputType([System.String[]])]
+    Param()
+
+    $lastTravisCommit = 1
+
+    # find last travis commit
+    while ($true) {
+        $commitInfo = git show HEAD~$lastTravisCommit
+        $author = $commitInfo[1]
+
+        if ($author.Contains('travis@travis-ci.org')) {
+            break
+        }
+
+        $lastTravisCommit += 1
+    }
+
+    $changedFiles = git diff --name-only HEAD..HEAD~$lastTravisCommit
+
+    $moduleList = Get-ChildItem $script:SourceRoot | Select-Object -ExpandProperty Name
+
+    $result = New-Object -TypeName 'System.Collections.ArrayList'
+
+    foreach ($module in $moduleList) {
+        $findDiffUtilParams = @{
+            ModuleName = $module
+            ChangedFiles = $changedFiles
+        }
+
+        $isChanged = Find-ChangedModulesUtil @findDiffUtilParams
+
+        if ($isChanged) {
+            $result.Add($module) | Out-Null
+        }
+    }
+
+    # this means changes are made outside of modules
+    # and will be counted towards both
+    if ($result.Count -eq 0) {
+        $result.AddRange($ModuleList) | Out-Null
+    }
+
+    $result.ToArray()
+}
+
+<#
+    .Description
+    Checks if the changed files are contained in the module
+#>
+function Find-ChangedModulesUtil {
+    [OutputType([bool])]
+    Param (
+        [Parameter(Mandatory = $true)]
+        [string]
+        $ModuleName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String[]]
+        $ChangedFiles
+    )
+
+    $os = $PSVersionTable['OS']
+    
+    foreach ($changedFile in $ChangedFiles) {
+        if ($os.Contains('Microsoft Windows')) {
+            $changedFile = $changedFile -replace '/', '\'
+        }
+
+        if ($changedFile.Contains($ModuleName)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+<#
 .SYNOPSIS
 Updates the Code Coverage badge with the new percent from the unit tests.
 
@@ -330,78 +415,11 @@ function Update-RequiredModules {
 }
 
 <#
-    .Synopsis
-    Runs the unit tests of the specified module.
-
-    .Description
-    Runs the unit tests of the specified module. The tests are searched in a Tests\Unit path in the module directory.
-    The code coverage result of the tests gets updated in the ReadMe document. 
-
-    .Parameter ModuleName
-    Name of the module whose unit tests should be run
-#>
-function Start-UnitTests {
-    [CmdletBinding()]
-    [OutputType([void])]
-    Param (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $ModuleName
-    )
-
-    # Runs all unit tests in the module.
-    $moduleFolderPath = (Get-Module $ModuleName -ListAvailable).ModuleBase
-    $unitTestsFolderPath = Join-Path (Join-Path $moduleFolderPath 'Tests') 'Unit'
-    $moduleUnitTestsResult = Invoke-Pester -Path "$unitTestsFolderPath\*" `
-                -CodeCoverage @{ Path = "$ModuleFolderPath\$ModuleName.psm1" } `
-                -PassThru `
-                -EnableExit
-
-    # Gets the coverage percent from the unit tests that were ran.
-    $numberOfCommandsAnalyzed = $moduleUnitTestsResult.CodeCoverage.NumberOfCommandsAnalyzed
-    $numberOfCommandsMissed = $moduleUnitTestsResult.CodeCoverage.NumberOfCommandsMissed
-
-    $coveragePercent = [math]::Floor(100 - (($numberOfCommandsMissed / $numberOfCommandsAnalyzed) * 100))
-
-    $updateCodeCoveragePercentInTextFileParams = @{
-        CodeCoveragePercent = $coveragePercent
-        TextFilePath = $Script:ReadMePath
-        ModuleName = $ModuleName
-    }
-
-    Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
-}
-
-<#
-    .Description
-    Start the building process for the VMware.PSDesiredStateConfiguration module and
-    retunrs the updated module version
-#>
-function Start-PsDesiredStateConfigurationBuild {
-    [CmdletBinding()]
-    [OutputType([string])]
-    Param()
-
-    $moduleName = 'VMware.PSDesiredStateConfiguration'
-    $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
-    $buildModuleFilePath = Join-Path -Path $moduleRoot -ChildPath "$moduleName.build.ps1"
-    . $buildModuleFilePath
-
-    Start-UnitTests $moduleName
-
-    $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
-
-    # return module version
-    Get-ModuleVersion -psdPath $psdPath
-}
-
-<#
     .Description
     Start the building process for the VMware.vSphereDsc module and
     retunrs the updated module version
 #>
-function Start-VsphereBuild {
+function Start-VsphereDSCBuild {
     [CmdletBinding()]
     [OutputType([string])]
     Param()
@@ -420,7 +438,15 @@ function Start-VsphereBuild {
     $psdContent = Update-RequiredModules -ModuleManifestContent $psdContent -RequiredModules $emptyRequiredModulesArray
     $psdContent | Out-File -FilePath $psdPath -Encoding Default
 
-    Start-UnitTests $ModuleName
+    $coveragePercent = Start-UnitTests $ModuleName
+
+    $updateCodeCoveragePercentInTextFileParams = @{
+        CodeCoveragePercent = $coveragePercent
+        TextFilePath = $Script:ReadMePath
+        ModuleName = $ModuleName
+    }
+
+    Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
 
     if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
         # Retrieving the 'RequiredModules' array from the RequiredModules file.
@@ -437,109 +463,40 @@ function Start-VsphereBuild {
     Get-ModuleVersion -psdPath $psdPath
 }
 
-<#
-    .Synopsis
-    Finds in what modules changes have occured
-
-    .Description
-    Finds in what modules changes have occured by finding the differences in commit history
-#>
-function Find-ChangedModules {
+function Start-PsDesiredStateConfigurationBuild {
     [CmdletBinding()]
-    [OutputType([System.String[]])]
+    [OutputType([string])]
     Param()
 
-    $lastTravisCommit = 1
+    $moduleName = 'VMware.PSDesiredStateConfiguration'
+    $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
+    $buildModuleFilePath = Join-Path -Path $moduleRoot -ChildPath "$moduleName.build.ps1"
+    . $buildModuleFilePath
 
-    # find last travis commit
-    while ($true) {
-        $commitInfo = git show HEAD~$lastTravisCommit
-        $author = $commitInfo[1]
+    # get coverage percentage from travis shared workspace file
+    $coveragePath = Join-Path $env:TRAVIS_BUILD_DIR $env:PSDS_CODECOVERAGE_RESULTFILE
+    $coveragePercent = Get-Content $coveragePath -Raw
+    $coveragePercent = $coveragePercent -as [int]
 
-        if ($author.Contains('travis@travis-ci.org')) {
-            break
-        }
-
-        $lastTravisCommit += 1
+    $updateCodeCoveragePercentInTextFileParams = @{
+        CodeCoveragePercent = $coveragePercent
+        TextFilePath = $Script:ReadMePath
+        ModuleName = $ModuleName
     }
 
-    $changedFiles = git diff --name-only HEAD..HEAD~$lastTravisCommit
+    Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
 
-    $moduleList = Get-ChildItem $script:SourceRoot | Select-Object -ExpandProperty Name
+    $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
 
-    $result = New-Object -TypeName 'System.Collections.ArrayList'
-
-    foreach ($module in $moduleList) {
-        $findDiffUtilParams = @{
-            ModuleName = $module
-            ChangedFiles = $changedFiles
-        }
-
-        $isChanged = Find-ChangedModulesUtil @findDiffUtilParams
-
-        if ($isChanged) {
-            $result.Add($module) | Out-Null
-        }
-    }
-
-    # this means changes are made outside of modules
-    # and will be counted towards both
-    if ($result.Count -eq 0) {
-        $result.AddRange($ModuleList) | Out-Null
-    }
-
-    $result.ToArray()
+    # return module version
+    Get-ModuleVersion -psdPath $psdPath
 }
 
-<#
-    .Description
-    Checks if the changed files are contained in the module
-#>
-function Find-ChangedModulesUtil {
-    [OutputType([bool])]
-    Param (
-        [Parameter(Mandatory = $true)]
-        [string]
-        $ModuleName,
+. (Join-Path $PSScriptRoot 'common.ps1')
 
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $ChangedFiles
-    )
+$psdscModuleVersion = Start-PSDesiredStateConfigurationBuild
 
-    $os = $PSVersionTable['OS']
-    
-    foreach ($changedFile in $ChangedFiles) {
-        if ($os.Contains('Microsoft Windows')) {
-            $changedFile = $changedFile -replace '/', '\'
-        }
-
-        if ($changedFile.Contains($ModuleName)) {
-            return $true
-        }
-    }
-
-    return $false
-}
-
-$script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
-
-# Adds the Source directory from the repository to the list of modules directories.
-$script:SourceRoot = Join-Path -Path $script:ProjectRoot -ChildPath 'Source'
-$script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
-$Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'
-
-$env:PSModulePath = $env:PSModulePath + ":$script:SourceRoot"
-
-# Registeres default PSRepository.
-Register-PSRepository -Default -ErrorAction SilentlyContinue
-
-# Installs Pester.
-Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
-
-$psdscModuleVersion = Start-PsDesiredStateConfigurationBuild
-
-$vSpheremoduleVersion = '1.0.0.0'
+$vSpheremoduleVersion = Start-VsphereDSCBuild
 
 $moduleNameToVersion = @{
     'VMware.vSphereDSC' = $vSpheremoduleVersion

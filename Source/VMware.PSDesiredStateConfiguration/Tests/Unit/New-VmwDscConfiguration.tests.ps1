@@ -179,8 +179,12 @@ InModuleScope -ModuleName 'VMware.PSDesiredStateConfiguration' {
                     Script:AssertConfigurationEqual $res $Script:expectedCompiled
                 }
                 It 'Should compile composite resource correctly' {
-
                     $os = $PSVersionTable['OS']
+
+                    # null check because the OS key is not present on PowerShell 5.1
+                    if ([string]::IsNullOrEmpty($os)) {
+                        $os = 'Microsoft Windows'
+                    }
 
                     if (-not $os.Contains('Microsoft Windows')) {
                         Write-Warning 'Composite Resources are not discoverable in non windows OS due to a bug in Powershell'
