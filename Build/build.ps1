@@ -419,7 +419,7 @@ function Update-RequiredModules {
     Start the building process for the VMware.vSphereDsc module and
     retunrs the updated module version
 #>
-function Start-VsphereBuild {
+function Start-VsphereDSCBuild {
     [CmdletBinding()]
     [OutputType([string])]
     Param()
@@ -496,7 +496,7 @@ function Start-PsDesiredStateConfigurationBuild {
 
 $psdscModuleVersion = Start-PSDesiredStateConfigurationBuild
 
-$vSpheremoduleVersion = Start-vSphereDSCBuild
+$vSpheremoduleVersion = Start-VsphereDSCBuild
 
 $moduleNameToVersion = @{
     'VMware.vSphereDSC' = $vSpheremoduleVersion
