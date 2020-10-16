@@ -473,18 +473,25 @@ function Start-PsDesiredStateConfigurationBuild {
     $buildModuleFilePath = Join-Path -Path $moduleRoot -ChildPath "$moduleName.build.ps1"
     . $buildModuleFilePath
 
+    # get coverage percentage from travis shared workspace file
+    $coveragePath = Join-Path $env:TRAVIS_BUILD_DIR $env:PSDS_CODECOVERAGE_RESULTFILE
+    $coveragePercent = Get-Content $coveragePath -Raw
+    $coveragePercent = $coveragePercent -as [int]
+
+    $updateCodeCoveragePercentInTextFileParams = @{
+        CodeCoveragePercent = $coveragePercent
+        TextFilePath = $Script:ReadMePath
+        ModuleName = $ModuleName
+    }
+
+    Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
+
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
 
     # return module version
     Get-ModuleVersion -psdPath $psdPath
 }
 
-#todo add as parameter
-$moduleCoverage = Get-Content -Path 'coverage.txt' -Raw
-
-Write-Host $moduleCoverage
-
-<#
 . (Join-Path $PSScriptRoot 'common.ps1')
 
 $psdscModuleVersion = Start-PSDesiredStateConfigurationBuild
@@ -515,4 +522,3 @@ if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
         Update-ChangelogDocument @updateChangeLogParams   
     }
 }
-#>
