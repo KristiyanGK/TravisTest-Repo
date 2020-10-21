@@ -27,7 +27,7 @@ jobs:
             - psdsTestsCoverage
       script:
         - pwsh -File './Build/enableExperimentalFeature.ps1'
-        - pwsh -File './Build/VMware.PSDS.TestRuns.ps1'
+        - pwsh -File './Build/VMware.PSDSCUnitTestsRunner.ps1'
     - stage: Build
       os: linux
       dist: trusty

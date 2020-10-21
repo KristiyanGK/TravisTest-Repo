@@ -1,7 +1,9 @@
+
+
 # Desired State Configuration for VMware
 
 ## Overview
-The **Desired State Configuration for Vmware** project contains **VMware.vSphereDSC** and **VMware.PSDesiredStateConfiguration** powershell modules.
+The **Desired State Configuration for VMware** project contains **VMware.vSphereDSC** and **VMware.PSDesiredStateConfiguration** PowerShell modules.
 
 The **VMware.vSphereDSC** module is a collection of DSC Resources. This module includes DSC resources that simplify the management of vCenter and ESXi settings, with a simple declarative language.
 
@@ -15,13 +17,13 @@ The **VMware.vSphereDSC** module contains resources for:
 - **vCenter** and **Host** settings
 
 For more information about all available **Resources**, please visit the **wiki** page of the repository: [Wiki](https://github.com/vmware/dscr-for-vmware/wiki).
-For more information about the **VMware.vSphereDSC** module please read here: [VMware.vSphereDSC info](https://github.com/KristiyanGK/TravisTest-Repo/blob/master/vSphereDsc.md).
+For more information about the **VMware.vSphereDSC** module ,please visit: [VMware.vSphereDSC info](https://github.com/vmware/dscr-for-vmware/blob/master/VMware.vSphereDSC.md).
 
-The **VMware.PSDesiredStateConfiguration** module provides an alternative in-language way to compile and execute DSC Configurations. It does not require the use of LCM and supports powershell core.
+The **VMware.PSDesiredStateConfiguration** module provides an alternative in-language way to compile and execute DSC Configurations. It does not require the use of LCM and supports PowerShell 7.0.
 
-For more information about the **VMware.PSDesiredStateConfiguration** module please read here: [VMware.PSDesiredStateConfiguration info](https://github.com/KristiyanGK/TravisTest-Repo/blob/master/PSDesiredStateConfiguration.md).
+For more information about the **VMware.PSDesiredStateConfiguration** module, please visit: [VMware.PSDesiredStateConfiguration info](https://github.com/vmware/dscr-for-vmware/blob/master/VMware.PSDesiredStateConfiguration.md).
 
-For a list of known limitations read here: [Known Limitations](https://github.com/KristiyanGK/TravisTest-Repo/blob/master/LIMITATIONS.md).
+For a list of known limitations, please visit: [Known Limitations](https://github.com/vmware/dscr-for-vmware/blob/master/LIMITATIONS.md).
 
 ## Branches
 
