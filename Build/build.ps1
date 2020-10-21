@@ -55,7 +55,7 @@ function Get-PullRequestDescription {
     [CmdletBinding()]
     [OutputType([string])]
 
-    $repository = 'vmware/dscr-for-vmware'
+    $repository = 'KristiyanGK/dscr-for-vmware'
     $searchType = 'pr'
     $pullRequestState = 'closed'
 
@@ -461,12 +461,6 @@ function Find-ChangedModules {
         if ($isChanged) {
             $result.Add($module) | Out-Null
         }
-    }
-
-    # this means changes are made outside of modules
-    # and will be counted towards both
-    if ($result.Count -eq 0) {
-        $result.AddRange($ModuleList) | Out-Null
     }
 
     $result.ToArray()

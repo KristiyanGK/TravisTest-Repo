@@ -22,7 +22,7 @@ upload_files() {
     git remote rm origin
 
     # Add new "origin" with the access token
-    git remote add origin https://${GH_TOKEN}@github.com/vmware/dscr-for-vmware.git > /dev/null 2>&1
+    git remote add origin https://${GH_TOKEN}@github.com/KristiyanGK/dscr-for-vmware.git > /dev/null 2>&1
     git push origin master --quiet
 }
 
