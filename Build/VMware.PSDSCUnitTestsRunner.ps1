@@ -20,6 +20,13 @@ The Unit tests for VMware.PSDesiredStateConfiguration get executed in a Ubuntu 1
 they depend on PowerShell 7.0.
 #>
 
+<#
+.Synopsis
+Runs the unit tests for the VMware.PSDesiredStateConfiguration module and returns code coverage percent.
+.Description
+Runs the unit tests for the VMware.PSDesiredStateConfiguration module and returns code coverage percent
+Before the tests are run it adds the required DSC resource to the PSModulePath
+#>
 function Invoke-PsDesiredStateConfigurationTests {
     # add required DSC Resource for unit tests
     $moduleName = 'VMware.PSDesiredStateConfiguration'
@@ -36,7 +43,7 @@ function Invoke-PsDesiredStateConfigurationTests {
 # add common utilities
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-$flagResult = Find-ProjectChanges
+$flagResult = Set-BuildFlags
 
 if (Test-Flag -InputFlag $flagResult -DesiredFlag Tests_PSDSC) {
     $coveragePercent = Invoke-PsDesiredStateConfigurationTests

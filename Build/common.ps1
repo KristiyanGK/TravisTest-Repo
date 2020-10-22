@@ -14,6 +14,10 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #>
 
+<#
+.DESCRIPTION
+BuildFlags defines operations which the build should perform.
+#>
 [Flags()] enum BuildFlags {
     Update_PSDSC = 1
     Update_VSDSC = 2
@@ -22,7 +26,41 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     None = 256
 }
 
+<#
+.SYNOPSIS
+Checks if a certain DesiredFlag is included in the InputFlag.
+.DESCRIPTION
+Checks if a certain DesiredFlag is included in the InputFlag.
+The check is performed using a binary and on flags.
+.PARAMETER InputFlag
+Contains all the flags for the current build.
+.PARAMETER DesiredFlag
+The flag that gets checked if it's contained the current build flags.
+#>
+function Test-Flag {
+    [OutputType([bool])]
+    Param (
+        [BuildFlags]
+        $InputFlag,
+
+        [BuildFlags]
+        $DesiredFlag
+    )
+
+    ($InputFlag -band $DesiredFlag) -ne 0
+}
+
+<#
+.SYNOPSIS
+Finds and returns a list of file paths that have been changed since last build
+.DESCRIPTION
+Finds and returns a list of file paths that have been changed since last build.
+The changes are searched in the .git HEAD from the current commit to the last travis commit.
+#>
 function Get-ChangedFiles {
+    [OutputType([System.String[]])]
+    Param()
+
     $lastTravisCommit = 1
 
     # find last travis commit
@@ -37,19 +75,27 @@ function Get-ChangedFiles {
         $lastTravisCommit += 1
     }
 
+    # extract names of changed files from HEAD history
     $changedFiles = git diff --name-only HEAD..HEAD~$lastTravisCommit
 
     $changedFiles
 }
-
-function Find-ProjectChanges {
+<#
+.SYNOPSIS
+Depending on the changes made in the project [BuildFlags] get set and returned.
+.DESCRIPTION
+Depending on the changes made in the project [BuildFlags] get set and returned.
+The returned value contains all steps that should be perfomred depending on build change.
+#>
+function Set-BuildFlags {
+    # retrieve a list of changed files
     $changedFiles = Get-ChangedFiles
 
     $flagResult = 0
 
     foreach ($changedFile in $changedFiles) {
         if ($changedFile.Contains('Source')) {
-
+            # module change triggers the it's build and tests to run
             if ($changedFile.Contains('VMware.PSDesiredStateConfiguration')) {
                 $flagResult = $flagResult -bor [BuildFlags]::Update_PSDSC
                 $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
@@ -58,11 +104,13 @@ function Find-ProjectChanges {
                 $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
             }
         } elseif ($changedFile.Contains('Build') -or $changedFiles.Contains('.travis.yml')) {
+            # build change triggers unit tests to be run
             $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
             $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
         }
     }
 
+    # no major changes have been made
     if ($flagResult -eq 0) {
         $flagResult = [BuildFlags]::None
     }
@@ -70,25 +118,15 @@ function Find-ProjectChanges {
     $flagResult
 }
 
-function Test-Flag {
-    Param (
-        [BuildFlags]
-        $InputFlag,
-
-        [BuildFlags]
-        $DesiredFlag
-    )
-
-    ($InputFlag -band $DesiredFlag) -ne 0
-}
-
 <#
-.Synopsis
+.SYNOPSIS
 Runs the unit tests for the specified module and returns code coverage percentage.
 
-.Description
-Runs the unit tests for the specified module and returns code coverage percentage. The tests should be located in a Tests\Unit location in the modules directory.
+.DESCRIPTION
+Runs the unit tests for the specified module and returns code coverage percentage. 
+The tests should be located in a Tests\Unit location in the modules directory.
 The code coverage result of the tests gets updated in the README.md document.
+The function uses the Pester module for running the tests and installs it if it is not found.
 
 .Notes
 The code coverage logic leads to the unit tests running slower.
@@ -118,6 +156,8 @@ function Invoke-UnitTests {
         # Install Pester.
         Write-Host 'Installing Pester'
 
+        # suppress progress messages during installation due
+        # to broken display on Travis console
         $oldProgressPreference = $ProgressPreference
         $Global:ProgressPreference = 'SilentlyContinue'
 
@@ -160,6 +200,7 @@ $script:SourceRoot = Join-Path -Path $script:ProjectRoot -ChildPath 'Source'
 $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
 $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'
 
+# Adds the Source directory from the repository to the list of modules directories.
 $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$script:SourceRoot"
 
 # Registeres default PSRepository.
