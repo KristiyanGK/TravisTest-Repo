@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 RootModule = 'VMware.vSphereDSC.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.1.0.72'
+ModuleVersion = '2.1.0.73'
 
 # ID used to uniquely identify this module
 GUID = '664b57b4-bd8d-4a56-9984-278f7fe10cf8'
@@ -47,10 +47,7 @@ PowerShellVersion = '5.1'
     The disadvantage though is PowerCLI has to be installed separately as a prerequisite.
 #>
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @(
-    #@{ "ModuleName" = "VMware.VimAutomation.Vds"; "ModuleVersion" = "11.2.0.12483615" },
-    #@{ "ModuleName" = "VMware.VimAutomation.Storage"; "ModuleVersion" = "11.5.0.14901686" }
-)
+RequiredModules = @()
 
 # Variables to export from this module
 VariablesToExport = '*'
