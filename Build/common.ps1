@@ -116,7 +116,7 @@ function Invoke-UnitTests {
 
     if ($null -eq (Get-Module -Name 'Pester' -ListAvailable)) {
         # Install Pester.
-        Write-Host 'Installing Pester'
+        Write-Verbose 'Installing Pester'
 
         $oldProgressPreference = $ProgressPreference
         $Global:ProgressPreference = 'SilentlyContinue'
@@ -125,7 +125,7 @@ function Invoke-UnitTests {
 
         $Global:ProgressPreference = $oldProgressPreference
 
-        Write-Host 'Pester Installed'   
+        Write-Verbose 'Pester Installed'   
     }
 
     # Runs all unit tests in the module.
@@ -164,3 +164,5 @@ $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$script:SourceRoot"
 
 # Registeres default PSRepository.
 Register-PSRepository -Default -ErrorAction SilentlyContinue
+
+$Global:VerbosePreference = 'Continue'
