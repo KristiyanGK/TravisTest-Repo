@@ -345,8 +345,6 @@ function Start-PSDesiredStateConfigurationBuild {
     [OutputType([string])]
     Param()
 
-    Write-Host '---------VMware.PSDesiredStateConfiguration build started'
-
     # run the specific module build file
     $moduleName = 'VMware.PSDesiredStateConfiguration'
     $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
@@ -354,8 +352,6 @@ function Start-PSDesiredStateConfigurationBuild {
     . $buildModuleFilePath
 
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
-
-    Write-Host '---------VMware.PSDesiredStateConfiguration build ended'
 
     # return module version
     Get-ModuleVersion -psdPath $psdPath
@@ -370,8 +366,6 @@ function Start-vSphereDSCBuild {
     [CmdletBinding()]
     [OutputType([string])]
     Param()
-
-    Write-Host '---------VMware.vSphereDSC build started'
 
     # Updating the content of the psm1 and psd1 files via the build module file.
     $moduleName = 'VMware.vSphereDSC'
@@ -393,15 +387,11 @@ function Start-vSphereDSCBuild {
         $psdContent | Out-File -FilePath $psdPath -Encoding Default
     }
 
-    Write-Host '---------VMware.vSphereDSC build started'
-
     # return module version
     Get-ModuleVersion -psdPath $psdPath
 }
 
 function Invoke-vSphereDSCTests {
-    Write-Host '---------VMware.vSphereDSC tests started'
-
     $moduleName = 'VMware.vSphereDSC'
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
     $psdContent = Get-Content -Path $psdPath
@@ -422,13 +412,9 @@ function Invoke-vSphereDSCTests {
 
     # update coverage in README.md
     Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
-
-    Write-Host '---------VMware.vSphereDSC tests started'
 }
 
 function Set-PSDesiredStateConfigurationTestsResults {
-    Write-Host '---------VMware.PSDesiredStateConfiguration tests started'
-
     # get code coverage result from shared travis workspace file
     $moduleName = 'PSDesiredStateConfiguration'
 
@@ -442,8 +428,6 @@ function Set-PSDesiredStateConfigurationTestsResults {
     }
 
     Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
-
-    Write-Host '---------VMware.PSDesiredStateConfiguration tests ended'
 }
 
 # add common functions, script variables and perform common logic
@@ -454,21 +438,37 @@ $flagChanges = Find-ProjectChanges
 $changedModuleNameToVersion = @{}
 
 if (Test-Flag -InputFlag $flagChanges -DesiredFlag Update_PSDSC) {
+    Write-Host '---------VMware.PSDesiredStateConfiguration build started'
+
     $version = Start-PSDesiredStateConfigurationBuild
     $changedModuleNameToVersion['VMware.PSDesiredStateConfiguration'] = $version
+
+    Write-Host '---------VMware.PSDesiredStateConfiguration build ended'
 }
 
 if (Test-Flag -InputFlag $flagChanges -DesiredFlag Tests_PSDSC) {
+    Write-Host '---------VMware.PSDesiredStateConfiguration tests started'
+
     Set-PSDesiredStateConfigurationTestsResults
+
+    Write-Host '---------VMware.PSDesiredStateConfiguration tests ended'
 }
 
 if (Test-Flag -InputFlag $flagChanges -DesiredFlag Update_VSDSC) {
+    Write-Host '---------VMware.vSphereDSC build started'
+
     $version = Start-vSphereDSCBuild
     $changedModuleNameToVersion['VMware.vSphereDSC'] = $version
+
+    Write-Host '---------VMware.vSphereDSC build ended'
 }
 
 if (Test-Flag -InputFlag $flagChanges -DesiredFlag Tests_VSDSC) {
+    Write-Host '---------VMware.vSphereDSC tests started'
+
     Invoke-vSphereDSCTests
+
+    Write-Host '---------VMware.vSphereDSC tests ended'
 }
 
 if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {

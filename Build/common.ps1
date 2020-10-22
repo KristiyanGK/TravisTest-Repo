@@ -164,5 +164,3 @@ $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$script:SourceRoot"
 
 # Registeres default PSRepository.
 Register-PSRepository -Default -ErrorAction SilentlyContinue
-
-$Global:VerbosePreference = 'Continue'
