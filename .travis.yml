@@ -6,8 +6,5 @@ branches:
 
 jobs:
   include:
-  - os: osx
-    before_install: 
-      - brew cask install powershell
-    script:
-      - pwsh -File './Build/testOsxBuild.ps1'
+  - stage: 'prep'
+  -
