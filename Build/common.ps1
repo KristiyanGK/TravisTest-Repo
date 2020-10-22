@@ -103,7 +103,7 @@ function Set-BuildFlags {
                 $flagResult = $flagResult -bor [BuildFlags]::Update_VSDSC
                 $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
             }
-        } elseif ($changedFile.Contains('Build') -or $changedFiles.Contains('.travis.yml')) {
+        } elseif ($changedFile.Contains('Build')) {
             # build change triggers unit tests to be run
             $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
             $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
