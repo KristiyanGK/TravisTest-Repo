@@ -20,18 +20,28 @@ The Unit tests for VMware.PSDesiredStateConfiguration get executed in a Ubuntu 1
 they depend on PowerShell 7.0.
 #>
 
+function Invoke-PsDesiredStateConfigurationTests {
+    # add required DSC Resource for unit tests
+    $moduleName = 'VMware.PSDesiredStateConfiguration'
+    $moduleRoot = Join-Path $Script:SourceRoot $moduleName
+    $configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc Resources') 'MyDscResource'
+    $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$configPath"
+
+    # run unit tests
+    $coveragePercent = Invoke-UnitTests $moduleName
+
+    $coveragePercent
+}
+
 # add common utilities
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-# add required DSC Resource for unit tests
-$moduleName = 'VMware.PSDesiredStateConfiguration'
-$moduleRoot = Join-Path $Script:SourceRoot $moduleName
-$configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc Resources') 'MyDscResource'
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$configPath"
+$flagResult = Find-ProjectChanges
 
-# run unit tests
-$coveragePercent = Invoke-UnitTests $moduleName
+if (Test-Flag -InputFlag $flagResult -DesiredFlag Tests_PSDSC) {
+    $coveragePercent = Invoke-PsDesiredStateConfigurationTests
 
-# save result in shared travis workspace file
-$resultPath = Join-Path $env:TRAVIS_BUILD_DIR $env:PSDS_CODECOVERAGE_RESULTFILE
-$coveragePercent | Out-File $resultPath
+    # save result in shared travis workspace file
+    $resultPath = Join-Path $env:TRAVIS_BUILD_DIR $env:PSDS_CODECOVERAGE_RESULTFILE
+    $coveragePercent | Out-File $resultPath
+}

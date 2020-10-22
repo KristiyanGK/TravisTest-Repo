@@ -14,6 +14,74 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #>
 
+[Flags()] enum BuildFlags {
+    Update_PSDSC = 1
+    Update_VSDSC = 2
+    Tests_VSDSC = 4
+    Tests_PSDSC = 8
+    None = 256
+}
+
+function Get-ChangedFiles {
+    $lastTravisCommit = 1
+
+    # find last travis commit
+    while ($true) {
+        $commitInfo = git show HEAD~$lastTravisCommit
+        $author = $commitInfo[1]
+
+        if ($author.Contains('travis@travis-ci.org')) {
+            break
+        }
+
+        $lastTravisCommit += 1
+    }
+
+    $changedFiles = git diff --name-only HEAD..HEAD~$lastTravisCommit
+
+    $changedFiles
+}
+
+function Find-ProjectChanges {
+    $changedFiles = Get-ChangedFiles
+
+    $flagResult = 0
+
+    foreach ($changedFile in $changedFiles) {
+        if ($changedFile.Contains('Source')) {
+
+            if ($changedFile.Contains('VMware.PSDesiredStateConfiguration')) {
+                $flagResult = $flagResult -bor [BuildFlags]::Update_PSDSC
+                $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
+            } elseif ($changedFile.Contains('VMware.vSphereDSC')) {
+                $flagResult = $flagResult -bor [BuildFlags]::Update_VSDSC
+                $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
+            }
+        } elseif ($changedFile.Contains('Build') -or $changedFiles.Contains('.travis.yml')) {
+            $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
+            $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
+        }
+    }
+
+    if ($flagResult -eq 0) {
+        $flagResult = [BuildFlags]::None
+    }
+
+    $flagResult
+}
+
+function Test-Flag {
+    Param (
+        [BuildFlags]
+        $InputFlag,
+
+        [BuildFlags]
+        $DesiredFlag
+    )
+
+    ($InputFlag -band $DesiredFlag) -ne 0
+}
+
 <#
 .Synopsis
 Runs the unit tests for the specified module and returns code coverage percentage.
@@ -46,6 +114,20 @@ function Invoke-UnitTests {
         $DisableCodeCoverage
     )
 
+    if ($null -eq (Get-Module -Name 'Pester' -ListAvailable)) {
+        # Install Pester.
+        Write-Host 'Installing Pester'
+
+        $oldProgressPreference = $ProgressPreference
+        $Global:ProgressPreference = 'SilentlyContinue'
+
+        Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
+
+        $Global:ProgressPreference = $oldProgressPreference
+
+        Write-Host 'Pester Installed'   
+    }
+
     # Runs all unit tests in the module.
     $moduleFolderPath = (Get-Module $ModuleName -ListAvailable).ModuleBase
     $unitTestsFolderPath = Join-Path (Join-Path $moduleFolderPath 'Tests') 'Unit'
@@ -74,8 +156,6 @@ function Invoke-UnitTests {
 }
 
 $script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
-
-# Adds the Source directory from the repository to the list of modules directories.
 $script:SourceRoot = Join-Path -Path $script:ProjectRoot -ChildPath 'Source'
 $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
 $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'
@@ -84,6 +164,3 @@ $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$script:SourceRoot"
 
 # Registeres default PSRepository.
 Register-PSRepository -Default -ErrorAction SilentlyContinue
-
-# Installs Pester.
-Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
