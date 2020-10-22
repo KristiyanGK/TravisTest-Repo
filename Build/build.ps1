@@ -392,6 +392,7 @@ in the README.md file
 #>
 function Invoke-vSphereDSCTests {
     $moduleName = 'VMware.vSphereDSC'
+    $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
     $psdContent = Get-Content -Path $psdPath
 
