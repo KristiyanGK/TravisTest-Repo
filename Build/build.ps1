@@ -434,7 +434,7 @@ $flagChanges = Find-ProjectChanges
 
 $changedModuleNameToVersion = @{}
 
-if (Test-Flag $flagChanges [BuildFlags]::Update_PSDSC) {
+if (Test-Flag -InputFlag $flagChanges -DesiredFlag Update_PSDSC) {
     Write-Host '---------VMware.PSDesiredStateConfiguration build started'
 
     $version = Start-PSDesiredStateConfigurationBuild
@@ -443,7 +443,7 @@ if (Test-Flag $flagChanges [BuildFlags]::Update_PSDSC) {
     Write-Host '---------VMware.PSDesiredStateConfiguration build ended'
 }
 
-if (Test-Flag $flagChanges [BuildFlags]::Tests_PSDSC) {
+if (Test-Flag -InputFlag $flagChanges -DesiredFlag Tests_PSDSC) {
     Write-Host '---------VMware.PSDesiredStateConfiguration tests started'
 
     Set-PSDesiredStateConfigurationTestsResults
@@ -451,7 +451,7 @@ if (Test-Flag $flagChanges [BuildFlags]::Tests_PSDSC) {
     Write-Host '---------VMware.PSDesiredStateConfiguration tests ended'
 }
 
-if (Test-Flag $flagChanges [BuildFlags]::Update_VSDSC) {
+if (Test-Flag -InputFlag $flagChanges -DesiredFlag Update_VSDSC) {
     Write-Host '---------VMware.vSphereDSC build started'
 
     $version = Start-vSphereDSCBuild
@@ -460,7 +460,7 @@ if (Test-Flag $flagChanges [BuildFlags]::Update_VSDSC) {
     Write-Host '---------VMware.vSphereDSC build started'
 }
 
-if (Test-Flag $flagChanges [BuildFlags]::Tests_VSDSC) {
+if (Test-Flag -InputFlag $flagChanges -DesiredFlag Tests_VSDSC) {
     Write-Host '---------VMware.vSphereDSC tests started'
 
     Invoke-vSphereDSCTests

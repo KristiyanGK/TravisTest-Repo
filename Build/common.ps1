@@ -68,13 +68,17 @@ function Find-ProjectChanges {
 function Test-Flag {
     Param (
         [BuildFlags]
-        $AllFlags,
+        $InputFlag,
 
         [BuildFlags]
-        $TestFlag
+        $DesiredFlag
     )
 
-    ($AllFlags -band $TestFlag) -ne 0
+    ($InputFlag -band $DesiredFlag) -ne 0
+}
+
+if (Test-Flag -InputFlag $res -DesiredFlag Update_PSDSC) {
+    Write-Host 'HELO'
 }
 
 <#
