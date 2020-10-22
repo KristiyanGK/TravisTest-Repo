@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+2020-10-22
+change for build fix
 ## VMware.PSDesiredStateConfiguration 0.0.0.1 - 2020-10-21
 ### Added
 - Introduced a new module **VMware.PSDesiredStateConfiguration** for compiling and executing DSC Configurations without the use of MOF or LCM.
