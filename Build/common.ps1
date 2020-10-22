@@ -67,8 +67,10 @@ function Find-ProjectChanges {
 
 function Test-Flag {
     Param (
+        [BuildFlags]
         $AllFlags,
 
+        [BuildFlags]
         $TestFlag
     )
 
