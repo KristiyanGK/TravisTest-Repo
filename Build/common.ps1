@@ -114,17 +114,19 @@ function Invoke-UnitTests {
         $DisableCodeCoverage
     )
 
-    # Install Pester.
-    Write-Host 'Installing Pester'
+    if ($null -eq (Get-Module -Name 'Pester' -ListAvailable) {
+        # Install Pester.
+        Write-Host 'Installing Pester'
 
-    $oldProgressPreference = $ProgressPreference
-    $Global:ProgressPreference = 'SilentlyContinue'
+        $oldProgressPreference = $ProgressPreference
+        $Global:ProgressPreference = 'SilentlyContinue'
 
-    Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
+        Install-Module -Name Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
 
-    $Global:ProgressPreference = $oldProgressPreference
+        $Global:ProgressPreference = $oldProgressPreference
 
-    Write-Host 'Pester Installed'
+        Write-Host 'Pester Installed'   
+    }
 
     # Runs all unit tests in the module.
     $moduleFolderPath = (Get-Module $ModuleName -ListAvailable).ModuleBase

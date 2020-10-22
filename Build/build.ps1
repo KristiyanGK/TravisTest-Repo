@@ -392,6 +392,8 @@ function Start-vSphereDSCBuild {
 }
 
 function Invoke-vSphereDSCTests {
+    $moduleName = 'VMware.vSphereDSC'
+
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
     $psdContent = Get-Content -Path $psdPath
 
@@ -401,12 +403,12 @@ function Invoke-vSphereDSCTests {
     $psdContent | Out-File -FilePath $psdPath -Encoding Default
 
     # run tests and calculate coverage percent
-    $coveragePercent = Invoke-UnitTests $ModuleName
+    $coveragePercent = Invoke-UnitTests $moduleName
 
     $updateCodeCoveragePercentInTextFileParams = @{
         CodeCoveragePercent = $coveragePercent
         TextFilePath = $Script:ReadMePath
-        ModuleName = $ModuleName
+        ModuleName = $moduleName
     }
 
     # update coverage in README.md
@@ -415,13 +417,15 @@ function Invoke-vSphereDSCTests {
 
 function Set-PSDesiredStateConfigurationTestsResults {
     # get code coverage result from shared travis workspace file
+    $moduleName = 'PSDesiredStateConfiguration'
+
     $coveragePath = Join-Path $env:TRAVIS_BUILD_DIR $env:PSDS_CODECOVERAGE_RESULTFILE
     $coveragePercent = [int] (Get-Content $coveragePath -Raw)
 
     $updateCodeCoveragePercentInTextFileParams = @{
         CodeCoveragePercent = $coveragePercent
         TextFilePath = $Script:ReadMePath
-        ModuleName = $ModuleName
+        ModuleName = $moduleName
     }
 
     Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams 
