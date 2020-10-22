@@ -38,7 +38,7 @@ function Invoke-PsDesiredStateConfigurationTests {
 
 $flagResult = Find-ProjectChanges
 
-if (Test-Flag $flagResult [BuildFlags]::Tests_PSDSC) {
+if (Test-Flag -InputFlag $flagResult -DesiredFlag Tests_PSDSC) {
     $coveragePercent = Invoke-PsDesiredStateConfigurationTests
 
     # save result in shared travis workspace file

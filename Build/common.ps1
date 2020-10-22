@@ -82,10 +82,6 @@ function Test-Flag {
     ($InputFlag -band $DesiredFlag) -ne 0
 }
 
-if (Test-Flag -InputFlag $res -DesiredFlag Update_PSDSC) {
-    Write-Host 'HELO'
-}
-
 <#
 .Synopsis
 Runs the unit tests for the specified module and returns code coverage percentage.
