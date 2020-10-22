@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.PSDesiredStateConfiguration 0.0.0.3 - 2020-10-22
+Merge branch 'master' of https://github.com/KristiyanGK/TravisTest-Repo
 2020-10-22
 change for build fix
 ## VMware.PSDesiredStateConfiguration 0.0.0.1 - 2020-10-21
