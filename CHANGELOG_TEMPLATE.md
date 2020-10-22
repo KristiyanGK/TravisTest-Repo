@@ -9,3 +9,4 @@
 - Description of the things removed for this version. For example if a part of the Documentation was removed, or some of the Tests (Unit or Integration) were removed.
 
 -some text here
+- another test
