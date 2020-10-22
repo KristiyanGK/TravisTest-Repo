@@ -116,7 +116,7 @@ function Invoke-UnitTests {
 
     if ($null -eq (Get-Module -Name 'Pester' -ListAvailable)) {
         # Install Pester.
-        Write-Verbose 'Installing Pester'
+        Write-Host 'Installing Pester'
 
         $oldProgressPreference = $ProgressPreference
         $Global:ProgressPreference = 'SilentlyContinue'
@@ -125,7 +125,7 @@ function Invoke-UnitTests {
 
         $Global:ProgressPreference = $oldProgressPreference
 
-        Write-Verbose 'Pester Installed'   
+        Write-Host 'Pester Installed'   
     }
 
     # Runs all unit tests in the module.

@@ -345,7 +345,7 @@ function Start-PSDesiredStateConfigurationBuild {
     [OutputType([string])]
     Param()
 
-    Write-Verbose '---------VMware.PSDesiredStateConfiguration build started'
+    Write-Host '---------VMware.PSDesiredStateConfiguration build started'
 
     # run the specific module build file
     $moduleName = 'VMware.PSDesiredStateConfiguration'
@@ -355,7 +355,7 @@ function Start-PSDesiredStateConfigurationBuild {
 
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
 
-    Write-Verbose '---------VMware.PSDesiredStateConfiguration build ended'
+    Write-Host '---------VMware.PSDesiredStateConfiguration build ended'
 
     # return module version
     Get-ModuleVersion -psdPath $psdPath
@@ -371,7 +371,7 @@ function Start-vSphereDSCBuild {
     [OutputType([string])]
     Param()
 
-    Write-Verbose '---------VMware.vSphereDSC build started'
+    Write-Host '---------VMware.vSphereDSC build started'
 
     # Updating the content of the psm1 and psd1 files via the build module file.
     $moduleName = 'VMware.vSphereDSC'
@@ -393,14 +393,14 @@ function Start-vSphereDSCBuild {
         $psdContent | Out-File -FilePath $psdPath -Encoding Default
     }
 
-    Write-Verbose '---------VMware.vSphereDSC build started'
+    Write-Host '---------VMware.vSphereDSC build started'
 
     # return module version
     Get-ModuleVersion -psdPath $psdPath
 }
 
 function Invoke-vSphereDSCTests {
-    Write-Verbose '---------VMware.vSphereDSC tests started'
+    Write-Host '---------VMware.vSphereDSC tests started'
 
     $moduleName = 'VMware.vSphereDSC'
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
@@ -423,11 +423,11 @@ function Invoke-vSphereDSCTests {
     # update coverage in README.md
     Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
 
-    Write-Verbose '---------VMware.vSphereDSC tests started'
+    Write-Host '---------VMware.vSphereDSC tests started'
 }
 
 function Set-PSDesiredStateConfigurationTestsResults {
-    Write-Verbose '---------VMware.PSDesiredStateConfiguration tests started'
+    Write-Host '---------VMware.PSDesiredStateConfiguration tests started'
 
     # get code coverage result from shared travis workspace file
     $moduleName = 'PSDesiredStateConfiguration'
@@ -443,7 +443,7 @@ function Set-PSDesiredStateConfigurationTestsResults {
 
     Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
 
-    Write-Verbose '---------VMware.PSDesiredStateConfiguration tests ended'
+    Write-Host '---------VMware.PSDesiredStateConfiguration tests ended'
 }
 
 # add common functions, script variables and perform common logic
