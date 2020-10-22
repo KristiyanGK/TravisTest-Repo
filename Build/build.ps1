@@ -119,10 +119,10 @@ function Update-ChangelogDocument {
         [Parameter(Mandatory = $true)]
         [string] $PullRequestDescription,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [string] $ModuleName,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [string] $ModuleVersion
     )
 
@@ -142,13 +142,7 @@ function Update-ChangelogDocument {
     $changelogSections = $changelogDocument[($headerLength + 1)..$changelogDocument.Length]
 
     $currentDate = Get-Date -Format yyyy-MM-dd
-    $newSectionHeader = [string]::Empty
-
-    if ([string]::IsNullOrEmpty($ModuleName) -or [string]::IsNullOrEmpty($ModuleVersion)) {
-        $newSectionHeader = "## $currentDate"
-    } else {
-        $newSectionHeader = "## $ModuleName $ModuleVersion - $currentDate"
-    }
+    $newSectionHeader = "## $ModuleName $ModuleVersion - $currentDate"
 
     $changelogDocumentNewContent = $changelogHeader + $newSectionHeader + $PullRequestDescription + $changelogSections
     $changelogDocumentNewContent | Set-Content -Path $ChangelogDocumentPath
@@ -336,7 +330,7 @@ function Update-RequiredModules {
 }
 
 <#
-.Description
+.DESCRIPTION
 Start the building process for the VMware.PSDesiredStateConfiguration module and
 returns the updated module version
 #>
@@ -358,7 +352,7 @@ function Start-PSDesiredStateConfigurationBuild {
 }
 
 <#
-.Description
+.DESCRIPTION
 Start the building process for the VMware.vSphereDsc module and
 returns the updated module version
 #>
@@ -391,8 +385,14 @@ function Start-vSphereDSCBuild {
     Get-ModuleVersion -psdPath $psdPath
 }
 
+<#
+.DESCRIPTION
+Invokes the VMware.vSphereDSC unit tests and updates the code coverage percent
+in the README.md file
+#>
 function Invoke-vSphereDSCTests {
     $moduleName = 'VMware.vSphereDSC'
+    $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
     $psdPath = Join-Path -Path $moduleRoot -ChildPath "$($moduleName).psd1"
     $psdContent = Get-Content -Path $psdPath
 
@@ -414,6 +414,12 @@ function Invoke-vSphereDSCTests {
     Update-CodeCoveragePercentInTextFile @updateCodeCoveragePercentInTextFileParams
 }
 
+<#
+.DESCRIPTION
+Sets the result from the VMware.PSDesiredStateConfiugration unit tests
+into the README.md file. The tests result gets retrieved from a Travis workspace file
+that gets populated from a different Travis job.
+#>
 function Set-PSDesiredStateConfigurationTestsResults {
     # get code coverage result from shared travis workspace file
     $moduleName = 'PSDesiredStateConfiguration'
@@ -433,7 +439,7 @@ function Set-PSDesiredStateConfigurationTestsResults {
 # add common functions, script variables and perform common logic
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-$flagChanges = Find-ProjectChanges
+$flagChanges = Set-BuildFlags
 
 $changedModuleNameToVersion = @{}
 
@@ -475,7 +481,10 @@ if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
     # get request description
     $pullRequestDescription = Get-PullRequestDescription
 
+    # check if there is a change in the modules
     if ($changedModuleNameToVersion.Count -eq 0) {
+        # when no change in the modules is found then
+        # a generic entry with only a date gets generated in the CHANGELOG.md
         $updateChangeLogParams = @{
             ChangelogDocumentPath = $Script:ChangelogDocumentPath
             PullRequestDescription = $pullRequestDescription
@@ -483,6 +492,7 @@ if ($env:TRAVIS_EVENT_TYPE -eq 'push' -and $env:TRAVIS_BRANCH -eq 'master') {
 
         Update-ChangelogDocument @updateChangeLogParams  
     } else {
+        # generates a entry for each changed module in the CHANGELOG.md
         foreach ($changedModuleKey in $changedModuleNameToVersion.Keys) {
             $updateChangeLogParams = @{
                 ChangelogDocumentPath = $Script:ChangelogDocumentPath
