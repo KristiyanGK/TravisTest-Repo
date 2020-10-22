@@ -19,6 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     Update_VSDSC = 2
     Tests_VSDSC = 4
     Tests_PSDSC = 8
+    None = 256
 }
 
 function Get-ChangedFiles {
@@ -60,6 +61,10 @@ function Find-ProjectChanges {
             $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
             $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
         }
+    }
+
+    if ($flagResult -eq 0) {
+        $flagResult = [BuildFlags]::None
     }
 
     $flagResult
