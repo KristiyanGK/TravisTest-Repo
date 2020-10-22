@@ -147,8 +147,6 @@ function Invoke-UnitTests {
 }
 
 $script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
-
-# Adds the Source directory from the repository to the list of modules directories.
 $script:SourceRoot = Join-Path -Path $script:ProjectRoot -ChildPath 'Source'
 $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
 $Script:ChangelogDocumentPath = Join-Path -Path $Script:ProjectRoot -ChildPath 'CHANGELOG.md'

@@ -345,8 +345,6 @@ function Start-PSDesiredStateConfigurationBuild {
     [OutputType([string])]
     Param()
 
-    Write-Host 'VMware.PSDesiredStateConfiguration build started'
-
     # run the specific module build file
     $moduleName = 'VMware.PSDesiredStateConfiguration'
     $moduleRoot = Join-Path -Path $script:SourceRoot -ChildPath $moduleName
