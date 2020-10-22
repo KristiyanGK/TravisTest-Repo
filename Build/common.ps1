@@ -114,7 +114,7 @@ function Invoke-UnitTests {
         $DisableCodeCoverage
     )
 
-    if ($null -eq (Get-Module -Name 'Pester' -ListAvailable) {
+    if ($null -eq (Get-Module -Name 'Pester' -ListAvailable)) {
         # Install Pester.
         Write-Host 'Installing Pester'
 
