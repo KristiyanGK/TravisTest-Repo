@@ -42,7 +42,7 @@ jobs:
         use: coverageWorkspace
       before_install:
         - chmod +x Build/travis-push.sh
-      ascript:
+      script:
         - pwsh -File './Build/build.ps1'
       after_success:
         - '[ "${TRAVIS_EVENT_TYPE}" = "push" ] && [ "${TRAVIS_BRANCH}" = "master" ] && Build/travis-push.sh'

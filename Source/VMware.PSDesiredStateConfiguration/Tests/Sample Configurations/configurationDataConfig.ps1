@@ -16,36 +16,41 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #>
 
+Param(
+    $ConfigDataParam
+)
+
 <#
-    Configuration with multiple nodes
+.DESCRIPTION
+Configuration that requires ConfigurationData
+Should get parsed correctly.
 #>
-Configuration Test
-{
+Configuration Test {
     Import-DscResource -ModuleName MyDscResource
 
-    Node 'MyNode' 
+    FileResource file 
     {
-        FileResource 'file'
-        {
-            Path = 'path'
-            SourcePath = 'path2'
-            Ensure = 'present'
-        }
-    }
-
-    Node 'Other'
-    {
-        FileResource file {
-            Path = 'no path'
-            SourcePath = 'no source'
-            Ensure = 'absent'
-        }
-    }
-
-    FileResource file {
-        Path = 'no path'
-        SourcePath = 'no source'
-        Ensure = 'absent'
+        Path = $ConfigurationData['AllNodes']['Path']
+        SourcePath = $ConfigurationData['AllNodes']['SourcePath']
+        Ensure = 'present'
     }
 }
 
+$Script:expectedCompiled = [VmwDscConfiguration]::new(
+    'Test',
+    @(
+        [VmwDscNode]::new(
+            'localhost',
+            [VmwDscResource]::new(
+                'file',
+                'FileResource',
+                @{ ModuleName = 'MyDscResource'; RequiredVersion = '1.0' },
+                @{
+                    Path = $ConfigDataParam['AllNodes'][0]['Path']
+                    SourcePath = $ConfigDataParam['AllNodes'][0]['SourcePath']
+                    Ensure = 'present'
+                }
+            )
+        )
+    )
+)

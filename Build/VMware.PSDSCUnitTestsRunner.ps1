@@ -15,27 +15,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #>
 
 <#
-.Notes
+.NOTES
 The Unit tests for VMware.PSDesiredStateConfiguration get executed in a Ubuntu 18.04 build because
 they depend on PowerShell 7.0.
 #>
 
 <#
-.Synopsis
+.SYNOPSIS
 Runs the unit tests for the VMware.PSDesiredStateConfiguration module and returns code coverage percent.
-.Description
+.DESCRIPTION
 Runs the unit tests for the VMware.PSDesiredStateConfiguration module and returns code coverage percent
 Before the tests are run it adds the required DSC resource to the PSModulePath
 #>
 function Invoke-PsDesiredStateConfigurationTests {
-    # add required DSC Resource for unit tests
     $moduleName = 'VMware.PSDesiredStateConfiguration'
     $moduleRoot = Join-Path $Script:SourceRoot $moduleName
     $configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc Resources') 'MyDscResource'
+
+    # add the required DSC Resource for unit tests
     $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$configPath"
 
+    $Global:ProgressPreference = 'SilentlyContinue'
     # run unit tests
     $coveragePercent = Invoke-UnitTests $moduleName
+
+    $Global:ProgressPreference = 'Continue'
 
     $coveragePercent
 }

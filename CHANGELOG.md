@@ -1,10 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## VMware.PSDesiredStateConfiguration 0.0.0.3 - 2020-10-22
-Merge branch 'master' of https://github.com/KristiyanGK/TravisTest-Repo
-2020-10-22
-change for build fix
+## 2020-11-03
+### Added
+- Added **BuildFlags** enumeration that tracks the steps which need to be performed during the build process.
+
+### Changed
+- The build now detects what changes have been made in order to run the tests and build functions only when a module code is changed.
+
 ## VMware.PSDesiredStateConfiguration 0.0.0.1 - 2020-10-21
 ### Added
 - Introduced a new module **VMware.PSDesiredStateConfiguration** for compiling and executing DSC Configurations without the use of MOF or LCM.

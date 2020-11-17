@@ -17,13 +17,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <#
 .DESCRIPTION
 BuildFlags defines operations which the build should perform.
+Update_PSDSC flag runs the build process for VMware.PSDesiredStateConfiguration.
+Update_VSDSC flag runs the build process for VMware.vSphereDSC.
+Tests_VSDSC flag runs the VMware.vSphereDSC unit tests.
+Tests_PSDSC flag runs the VMware.PSDesiredStateConfiguration unit tests.
+None is the defaut value for not running any additional steps.
 #>
 [Flags()] enum BuildFlags {
     Update_PSDSC = 1
     Update_VSDSC = 2
     Tests_VSDSC = 4
     Tests_PSDSC = 8
-    None = 256
+    None = 16
 }
 
 <#
@@ -55,7 +60,7 @@ function Test-Flag {
 Finds and returns a list of file paths that have been changed since last build
 .DESCRIPTION
 Finds and returns a list of file paths that have been changed since last build.
-The changes are searched in the .git HEAD from the current commit to the last travis commit.
+The changes are searched in the .git HEAD from the current commit to the last travis commit or DSCAutomation commit.
 #>
 function Get-ChangedFiles {
     [OutputType([System.String[]])]
@@ -63,12 +68,12 @@ function Get-ChangedFiles {
 
     $lastTravisCommit = 1
 
-    # find last travis commit
+    # stops at first found travis commit or DSCAutomation commit
     while ($true) {
         $commitInfo = git show HEAD~$lastTravisCommit
         $author = $commitInfo[1]
 
-        if ($author.Contains('travis@travis-ci.org')) {
+        if ($author.Contains('travis@travis-ci.org') -or $author.Contains('DSCAutomation')) {
             break
         }
 
@@ -80,12 +85,15 @@ function Get-ChangedFiles {
 
     $changedFiles
 }
+
 <#
 .SYNOPSIS
 Depending on the changes made in the project [BuildFlags] get set and returned.
 .DESCRIPTION
 Depending on the changes made in the project [BuildFlags] get set and returned.
 The returned value contains all steps that should be perfomred depending on build change.
+If there is change in the any of the modules in Source then the changed module build + unit tests get run.
+If there is change in the build process or in .travis.yml the unit tests for all modules get run.
 #>
 function Set-BuildFlags {
     # retrieve a list of changed files
@@ -103,7 +111,7 @@ function Set-BuildFlags {
                 $flagResult = $flagResult -bor [BuildFlags]::Update_VSDSC
                 $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
             }
-        } elseif ($changedFile.Contains('Build')) {
+        } elseif ($changedFile.Contains('Build') -or $changedFiles.Contains('.travis.yml')) {
             # build change triggers unit tests to be run
             $flagResult = $flagResult -bor [BuildFlags]::Tests_PSDSC
             $flagResult = $flagResult -bor [BuildFlags]::Tests_VSDSC
@@ -126,16 +134,16 @@ Runs the unit tests for the specified module and returns code coverage percentag
 Runs the unit tests for the specified module and returns code coverage percentage. 
 The tests should be located in a Tests\Unit location in the modules directory.
 The code coverage result of the tests gets updated in the README.md document.
-The function uses the Pester module for running the tests and installs it if it is not found.
+This function relies on Pester for running the unit tests. If the module is not found it gets installed.
 
-.Notes
+.NOTES
 The code coverage logic leads to the unit tests running slower.
 Bug link: https://github.com/pester/Pester/issues/1318
 
-.Parameter ModuleName
+.PARAMETER ModuleName
 Name of the module whose unit tests should be run
 
-.Parameter DisableCodeCoverage
+.PARAMETER DisableCodeCoverage
 Disables code coverage for the unit tests.
 With this flag turned on the function does not return a result.
 #>
@@ -195,6 +203,7 @@ function Invoke-UnitTests {
     }
 }
 
+# Define script variables
 $script:ProjectRoot = (Get-Item -Path $PSScriptRoot).Parent.FullName
 $script:SourceRoot = Join-Path -Path $script:ProjectRoot -ChildPath 'Source'
 $script:ReadMePath = Join-Path -Path $script:ProjectRoot -ChildPath 'README.md'
