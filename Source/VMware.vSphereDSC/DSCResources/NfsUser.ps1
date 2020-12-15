@@ -62,7 +62,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodStartMessage
@@ -95,7 +95,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodEndMessage
@@ -111,7 +111,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodStartMessage
@@ -147,7 +147,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodEndMessage
@@ -163,7 +163,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodStartMessage
@@ -187,7 +187,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodEndMessage
@@ -238,7 +238,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.CreateNfsUserMessage -Arguments @($this.Name, $this.VMHost.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.CreateNfsUserMessage
@@ -273,7 +273,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.ChangeNfsUserPasswordMessage -Arguments @($nfsUser.Username, $this.VMHost.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.ChangeNfsUserPasswordMessage
@@ -306,7 +306,7 @@ class NfsUser : VMHostEntityBaseDSC {
             Write-VerboseLog -Message $this.RemoveNfsUserMessage -Arguments @($nfsUser.Username, $this.VMHost.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.RemoveNfsUserMessage

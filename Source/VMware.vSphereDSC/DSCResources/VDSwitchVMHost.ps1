@@ -148,7 +148,7 @@ class VDSwitchVMHost : BaseDSC {
                 Write-WarningLog -Message "The passed VMHost {0} was not found and it will be ignored." -Arguments @($vmHostName)
 
                 $writeToLogFilesplat = @{
-                    Connection = $this.Connection.Name
+                    Connection = $this.ConnectionName
                     ResourceName = $this.GetType().ToString()
                     LogType = 'Warning'
                     Message = "The passed VMHost {0} was not found and it will be ignored."
@@ -212,7 +212,7 @@ class VDSwitchVMHost : BaseDSC {
                     Write-WarningLog -Message "VMHost {0} is already added to Distributed Switch {1} and it will be ignored." -Arguments @($vmHost.Name, $distributedSwitch.Name)
 
                     $writeToLogFilesplat = @{
-                        Connection = $this.Connection.Name
+                        Connection = $this.ConnectionName
                         ResourceName = $this.GetType().ToString()
                         LogType = 'Warning'
                         Message = "VMHost {0} is already added to Distributed Switch {1} and it will be ignored."
@@ -234,7 +234,7 @@ class VDSwitchVMHost : BaseDSC {
                     Write-WarningLog -Message "VMHost {0} is not added to Distributed Switch {1} and it will be ignored." -Arguments @($vmHost.Name, $distributedSwitch.Name)
 
                     $writeToLogFilesplat = @{
-                        Connection = $this.Connection.Name
+                        Connection = $this.ConnectionName
                         ResourceName = $this.GetType().ToString()
                         LogType = 'Warning'
                         Message = "VMHost {0} is not added to Distributed Switch {1} and it will be ignored."

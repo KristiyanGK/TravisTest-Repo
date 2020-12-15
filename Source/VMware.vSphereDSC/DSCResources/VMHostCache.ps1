@@ -190,7 +190,7 @@ class VMHostCache : VMHostBaseDSC {
         Write-VerboseLog -Message "Cache Configuration was successfully updated for VMHost {0}." -Arguments @($this.Name)
 
         $writeToLogFilesplat = @{
-            Connection = $this.Connection.Name
+            Connection = $this.ConnectionName
             ResourceName = $this.GetType().ToString()
             LogType = 'Verbose'
             Message = "Cache Configuration was successfully updated for VMHost {0}."

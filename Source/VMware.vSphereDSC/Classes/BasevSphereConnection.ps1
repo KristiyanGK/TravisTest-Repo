@@ -47,6 +47,9 @@ class BasevSphereConnection {
     hidden [string] $vCenterProductId = 'vpx'
     hidden [string] $ESXiProductId = 'embeddedEsx'
 
+    # holds the name of the connection for logging purposes.
+    hidden [string] $ConnectionName
+
     <#
     .DESCRIPTION
 
@@ -80,6 +83,17 @@ class BasevSphereConnection {
         elseif ($desiredArray.Length -eq 0 -and $currentArray.Length -ne 0) {
             # Empty array specified as desired, but current is not an empty array, so update should be performed.
             Write-VerboseLog -Message $this.SettingIsNotInDesiredStateMessage -Arguments @($settingName, ($currentArray -Join ', '), ($desiredArray -Join ', '))
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SettingIsNotInDesiredStateMessage
+                Arguments = @($settingName, ($currentArray -Join ', '), ($desiredArray -Join ', '))
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = $true
         }
         else {
@@ -93,6 +107,17 @@ class BasevSphereConnection {
                     we should perform an update operation.
                 #>
                 Write-VerboseLog -Message $this.SettingIsNotInDesiredStateMessage -Arguments @($settingName, ($currentArray -Join ', '), ($desiredArray -Join ', '))
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.ConnectionName
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Verbose'
+                    Message = $this.SettingIsNotInDesiredStateMessage
+                    Arguments = @($settingName, ($currentArray -Join ', '), ($desiredArray -Join ', '))
+                }
+
+                Write-LogToFile @writeToLogFilesplat
+
                 $result = $true
             }
             else {
@@ -124,6 +149,16 @@ class BasevSphereConnection {
 
         if ($result) {
             Write-VerboseLog -Message $this.SettingIsNotInDesiredStateMessage -Arguments @($settingName, $currentSetting, $desiredSetting)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SettingIsNotInDesiredStateMessage
+                Arguments = @($settingName, $currentSetting, $desiredSetting)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
 
         return $result
@@ -159,9 +194,29 @@ class BasevSphereConnection {
     [void] WriteDscResourceState($result) {
         if ($result) {
             Write-VerboseLog -Message $this.DscResourceIsInDesiredStateMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.DscResourceIsInDesiredStateMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
         else {
             Write-VerboseLog -Message $this.DscResourceIsNotInDesiredStateMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.DscResourceIsNotInDesiredStateMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -226,6 +281,8 @@ class BasevSphereConnection {
 
             $this.Connection = Connect-VIServer -Session $this.Connection.SessionSecret -Server $this.Connection.Name
         }
+
+        $this.ConnectionName = $this.Connection.Name
     }
 
     <#

@@ -56,7 +56,7 @@ class VMHostSettings : VMHostBaseDSC {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = "{0} Entering {1}"
@@ -81,7 +81,7 @@ class VMHostSettings : VMHostBaseDSC {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = "{0} Entering {1}"
@@ -110,7 +110,7 @@ class VMHostSettings : VMHostBaseDSC {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = "{0} Entering {1}"
@@ -143,7 +143,7 @@ class VMHostSettings : VMHostBaseDSC {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
     $writeToLogFilesplat = @{
-        Connection = $this.Connection.Name
+        Connection = $this.ConnectionName
         ResourceName = $this.GetType().ToString()
         LogType = 'Verbose'
         Message = "{0} Entering {1}"
@@ -178,7 +178,7 @@ class VMHostSettings : VMHostBaseDSC {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
     $writeToLogFilesplat = @{
-        Connection = $this.Connection.Name
+        Connection = $this.ConnectionName
         ResourceName = $this.GetType().ToString()
         LogType = 'Verbose'
         Message = "{0} Entering {1}"
@@ -209,7 +209,7 @@ class VMHostSettings : VMHostBaseDSC {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
     $writeToLogFilesplat = @{
-        Connection = $this.Connection.Name
+        Connection = $this.ConnectionName
         ResourceName = $this.GetType().ToString()
         LogType = 'Verbose'
         Message = "{0} Entering {1}"
@@ -237,7 +237,7 @@ class VMHostSettings : VMHostBaseDSC {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
     $writeToLogFilesplat = @{
-        Connection = $this.Connection.Name
+        Connection = $this.ConnectionName
         ResourceName = $this.GetType().ToString()
         LogType = 'Verbose'
         Message = "{0} Entering {1}"

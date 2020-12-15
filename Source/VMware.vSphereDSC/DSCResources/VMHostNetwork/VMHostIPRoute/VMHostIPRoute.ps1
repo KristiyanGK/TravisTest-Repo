@@ -59,7 +59,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodStartMessage
@@ -89,7 +89,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodEndMessage
@@ -105,7 +105,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodStartMessage
@@ -136,7 +136,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodEndMessage
@@ -152,7 +152,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodStartMessage
@@ -177,7 +177,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodEndMessage
@@ -219,7 +219,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.CreateVMHostIPRouteMessage -Arguments @($this.Gateway, $this.Destination, $vmHost.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.CreateVMHostIPRouteMessage
@@ -252,7 +252,7 @@ class VMHostIPRoute : VMHostBaseDSC {
             Write-VerboseLog -Message $this.RemoveVMHostIPRouteMessage -Arguments @($this.Gateway, $this.Destination, $this.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.RemoveVMHostIPRouteMessage

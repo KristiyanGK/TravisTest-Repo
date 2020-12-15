@@ -39,6 +39,17 @@ class VMHostVssBaseDSC : VMHostNetworkBaseDSC {
     [PSObject] GetVss() {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+        $writeToLogFilesplat = @{
+            Connection = $this.ConnectionName
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
         $this.vmHostNetworkSystem.UpdateViewData('NetworkInfo.Vswitch')
         return ($this.vmHostNetworkSystem.NetworkInfo.Vswitch | Where-Object { $_.Name -eq $this.VssName })
     }

@@ -121,7 +121,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodStartMessage
@@ -165,7 +165,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodEndMessage
@@ -181,7 +181,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodStartMessage
@@ -228,7 +228,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodEndMessage
@@ -244,7 +244,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodStartMessage
@@ -282,7 +282,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodEndMessage
@@ -350,7 +350,7 @@ class DRSRule : BaseDSC {
                 Write-WarningLog -Message $this.CouldNotFindVMMessage -Arguments @($notFoundVMName, $cluster.Name)
 
                 $writeToLogFilesplat = @{
-                    Connection = $this.Connection.Name
+                    Connection = $this.ConnectionName
                     ResourceName = $this.GetType().ToString()
                     LogType = 'Warning'
                     Message = $this.CouldNotFindVMMessage
@@ -417,7 +417,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.CreateDrsRuleMessage -Arguments @($this.Name, $cluster.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.CreateDrsRuleMessage
@@ -454,7 +454,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.ModifyDrsRuleMessage -Arguments @($drsRule.Name, $drsRule.Cluster.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.ModifyDrsRuleMessage
@@ -487,7 +487,7 @@ class DRSRule : BaseDSC {
             Write-VerboseLog -Message $this.RemoveDrsRuleMessage -Arguments @($drsRule.Name, $drsRule.Cluster.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.RemoveDrsRuleMessage

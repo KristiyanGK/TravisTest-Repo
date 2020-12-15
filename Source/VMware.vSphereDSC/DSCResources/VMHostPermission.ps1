@@ -95,7 +95,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodStartMessage
@@ -132,7 +132,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodEndMessage
@@ -148,7 +148,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodStartMessage
@@ -188,7 +188,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodEndMessage
@@ -204,7 +204,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodStartMessage
@@ -232,7 +232,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodEndMessage
@@ -520,7 +520,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.CreatePermissionMessage -Arguments @($entity.Name, $vmHostPrincipal.Name, $vmHostRole.Name, $this.Connection.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.CreatePermissionMessage
@@ -564,7 +564,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.ModifyPermissionMessage -Arguments @($vmHostPermission.Entity.Name, $vmHostPermission.Principal, $this.Connection.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.ModifyPermissionMessage
@@ -590,7 +590,7 @@ class VMHostPermission : BaseDSC {
             Write-VerboseLog -Message $this.RemovePermissionMessage -Arguments @($vmHostPermission.Entity.Name, $vmHostPermission.Principal, $vmHostPermission.Role, $this.Connection.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.RemovePermissionMessage

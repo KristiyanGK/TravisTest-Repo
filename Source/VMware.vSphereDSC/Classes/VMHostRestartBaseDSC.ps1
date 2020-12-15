@@ -85,6 +85,16 @@ class VMHostRestartBaseDSC : VMHostBaseDSC {
                 }
 
                 Write-VerboseLog -Message $this.VMHostIsStillNotInDesiredStateMessage -Arguments @($this.Name, $desiredState)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.ConnectionName
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Verbose'
+                    Message = $this.VMHostIsStillNotInDesiredStateMessage
+                    Arguments = @($this.Name, $desiredState)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
             catch {
                 <#
@@ -93,10 +103,30 @@ class VMHostRestartBaseDSC : VMHostBaseDSC {
                 that the VMHost is not in the Desired State.
                 #>
                 Write-VerboseLog -Message $this.VMHostIsStillNotInDesiredStateMessage -Arguments @($this.Name, $desiredState)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.ConnectionName
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Verbose'
+                    Message = $this.VMHostIsStillNotInDesiredStateMessage
+                    Arguments = @($this.Name, $desiredState)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
         }
 
         Write-VerboseLog -Message $this.VMHostIsRestartedSuccessfullyMessage -Arguments @($this.Name, $desiredState)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.ConnectionName
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = $this.VMHostIsRestartedSuccessfullyMessage
+            Arguments = @($this.Name, $desiredState)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
     }
 
     <#
@@ -115,6 +145,17 @@ class VMHostRestartBaseDSC : VMHostBaseDSC {
             }
 
             Write-VerboseLog -Message $this.RestartVMHostMessage -Arguments @($vmHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RestartVMHostMessage
+                Arguments = @($vmHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Restart-VMHost @restartVMHostParams
         }
         catch {

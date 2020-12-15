@@ -121,6 +121,17 @@ class DatastoreBaseDSC : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreateDatastoreMessage -Arguments @($this.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateDatastoreMessage
+                Arguments = @($this.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $datastore = New-Datastore @newDatastoreParams
 
             return $datastore
@@ -149,6 +160,17 @@ class DatastoreBaseDSC : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyDatastoreMessage -Arguments @($datastore.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyDatastoreMessage
+                Arguments = @($datastore.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-Datastore @setDatastoreParams
         }
         catch {
@@ -173,6 +195,17 @@ class DatastoreBaseDSC : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RemoveDatastoreMessage -Arguments @($datastore.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveDatastoreMessage
+                Arguments = @($datastore.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Remove-Datastore @removeDatastoreParams
         }
         catch {

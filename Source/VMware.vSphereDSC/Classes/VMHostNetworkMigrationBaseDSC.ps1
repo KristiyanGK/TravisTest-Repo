@@ -48,6 +48,17 @@ class VMHostNetworkMigrationBaseDSC : VMHostEntityBaseDSC {
 
         foreach ($physicalNetworkAdapterName in $this.PhysicalNicNames) {
             Write-VerboseLog -Message $this.RetrievePhysicalNicMessage -Arguments @($physicalNetworkAdapterName, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RetrievePhysicalNicMessage
+                Arguments = @($physicalNetworkAdapterName, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $getVMHostNetworkAdapterParams = @{
                 Server = $this.Connection
                 Name = $physicalNetworkAdapterName
@@ -60,6 +71,16 @@ class VMHostNetworkMigrationBaseDSC : VMHostEntityBaseDSC {
             $physicalNetworkAdapter = Get-VMHostNetworkAdapter @getVMHostNetworkAdapterParams
             if ($null -eq $physicalNetworkAdapter) {
                 Write-WarningLog -Message $this.CouldNotFindPhysicalNicMessage -Arguments @($physicalNetworkAdapterName, $this.VMHost.Name)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.ConnectionName
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Warning'
+                    Message = $this.CouldNotFindPhysicalNicMessage
+                    Arguments = @($physicalNetworkAdapterName, $this.VMHost.Name)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
             else {
                 $physicalNetworkAdapters += $physicalNetworkAdapter
@@ -80,6 +101,17 @@ class VMHostNetworkMigrationBaseDSC : VMHostEntityBaseDSC {
 
         foreach ($vmKernelNetworkAdapterName in $this.VMKernelNicNames) {
             Write-VerboseLog -Message $this.RetrieveVMKernelNicMessage -Arguments @($vmKernelNetworkAdapterName, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.ConnectionName
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RetrieveVMKernelNicMessage
+                Arguments = @($vmKernelNetworkAdapterName, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $getVMHostNetworkAdapterParams = @{
                 Server = $this.Connection
                 Name = $vmKernelNetworkAdapterName

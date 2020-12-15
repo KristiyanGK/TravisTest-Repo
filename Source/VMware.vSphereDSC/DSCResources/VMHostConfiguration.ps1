@@ -117,7 +117,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodStartMessage
@@ -150,7 +150,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodEndMessage
@@ -166,7 +166,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodStartMessage
@@ -193,7 +193,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodEndMessage
@@ -209,7 +209,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodStartMessage
@@ -232,7 +232,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodEndMessage
@@ -502,7 +502,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.ModifyVMHostConfigurationMessage -Arguments @($setVMHostParams.VMHost.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.ModifyVMHostConfigurationMessage
@@ -538,7 +538,7 @@ class VMHostConfiguration : VMHostBaseDSC {
                 Write-VerboseLog -Message $this.ApplyingDrsRecommendationsFromClusterMessage -Arguments @($setVMHostParams.VMHost.Parent.Name)
 
                 $writeToLogFilesplat = @{
-                    Connection = $this.Connection.Name
+                    Connection = $this.ConnectionName
                     ResourceName = $this.GetType().ToString()
                     LogType = 'Verbose'
                     Message = $this.ApplyingDrsRecommendationsFromClusterMessage
@@ -559,7 +559,7 @@ class VMHostConfiguration : VMHostBaseDSC {
                 Write-VerboseLog -Message $this.VMHostStateWasChangedSuccessfullyMessage -Arguments @($vmHost.Name, $vmHost.ConnectionState.ToString())
 
                 $writeToLogFilesplat = @{
-                    Connection = $this.Connection.Name
+                    Connection = $this.ConnectionName
                     ResourceName = $this.GetType().ToString()
                     LogType = 'Verbose'
                     Message = $this.VMHostStateWasChangedSuccessfullyMessage
@@ -584,7 +584,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.ModifyVMHostConfigurationMessage -Arguments @($setVMHostParams.VMHost.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.ModifyVMHostConfigurationMessage
@@ -621,7 +621,7 @@ class VMHostConfiguration : VMHostBaseDSC {
             Write-VerboseLog -Message $this.ModifyVMHostCryptoKeyMessage -Arguments @($vmHost.Name, $kmsCluster.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.ModifyVMHostCryptoKeyMessage

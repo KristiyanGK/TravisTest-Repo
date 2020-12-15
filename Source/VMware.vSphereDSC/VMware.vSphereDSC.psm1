@@ -182,24 +182,6 @@ enum VsanDataMigrationMode {
     Unset
 }
 
-enum AccessMode {
-    ReadWrite
-    ReadOnly
-}
-
-enum AuthenticationMethod {
-    AUTH_SYS
-    Kerberos
-}
-
-enum NicTeamingPolicy {
-    Loadbalance_ip
-    Loadbalance_srcmac
-    Loadbalance_srcid
-    Failover_explicit
-    Unset
-}
-
 enum DrsAutomationLevel {
     FullyAutomated
     Manual
@@ -221,6 +203,16 @@ enum HARestartPriority {
     Medium
     High
     Unset
+}
+
+enum AccessMode {
+    ReadWrite
+    ReadOnly
+}
+
+enum AuthenticationMethod {
+    AUTH_SYS
+    Kerberos
 }
 
 enum BadCertificateAction {
@@ -247,15 +239,15 @@ enum ProxyPolicy {
     Unset
 }
 
+enum NicTeamingPolicy {
+    Loadbalance_ip
+    Loadbalance_srcmac
+    Loadbalance_srcid
+    Failover_explicit
+    Unset
+}
+
 class BasevSphereConnection {
-    <#
-    .DESCRIPTION
-
-    Name of the Server we are trying to connect to. The Server can be a vCenter or ESXi.
-    #>
-    [DscProperty(Key)]
-    [string] $Server
-
     <#
     .DESCRIPTION
 
@@ -2883,6 +2875,17 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $datacenter = $this.GetDatacenter()
@@ -2908,12 +2911,33 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $datacenter = $this.GetDatacenter()
@@ -2942,12 +2966,33 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [DatastoreCluster] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [DatastoreCluster]::new()
 
             $this.ConnectVIServer()
@@ -2964,6 +3009,16 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -3043,6 +3098,17 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreateDatastoreClusterMessage -Arguments @($this.Name, $datastoreClusterLocation.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateDatastoreClusterMessage
+                Arguments = @($this.Name, $datastoreClusterLocation.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             return New-DatastoreCluster @newDatastoreClusterParams
         }
         catch {
@@ -3071,6 +3137,17 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyDatastoreClusterMessage -Arguments @($datastoreCluster.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyDatastoreClusterMessage
+                Arguments = @($datastoreCluster.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-DatastoreCluster @setDatastoreClusterParams
         }
         catch {
@@ -3094,6 +3171,17 @@ class DatastoreCluster : DatacenterInventoryBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RemoveDatastoreClusterMessage -Arguments @($datastoreCluster.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveDatastoreClusterMessage
+                Arguments = @($datastoreCluster.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Remove-DatastoreCluster @removeDatastoreClusterParams
         }
         catch {
@@ -3198,6 +3286,17 @@ class DatastoreClusterAddDatastore : BaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.InitInventoryUtil()
@@ -3220,12 +3319,33 @@ class DatastoreClusterAddDatastore : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.InitInventoryUtil()
@@ -3251,12 +3371,33 @@ class DatastoreClusterAddDatastore : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [DatastoreClusterAddDatastore] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [DatastoreClusterAddDatastore]::new()
 
             $this.ConnectVIServer()
@@ -3287,6 +3428,16 @@ class DatastoreClusterAddDatastore : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -3324,6 +3475,16 @@ class DatastoreClusterAddDatastore : BaseDSC {
             $notFoundDatastoreNames = $this.DatastoreNames | Where-Object -FilterScript { $result.Name -NotContains $_ }
             foreach ($notFoundDatastoreName in $notFoundDatastoreNames) {
                 Write-WarningLog -Message $this.CouldNotFindDatastoreMessage -Arguments @($notFoundDatastoreName, $datacenter.Name)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Warning'
+                    Message = $this.CouldNotFindDatastoreMessage
+                    Arguments = @($notFoundDatastoreName, $datacenter.Name)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
         }
 
@@ -3382,6 +3543,20 @@ class DatastoreClusterAddDatastore : BaseDSC {
                 ($datastoresToAddToDatastoreCluster.Name -Join ', '),
                 $datastoreCluster.Name
             )
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.AddDatastoresToDatastoreClusterMessage
+                Arguments = @(
+                    ($datastoresToAddToDatastoreCluster.Name -Join ', '),
+                    $datastoreCluster.Name
+                )
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+                
             Move-Datastore @moveDatastoreParams
         }
         catch {
@@ -3501,6 +3676,17 @@ class DRSRule : BaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.InitInventoryUtil()
@@ -3534,12 +3720,33 @@ class DRSRule : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.InitInventoryUtil()
@@ -3576,12 +3783,33 @@ class DRSRule : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [DRSRule] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [DRSRule]::new()
 
             $this.ConnectVIServer()
@@ -3609,6 +3837,16 @@ class DRSRule : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -3667,6 +3905,16 @@ class DRSRule : BaseDSC {
             $notFoundVMNames = $this.VMNames | Where-Object -FilterScript { $result.Name -NotContains $_ }
             foreach ($notFoundVMName in $notFoundVMNames) {
                 Write-WarningLog -Message $this.CouldNotFindVMMessage -Arguments @($notFoundVMName, $cluster.Name)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Warning'
+                    Message = $this.CouldNotFindVMMessage
+                    Arguments = @($notFoundVMName, $cluster.Name)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
         }
 
@@ -3724,6 +3972,17 @@ class DRSRule : BaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreateDrsRuleMessage -Arguments @($this.Name, $cluster.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateDrsRuleMessage
+                Arguments = @($this.Name, $cluster.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             New-DrsRule @newDrsRuleParams
         }
         catch {
@@ -3750,6 +4009,17 @@ class DRSRule : BaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyDrsRuleMessage -Arguments @($drsRule.Name, $drsRule.Cluster.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyDrsRuleMessage
+                Arguments = @($drsRule.Name, $drsRule.Cluster.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-DrsRule @setDrsRuleParams
         }
         catch {
@@ -3772,6 +4042,17 @@ class DRSRule : BaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RemoveDrsRuleMessage -Arguments @($drsRule.Name, $drsRule.Cluster.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveDrsRuleMessage
+                Arguments = @($drsRule.Name, $drsRule.Cluster.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Remove-DrsRule @removeDrsRuleParams
         }
         catch {
@@ -3994,6 +4275,17 @@ class NfsUser : VMHostEntityBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -4016,12 +4308,33 @@ class NfsUser : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -4047,12 +4360,33 @@ class NfsUser : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [NfsUser] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [NfsUser]::new()
 
             $this.ConnectVIServer()
@@ -4066,6 +4400,16 @@ class NfsUser : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -4107,6 +4451,17 @@ class NfsUser : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreateNfsUserMessage -Arguments @($this.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateNfsUserMessage
+                Arguments = @($this.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             New-NfsUser @newNfsUserParams
         }
         catch {
@@ -4131,6 +4486,17 @@ class NfsUser : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ChangeNfsUserPasswordMessage -Arguments @($nfsUser.Username, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ChangeNfsUserPasswordMessage
+                Arguments = @($nfsUser.Username, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-NfsUser @setNfsUserParams
         }
         catch {
@@ -4153,6 +4519,17 @@ class NfsUser : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RemoveNfsUserMessage -Arguments @($nfsUser.Username, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveNfsUserMessage
+                Arguments = @($nfsUser.Username, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Remove-NfsUser @removeNfsUserParams
         }
         catch {
@@ -4514,6 +4891,17 @@ class vCenterSettings : BasevSphereConnection {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.UpdatevCenterSettings($this.Connection)
@@ -4521,12 +4909,33 @@ class vCenterSettings : BasevSphereConnection {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $result = !$this.ShouldUpdatevCenterSettings()
@@ -4538,12 +4947,33 @@ class vCenterSettings : BasevSphereConnection {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [vCenterSettings] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [vCenterSettings]::new()
             $result.Server = $this.Server
 
@@ -4555,6 +4985,16 @@ class vCenterSettings : BasevSphereConnection {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -4633,6 +5073,17 @@ class vCenterSettings : BasevSphereConnection {
 
     [void] SetAdvancedSetting($advancedSettingName, $advancedSetting, $advancedSettingDesiredValue, $advancedSettingCurrentValue, $clearValue) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
     	if ($clearValue) {
       	    if ($this.ShouldUpdateDscResourceSetting($advancedSettingName, $advancedSettingCurrentValue, [string]::Empty)) {
@@ -4749,6 +5200,17 @@ class vCenterStatistics : BaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $performanceManager = $this.GetPerformanceManager()
@@ -4759,12 +5221,33 @@ class vCenterStatistics : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $performanceManager = $this.GetPerformanceManager()
@@ -4784,12 +5267,33 @@ class vCenterStatistics : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [vCenterStatistics] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [vCenterStatistics]::new()
             $result.Server = $this.Server
             $result.Period = $this.Period
@@ -4812,6 +5316,16 @@ class vCenterStatistics : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -4940,6 +5454,17 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsvCenter()
 
@@ -4980,12 +5505,33 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsvCenter()
 
@@ -5015,12 +5561,33 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [vCenterVMHost] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [vCenterVMHost]::new()
 
             $this.ConnectVIServer()
@@ -5034,6 +5601,16 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -5143,6 +5720,17 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.AddVMHostTovCenterMessage -Arguments @($this.Name, $this.Connection.Name, $vmHostLocation.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.AddVMHostTovCenterMessage
+                Arguments = @($this.Name, $this.Connection.Name, $vmHostLocation.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Add-VMHost @addVMHostParams
         }
         catch {
@@ -5167,6 +5755,17 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.MoveVMHostToDestinationMessage -Arguments @($vmHost.Name, $vmHostLocation.Name, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.MoveVMHostToDestinationMessage
+                Arguments = @($vmHost.Name, $vmHostLocation.Name, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Move-VMHost @moveVMHostParams
         }
         catch {
@@ -5190,6 +5789,17 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RemoveVMHostFromvCenterMessage -Arguments @($vmHost.Name, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveVMHostFromvCenterMessage
+                Arguments = @($vmHost.Name, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Remove-VMHost @removeVMHostParams
         }
         catch {
@@ -6020,6 +6630,16 @@ class VDSwitchVMHost : BaseDSC {
             $vmHost = Get-VMHost -Server $this.Connection -Name $vmHostName -ErrorAction SilentlyContinue
             if ($null -eq $vmHost) {
                 Write-WarningLog -Message "The passed VMHost {0} was not found and it will be ignored." -Arguments @($vmHostName)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Warning'
+                    Message = "The passed VMHost {0} was not found and it will be ignored."
+                    Arguments = @($vmHostName)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
             else {
                 $vmHosts += $vmHost
@@ -6074,6 +6694,17 @@ class VDSwitchVMHost : BaseDSC {
                 $addedVMHost = $vmHost.ExtensionData.Config.Network.ProxySwitch | Where-Object -FilterScript { $_.DvsName -eq $distributedSwitch.Name }
                 if ($null -ne $addedVMHost) {
                     Write-WarningLog -Message "VMHost {0} is already added to Distributed Switch {1} and it will be ignored." -Arguments @($vmHost.Name, $distributedSwitch.Name)
+
+                    $writeToLogFilesplat = @{
+                        Connection = $this.Connection.Name
+                        ResourceName = $this.GetType().ToString()
+                        LogType = 'Warning'
+                        Message = "VMHost {0} is already added to Distributed Switch {1} and it will be ignored."
+                        Arguments = @($vmHost.Name, $distributedSwitch.Name)
+                    }
+
+                    Write-LogToFile @writeToLogFilesplat
+
                     continue
                 }
 
@@ -6085,6 +6716,17 @@ class VDSwitchVMHost : BaseDSC {
                 $removedVMHost = $vmHost.ExtensionData.Config.Network.ProxySwitch | Where-Object -FilterScript { $_.DvsName -eq $distributedSwitch.Name }
                 if ($null -eq $removedVMHost) {
                     Write-WarningLog -Message "VMHost {0} is not added to Distributed Switch {1} and it will be ignored." -Arguments @($vmHost.Name, $distributedSwitch.Name)
+
+                    $writeToLogFilesplat = @{
+                        Connection = $this.Connection.Name
+                        ResourceName = $this.GetType().ToString()
+                        LogType = 'Warning'
+                        Message = "VMHost {0} is not added to Distributed Switch {1} and it will be ignored."
+                        Arguments = @($vmHost.Name, $distributedSwitch.Name)
+                    }
+
+                    Write-LogToFile @writeToLogFilesplat
+
                     continue
                 }
 
@@ -6172,6 +6814,17 @@ class VMHostAccount : BaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.EnsureConnectionIsESXi()
@@ -6194,12 +6847,33 @@ class VMHostAccount : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.EnsureConnectionIsESXi()
@@ -6226,12 +6900,33 @@ class VMHostAccount : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostAccount] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostAccount]::new()
             $result.Server = $this.Server
 
@@ -6246,6 +6941,16 @@ class VMHostAccount : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -6569,6 +7274,16 @@ class VMHostAdvancedSettings : VMHostBaseDSC {
             provide an information to the user that invalid data is passed.
             #>
             Write-WarningLog -Message "Advanced Setting {0} does not exist for VMHost {1} and will be ignored." -Arguments @($advancedSettingName, $vmHostName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Warning'
+                Message = "Advanced Setting {0} does not exist for VMHost {1} and will be ignored."
+                Arguments = @($advancedSettingName, $vmHostName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
 
         return $advancedSetting
@@ -6613,6 +7328,20 @@ class VMHostAdvancedSettings : VMHostBaseDSC {
                 $advancedSetting.Value,
                 $advancedSettingDesiredValue
             )
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SettingIsNotInDesiredStateMessage
+                Arguments = @(
+                    $advancedSetting.Name,
+                    $advancedSetting.Value,
+                    $advancedSettingDesiredValue
+                )
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
 
         return $result
@@ -6865,6 +7594,20 @@ class VMHostAgentVM : VMHostBaseDSC {
                         $agentVmSettingAsViewObject.Name,
                         $agentVmSetting
                     )
+
+                    $writeToLogFilesplat = @{
+                        Connection = $this.Connection.Name
+                        ResourceName = $this.GetType().ToString()
+                        LogType = 'Verbose'
+                        Message = $this.SettingIsNotInDesiredStateMessage
+                        Arguments = @(
+                            $agentVmSettingName,
+                            $agentVmSettingAsViewObject.Name,
+                            $agentVmSetting
+                        )
+                    }
+
+                    Write-LogToFile @writeToLogFilesplat
 
                     return $true
                 }
@@ -7331,6 +8074,16 @@ class VMHostCache : VMHostBaseDSC {
         }
 
         Write-VerboseLog -Message "Cache Configuration was successfully updated for VMHost {0}." -Arguments @($this.Name)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "Cache Configuration was successfully updated for VMHost {0}."
+            Arguments = @($this.Name)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
     }
 
     <#
@@ -7449,6 +8202,17 @@ class VMHostConfiguration : VMHostBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $vmHost = $this.GetVMHost()
@@ -7471,12 +8235,33 @@ class VMHostConfiguration : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $vmHost = $this.GetVMHost()
@@ -7493,12 +8278,33 @@ class VMHostConfiguration : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostConfiguration] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostConfiguration]::new()
 
             $this.ConnectVIServer()
@@ -7511,6 +8317,16 @@ class VMHostConfiguration : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -7771,6 +8587,17 @@ class VMHostConfiguration : VMHostBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyVMHostConfigurationMessage -Arguments @($setVMHostParams.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyVMHostConfigurationMessage
+                Arguments = @($setVMHostParams.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $modifyVMHostConfigurationTask = Set-VMHost @setVMHostParams
 
             # The Drs Recommendation is not generated immediately after 'EnterMaintenance' task generation.
@@ -7796,6 +8623,17 @@ class VMHostConfiguration : VMHostBaseDSC {
 
                 # All generated Drs Recommendations from the Cluster should be applied and when the Task is completed all powered on VMs are relocated or powered off.
                 Write-VerboseLog -Message $this.ApplyingDrsRecommendationsFromClusterMessage -Arguments @($setVMHostParams.VMHost.Parent.Name)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Verbose'
+                    Message = $this.ApplyingDrsRecommendationsFromClusterMessage
+                    Arguments = @($setVMHostParams.VMHost.Parent.Name)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
+
                 $applyDrsRecommendationTask = Apply-DrsRecommendation @applyDrsRecommendationParams
                 Wait-Task -Task $applyDrsRecommendationTask -ErrorAction Stop -Verbose:$false
             }
@@ -7806,6 +8644,16 @@ class VMHostConfiguration : VMHostBaseDSC {
             # The state of the VMHost should be verified when the Task completes.
             if ($vmHost.ConnectionState.ToString() -eq ([VMHostState]::Maintenance).ToString()) {
                 Write-VerboseLog -Message $this.VMHostStateWasChangedSuccessfullyMessage -Arguments @($vmHost.Name, $vmHost.ConnectionState.ToString())
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Verbose'
+                    Message = $this.VMHostStateWasChangedSuccessfullyMessage
+                    Arguments = @($vmHost.Name, $vmHost.ConnectionState.ToString())
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
         }
         catch {
@@ -7821,6 +8669,17 @@ class VMHostConfiguration : VMHostBaseDSC {
     [void] ModifyVMHostConfiguration($setVMHostParams) {
         try {
             Write-VerboseLog -Message $this.ModifyVMHostConfigurationMessage -Arguments @($setVMHostParams.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyVMHostConfigurationMessage
+                Arguments = @($setVMHostParams.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-VMHost @setVMHostParams
         }
         catch {
@@ -7847,6 +8706,17 @@ class VMHostConfiguration : VMHostBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyVMHostCryptoKeyMessage -Arguments @($vmHost.Name, $kmsCluster.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyVMHostCryptoKeyMessage
+                Arguments = @($vmHost.Name, $kmsCluster.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-VMHost @setVMHostParams
         }
         catch {
@@ -7945,6 +8815,17 @@ class VMHostDnsSettings : VMHostBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -7953,12 +8834,33 @@ class VMHostDnsSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -7981,12 +8883,33 @@ class VMHostDnsSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostDnsSettings] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostDnsSettings]::new()
 
             $this.ConnectVIServer()
@@ -8008,6 +8931,16 @@ class VMHostDnsSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -8093,6 +9026,17 @@ class VMHostFirewallRuleset : VMHostEntityBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.RetrieveVMHost()
@@ -8110,12 +9054,33 @@ class VMHostFirewallRuleset : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.RetrieveVMHost()
@@ -8130,12 +9095,33 @@ class VMHostFirewallRuleset : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostFirewallRuleset] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostFirewallRuleset]::new()
 
             $this.ConnectVIServer()
@@ -8150,6 +9136,16 @@ class VMHostFirewallRuleset : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -8278,6 +9274,17 @@ class VMHostFirewallRuleset : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyVMHostFirewallRulesetStateMessage -Arguments @($vmHostFirewallRuleset.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyVMHostFirewallRulesetStateMessage
+                Arguments = @($vmHostFirewallRuleset.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-VMHostFirewallException @setVMHostFirewallExceptionParams
         }
         catch {
@@ -8306,6 +9313,17 @@ class VMHostFirewallRuleset : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyVMHostFirewallRulesetAllowedIPAddressesListMessage -Arguments @($vmHostFirewallRuleset.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyVMHostFirewallRulesetAllowedIPAddressesListMessage
+                Arguments = @($vmHostFirewallRuleset.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Update-VMHostFirewallRuleset -VMHostFirewallSystem $vmHostFirewallSystem -VMHostFirewallRulesetId $vmHostFirewallRuleset.ExtensionData.Key -VMHostFirewallRulesetSpec $vmHostFirewallRulesetSpec
         }
         catch {
@@ -8355,6 +9373,17 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -8365,12 +9394,33 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -8389,12 +9439,33 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostIScsiHba] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostIScsiHba]::new()
 
             $this.ConnectVIServer()
@@ -8409,6 +9480,16 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -8430,6 +9511,17 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ConfigureIScsiHbaMessage -Arguments @($iScsiHba.Device, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ConfigureIScsiHbaMessage
+                Arguments = @($iScsiHba.Device, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-VMHostHba @setVMHostHbaParams
         }
         catch {
@@ -8539,6 +9631,17 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
             $this.IPEndPoint = $this.Address + ':' + $this.Port.ToString()
@@ -8563,12 +9666,33 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
             $this.IPEndPoint = $this.Address + ':' + $this.Port.ToString()
@@ -8597,12 +9721,33 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostIScsiHbaTarget] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostIScsiHbaTarget]::new()
 
             $this.ConnectVIServer()
@@ -8619,6 +9764,16 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -8662,6 +9817,17 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreateIScsiHbaTargetMessage -Arguments @($this.IPEndPoint, $this.IScsiHbaName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateIScsiHbaTargetMessage
+                Arguments = @($this.IPEndPoint, $this.IScsiHbaName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             New-IScsiHbaTarget @newIScsiHbaTargetParams
         }
         catch {
@@ -8687,6 +9853,17 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyIScsiHbaTargetMessage -Arguments @($this.IPEndPoint, $this.IScsiHbaName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyIScsiHbaTargetMessage
+                Arguments = @($this.IPEndPoint, $this.IScsiHbaName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-IScsiHbaTarget @setIScsiHbaTargetParams
         }
         catch {
@@ -8710,6 +9887,17 @@ class VMHostIScsiHbaTarget : VMHostIScsiHbaBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RemoveIScsiHbaTargetMessage -Arguments @($this.IPEndPoint, $this.IScsiHbaName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveIScsiHbaTargetMessage
+                Arguments = @($this.IPEndPoint, $this.IScsiHbaName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Remove-IScsiHbaTarget @removeIScsiHbaTargetParams
         }
         catch {
@@ -8780,6 +9968,17 @@ class VMHostNtpSettings : VMHostBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -8789,12 +9988,33 @@ class VMHostNtpSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -8814,12 +10034,33 @@ class VMHostNtpSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostNtpSettings] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostNtpSettings]::new()
 
             $this.ConnectVIServer()
@@ -8839,6 +10080,16 @@ class VMHostNtpSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -9109,6 +10360,17 @@ class VMHostPermission : BaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsESXi()
 
@@ -9135,12 +10397,33 @@ class VMHostPermission : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsESXi()
 
@@ -9170,12 +10453,33 @@ class VMHostPermission : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostPermission] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostPermission]::new()
 
             $this.ConnectVIServer()
@@ -9193,6 +10497,16 @@ class VMHostPermission : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -9471,6 +10785,17 @@ class VMHostPermission : BaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreatePermissionMessage -Arguments @($entity.Name, $vmHostPrincipal.Name, $vmHostRole.Name, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreatePermissionMessage
+                Arguments = @($entity.Name, $vmHostPrincipal.Name, $vmHostRole.Name, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             New-VIPermission @newVIPermissionParams
         }
         catch {
@@ -9504,6 +10829,17 @@ class VMHostPermission : BaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyPermissionMessage -Arguments @($vmHostPermission.Entity.Name, $vmHostPermission.Principal, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyPermissionMessage
+                Arguments = @($vmHostPermission.Entity.Name, $vmHostPermission.Principal, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-VIPermission @setVIPermissionParams
         }
         catch {
@@ -9519,6 +10855,17 @@ class VMHostPermission : BaseDSC {
     [void] RemoveVMHostPermission($vmHostPermission) {
         try {
             Write-VerboseLog -Message $this.RemovePermissionMessage -Arguments @($vmHostPermission.Entity.Name, $vmHostPermission.Principal, $vmHostPermission.Role, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemovePermissionMessage
+                Arguments = @($vmHostPermission.Entity.Name, $vmHostPermission.Principal, $vmHostPermission.Role, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $vmHostPermission | Remove-VIPermission -Confirm:$false -ErrorAction Stop -Verbose:$false
         }
         catch {
@@ -9684,6 +11031,17 @@ class VMHostRole : BaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsESXi()
 
@@ -9714,12 +11072,33 @@ class VMHostRole : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsESXi()
 
@@ -9748,12 +11127,33 @@ class VMHostRole : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostRole] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostRole]::new()
 
             $this.ConnectVIServer()
@@ -9767,6 +11167,16 @@ class VMHostRole : BaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -9792,6 +11202,16 @@ class VMHostRole : BaseDSC {
             $privilege = Get-VIPrivilege -Server $this.Connection -Id $privilegeId -ErrorAction SilentlyContinue -Verbose:$false
             if ($null -eq $privilege) {
                 Write-WarningLog -Message $this.CouldNotFindPrivilegeMessage -Arguments @($privilegeId)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Warning'
+                    Message = $this.CouldNotFindPrivilegeMessage
+                    Arguments = @($privilegeId)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
             }
             else {
                 $privileges += $privilege
@@ -9839,6 +11259,17 @@ class VMHostRole : BaseDSC {
     [void] NewVMHostRole() {
         try {
             Write-VerboseLog -Message $this.CreateRoleMessage -Arguments @($this.Name, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateRoleMessage
+                Arguments = @($this.Name, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             New-VIRole -Server $this.Connection -Name $this.Name -Confirm:$false -ErrorAction Stop -Verbose:$false
         }
         catch {
@@ -9856,6 +11287,17 @@ class VMHostRole : BaseDSC {
 
         try {
             Write-VerboseLog -Message $this.CreateRoleWithPrivilegesMessage -Arguments @($this.Name, $desiredPrivilegeIds, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateRoleWithPrivilegesMessage
+                Arguments = @($this.Name, $desiredPrivilegeIds, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             New-VIRole -Server $this.Connection -Name $this.Name -Privilege $desiredPrivileges -Confirm:$false -ErrorAction Stop -Verbose:$false
         }
         catch {
@@ -9903,6 +11345,17 @@ class VMHostRole : BaseDSC {
         try {
             Write-VerboseLog -Message $this.ModifyPrivilegesOfRoleMessage -Arguments @($vmHostRole.Name, $this.Connection.Name)
 
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyPrivilegesOfRoleMessage
+                Arguments = @($vmHostRole.Name, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             if ($privilegesToAdd.Length -eq 0) {
                 $setVIRoleParams.RemovePrivilege = $privilegesToRemove
                 Set-VIRole @setVIRoleParams
@@ -9932,6 +11385,17 @@ class VMHostRole : BaseDSC {
     [void] RemoveVMHostRole($vmHostRole) {
         try {
             Write-VerboseLog -Message $this.RemoveRoleMessage -Arguments @($vmHostRole.Name, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveRoleMessage
+                Arguments = @($vmHostRole.Name, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $vmHostRole | Remove-VIRole -Server $this.Connection -Force -Confirm:$false -ErrorAction Stop -Verbose:$false
         }
         catch {
@@ -10085,6 +11549,17 @@ class VMHostSatpClaimRule : EsxCliBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -10106,12 +11581,33 @@ class VMHostSatpClaimRule : EsxCliBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -10134,12 +11630,33 @@ class VMHostSatpClaimRule : EsxCliBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostSatpClaimRule] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostSatpClaimRule]::new()
 
             $result.Server = $this.Server
@@ -10172,6 +11689,16 @@ class VMHostSatpClaimRule : EsxCliBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -10413,6 +11940,17 @@ class VMHostScsiLun : VMHostEntityBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -10423,12 +11961,33 @@ class VMHostScsiLun : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -10443,12 +12002,33 @@ class VMHostScsiLun : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostScsiLun] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostScsiLun]::new()
 
             $this.ConnectVIServer()
@@ -10463,6 +12043,16 @@ class VMHostScsiLun : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -10606,6 +12196,17 @@ class VMHostScsiLun : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ModifyScsiLunConfigurationMessage -Arguments @($scsiLun.CanonicalName, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ModifyScsiLunConfigurationMessage
+                Arguments = @($scsiLun.CanonicalName, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-ScsiLun @setScsiLunParams
         }
         catch {
@@ -10679,6 +12280,17 @@ class VMHostScsiLunPath : VMHostEntityBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -10690,12 +12302,33 @@ class VMHostScsiLunPath : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -10711,12 +12344,33 @@ class VMHostScsiLunPath : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostScsiLunPath] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostScsiLunPath]::new()
 
             $this.ConnectVIServer()
@@ -10732,6 +12386,16 @@ class VMHostScsiLunPath : VMHostEntityBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -10806,6 +12470,17 @@ class VMHostScsiLunPath : VMHostEntityBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.ConfigureScsiLunPathMessage -Arguments @($scsiLunPath.Name, $scsiLunPath.ScsiLun.CanonicalName, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ConfigureScsiLunPathMessage
+                Arguments = @($scsiLunPath.Name, $scsiLunPath.ScsiLun.CanonicalName, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-ScsiLunPath @setScsiLunPathParams
         }
         catch {
@@ -10882,6 +12557,17 @@ class VMHostService : VMHostBaseDSC {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -10895,6 +12581,17 @@ class VMHostService : VMHostBaseDSC {
     [bool] Test() {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
@@ -10913,6 +12610,17 @@ class VMHostService : VMHostBaseDSC {
     [VMHostService] Get() {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $result = [VMHostService]::new()
             $result.Server = $this.Server
@@ -10936,6 +12644,17 @@ class VMHostService : VMHostBaseDSC {
     [bool] ShouldUpdateVMHostService($vmHost) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
         $vmHostCurrentService = Get-VMHostService -Server $this.Connection -VMHost $vmHost | Where-Object { $_.Key -eq $this.Key }
 
         $shouldUpdateVMHostService = @(
@@ -10953,6 +12672,17 @@ class VMHostService : VMHostBaseDSC {
     #>
     [void] UpdateVMHostService($vmHost) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
         $vmHostCurrentService = Get-VMHostService -Server $this.Connection -VMHost $vmHost | Where-Object { $_.Key -eq $this.Key }
 
@@ -10977,6 +12707,17 @@ class VMHostService : VMHostBaseDSC {
     #>
     [void] PopulateResult($vmHost, $vmHostService) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
         $vmHostCurrentService = Get-VMHostService -Server $this.Connection -VMHost $vmHost | Where-Object { $_.Key -eq $this.Key }
         $vmHostService.Name = $vmHost.Name
@@ -11031,6 +12772,17 @@ class VMHostSettings : VMHostBaseDSC {
     	try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -11044,6 +12796,17 @@ class VMHostSettings : VMHostBaseDSC {
     [bool] Test() {
     	try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
@@ -11062,6 +12825,17 @@ class VMHostSettings : VMHostBaseDSC {
     [VMHostSettings] Get() {
     	try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $result = [VMHostSettings]::new()
             $result.Server = $this.Server
@@ -11084,6 +12858,17 @@ class VMHostSettings : VMHostBaseDSC {
     #>
     [bool] ShouldUpdateVMHostSettings($vmHost) {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+    $writeToLogFilesplat = @{
+        Connection = $this.Connection.Name
+        ResourceName = $this.GetType().ToString()
+        LogType = 'Verbose'
+        Message = "{0} Entering {1}"
+        Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    }
+
+    Write-LogToFile @writeToLogFilesplat
+
 
     	$vmHostCurrentAdvancedSettings = Get-AdvancedSetting -Server $this.Connection -Entity $vmHost
 
@@ -11109,6 +12894,17 @@ class VMHostSettings : VMHostBaseDSC {
   	[void] SetAdvancedSetting($advancedSettingName, $advancedSetting, $advancedSettingDesiredValue, $advancedSettingCurrentValue, $clearValue) {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+    $writeToLogFilesplat = @{
+        Connection = $this.Connection.Name
+        ResourceName = $this.GetType().ToString()
+        LogType = 'Verbose'
+        Message = "{0} Entering {1}"
+        Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    }
+
+    Write-LogToFile @writeToLogFilesplat
+
+
     	if ($clearValue) {
       	    if ($this.ShouldUpdateDscResourceSetting($advancedSettingName, $advancedSettingCurrentValue, [string]::Empty)) {
                 Set-AdvancedSetting -AdvancedSetting $advancedSetting -Value [string]::Empty -Confirm:$false
@@ -11129,6 +12925,17 @@ class VMHostSettings : VMHostBaseDSC {
     [void] UpdateVMHostSettings($vmHost) {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+    $writeToLogFilesplat = @{
+        Connection = $this.Connection.Name
+        ResourceName = $this.GetType().ToString()
+        LogType = 'Verbose'
+        Message = "{0} Entering {1}"
+        Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    }
+
+    Write-LogToFile @writeToLogFilesplat
+
+
     	$vmHostCurrentAdvancedSettings = Get-AdvancedSetting -Server $this.Connection -Entity $vmHost
 
     	$currentMotd = $vmHostCurrentAdvancedSettings | Where-Object { $_.Name -eq $this.MotdSettingName }
@@ -11145,6 +12952,17 @@ class VMHostSettings : VMHostBaseDSC {
     #>
     [void] PopulateResult($vmHost, $result) {
     	Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+    $writeToLogFilesplat = @{
+        Connection = $this.Connection.Name
+        ResourceName = $this.GetType().ToString()
+        LogType = 'Verbose'
+        Message = "{0} Entering {1}"
+        Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+    }
+
+    Write-LogToFile @writeToLogFilesplat
+
 
     	$vmHostCurrentAdvancedSettings = Get-AdvancedSetting -Server $this.Connection -Entity $vmHost
 
@@ -11243,6 +13061,17 @@ class VMHostSyslog : VMHostBaseDSC {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -11256,6 +13085,17 @@ class VMHostSyslog : VMHostBaseDSC {
     [bool] Test() {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
@@ -11274,6 +13114,17 @@ class VMHostSyslog : VMHostBaseDSC {
     [VMHostSyslog] Get() {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $result = [VMHostSyslog]::new()
 
@@ -11295,6 +13146,17 @@ class VMHostSyslog : VMHostBaseDSC {
     #>
     [bool] ShouldUpdateVMHostSyslog($VMHost) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
         $esxcli = Get-Esxcli -Server $this.Connection -VMHost $vmHost -V2
         $current = Get-VMHostSyslogConfig -EsxCLi $esxcli
@@ -11323,6 +13185,17 @@ class VMHostSyslog : VMHostBaseDSC {
     [void] UpdateVMHostSyslog($VMHost) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
         $esxcli = Get-Esxcli -Server $this.Connection -VMHost $vmHost -V2
 
         $vmHostSyslogConfig = @{
@@ -11349,6 +13222,17 @@ class VMHostSyslog : VMHostBaseDSC {
     #>
     [void] PopulateResult($VMHost, $syslog) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
         $esxcli = Get-Esxcli -Server $this.Connection -VMHost $vmHost -V2
         $currentVMHostSyslog = Get-VMHostSyslogConfig -EsxCLi $esxcli
@@ -11408,6 +13292,17 @@ class VMHostTpsSettings : VMHostBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -11416,12 +13311,33 @@ class VMHostTpsSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
 
@@ -11434,12 +13350,33 @@ class VMHostTpsSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostTpsSettings] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostTpsSettings]::new()
             $result.Server = $this.Server
 
@@ -11462,6 +13399,16 @@ class VMHostTpsSettings : VMHostBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -11495,6 +13442,17 @@ class VMHostTpsSettings : VMHostBaseDSC {
 
             if ($null -ne $this.$tpsSettingName -and $this.$tpsSettingName -ne $tpsSetting.Value) {
                 Write-VerboseLog -Message $this.SettingIsNotInDesiredStateMessage -Arguments @($tpsSettingName, $tpsSetting.Value, $this.$tpsSettingName)
+
+                $writeToLogFilesplat = @{
+                    Connection = $this.Connection.Name
+                    ResourceName = $this.GetType().ToString()
+                    LogType = 'Verbose'
+                    Message = $this.SettingIsNotInDesiredStateMessage
+                    Arguments = @($tpsSettingName, $tpsSetting.Value, $this.$tpsSettingName)
+                }
+
+                Write-LogToFile @writeToLogFilesplat
+
                 return $true
             }
         }
@@ -11530,6 +13488,618 @@ class VMHostTpsSettings : VMHostBaseDSC {
 }
 
 [DscResource()]
+class DrsCluster : DatacenterInventoryBaseDSC {
+    DrsCluster() {
+        $this.InventoryItemFolderType = [FolderType]::Host
+    }
+
+    <#
+    .DESCRIPTION
+
+    Indicates that VMware DRS (Distributed Resource Scheduler) is enabled.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $DrsEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies a DRS (Distributed Resource Scheduler) automation level. The valid values are FullyAutomated, Manual, PartiallyAutomated, Disabled and Unset.
+    #>
+    [DscProperty()]
+    [DrsAutomationLevel] $DrsAutomationLevel = [DrsAutomationLevel]::Unset
+
+    <#
+    .DESCRIPTION
+
+    Threshold for generated ClusterRecommendations. DRS generates only those recommendations that are above the specified vmotionRate. Ratings vary from 1 to 5.
+    This setting applies to Manual, PartiallyAutomated, and FullyAutomated DRS Clusters.
+    #>
+    [DscProperty()]
+    [nullable[int]] $DrsMigrationThreshold
+
+    <#
+    .DESCRIPTION
+
+    For availability, distributes a more even number of virtual machines across hosts.
+    #>
+    [DscProperty()]
+    [nullable[int]] $DrsDistribution
+
+    <#
+    .DESCRIPTION
+
+    Load balance based on consumed memory of virtual machines rather than active memory.
+    This setting is recommended for clusters where host memory is not over-committed.
+    #>
+    [DscProperty()]
+    [nullable[int]] $MemoryLoadBalancing
+
+    <#
+    .DESCRIPTION
+
+    Controls CPU over-commitment in the cluster.
+    Min value is 0 and Max value is 500.
+    #>
+    [DscProperty()]
+    [nullable[int]] $CPUOverCommitment
+
+    hidden [string] $DrsEnabledConfigPropertyName = 'Enabled'
+    hidden [string] $DrsAutomationLevelConfigPropertyName = 'DefaultVmBehavior'
+    hidden [string] $DrsMigrationThresholdConfigPropertyName = 'VmotionRate'
+    hidden [string] $DrsDistributionSettingName = 'LimitVMsPerESXHostPercent'
+    hidden [string] $MemoryLoadBalancingSettingName = 'PercentIdleMBInMemDemand'
+    hidden [string] $CPUOverCommitmentSettingName = 'MaxVcpusPerClusterPct'
+
+    [void] Set() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $this.AddCluster($clusterLocation)
+                }
+                else {
+                    $this.UpdateCluster($cluster)
+                }
+            }
+            else {
+                if ($null -ne $cluster) {
+                    $this.RemoveCluster($cluster)
+                }
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $result = $false
+                }
+                else {
+                    $result = !$this.ShouldUpdateCluster($cluster)
+                }
+            }
+            else {
+                $result = ($null -eq $cluster)
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [DrsCluster] Get() {
+        try {
+            $result = [DrsCluster]::new()
+            $result.Server = $this.Server
+            $result.Location = $this.Location
+            $result.DatacenterName = $this.DatacenterName
+            $result.DatacenterLocation = $this.DatacenterLocation
+
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $this.PopulateResult($cluster, $result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Cluster should be updated.
+    #>
+    [bool] ShouldUpdateCluster($cluster) {
+        $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
+
+        $currentDrsDistributionOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.DrsDistributionSettingName }).Value
+        $currentMemoryLoadBalancingOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
+        $currentCPUOverCommitmentOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
+
+        $shouldUpdateCluster = @(
+            $this.ShouldUpdateDscResourceSetting('DrsEnabled', $drsConfig.Enabled, $this.DrsEnabled),
+            $this.ShouldUpdateDscResourceSetting('DrsAutomationLevel', [string] $drsConfig.DefaultVmBehavior, $this.DrsAutomationLevel.ToString()),
+            $this.ShouldUpdateDscResourceSetting('DrsMigrationThreshold', $drsConfig.VmotionRate, $this.DrsMigrationThreshold),
+            $this.ShouldUpdateDscResourceSetting('DrsDistribution', $currentDrsDistributionOption, $this.DrsDistribution),
+            $this.ShouldUpdateDscResourceSetting('MemoryLoadBalancing', $currentMemoryLoadBalancingOption, $this.MemoryLoadBalancing),
+            $this.ShouldUpdateDscResourceSetting('CPUOverCommitment', $currentCPUOverCommitmentOption, $this.CPUOverCommitment)
+        )
+
+        return ($shouldUpdateCluster -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the DrsConfig property with the desired value.
+    #>
+    [void] PopulateDrsConfigProperty($drsConfig, $propertyName, $propertyValue) {
+        <#
+            Special case where the passed property value is enum type. These type of properties
+            should be populated only when their value is not equal to Unset.
+            Unset means that the property was not specified in the Configuration.
+        #>
+        if ($propertyValue -is [DrsAutomationLevel]) {
+            if ($propertyValue -ne [DrsAutomationLevel]::Unset) {
+                $drsConfig.$propertyName = $propertyValue.ToString()
+            }
+        }
+        elseif ($null -ne $propertyValue) {
+            $drsConfig.$propertyName = $propertyValue
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the Option array for the DrsConfig with the specified options in the Configuration.
+    #>
+    [PSObject] GetOptionsForDrsConfig($allOptions) {
+        $drsConfigOptions = @()
+
+        foreach ($key in $allOptions.Keys) {
+            if ($null -ne $allOptions.$key) {
+                $option = New-Object VMware.Vim.OptionValue
+
+                $option.Key = $key
+                $option.Value = $allOptions.$key.ToString()
+
+                $drsConfigOptions += $option
+            }
+        }
+
+        return $drsConfigOptions
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the populated Cluster Spec with the specified values in the Configuration.
+    #>
+    [PSObject] GetPopulatedClusterSpec() {
+        $clusterSpec = New-Object VMware.Vim.ClusterConfigSpecEx
+        $clusterSpec.DrsConfig = New-Object VMware.Vim.ClusterDrsConfigInfo
+
+        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsEnabledConfigPropertyName, $this.DrsEnabled)
+        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsAutomationLevelConfigPropertyName, $this.DrsAutomationLevel)
+        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsMigrationThresholdConfigPropertyName, $this.DrsMigrationThreshold)
+
+        $allOptions = [ordered] @{
+            $this.DrsDistributionSettingName = $this.DrsDistribution
+            $this.MemoryLoadBalancingSettingName = $this.MemoryLoadBalancing
+            $this.CPUOverCommitmentSettingName = $this.CPUOverCommitment
+        }
+
+        $clusterSpec.DrsConfig.Option = $this.GetOptionsForDrsConfig($allOptions)
+
+        return $clusterSpec
+    }
+
+    <#
+    .DESCRIPTION
+
+    Creates a new Cluster with the specified properties at the specified location.
+    #>
+    [void] AddCluster($clusterLocation) {
+        $clusterSpec = $this.GetPopulatedClusterSpec()
+
+        try {
+            Add-Cluster -Folder $clusterLocation.ExtensionData -Name $this.Name -Spec $clusterSpec
+        }
+        catch {
+            throw "Server operation failed with the following error: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the Cluster with the specified properties.
+    #>
+    [void] UpdateCluster($cluster) {
+        $clusterSpec = $this.GetPopulatedClusterSpec()
+
+        try {
+            Update-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData -Spec $clusterSpec
+        }
+        catch {
+            throw "Server operation failed with the following error: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Removes the Cluster from the specified Datacenter.
+    #>
+    [void] RemoveCluster($cluster) {
+        try {
+            Remove-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData
+        }
+        catch {
+            throw "Server operation failed with the following error: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Cluster from the server.
+    #>
+    [void] PopulateResult($cluster, $result) {
+        if ($null -ne $cluster) {
+            $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
+
+            $result.Name = $cluster.Name
+            $result.Ensure = [Ensure]::Present
+            $result.DrsEnabled = $drsConfig.Enabled
+
+            if ($null -eq $drsConfig.DefaultVmBehavior) {
+                $result.DrsAutomationLevel = [DrsAutomationLevel]::Unset
+            }
+            else {
+                $result.DrsAutomationLevel = $drsConfig.DefaultVmBehavior.ToString()
+            }
+
+            $result.DrsMigrationThreshold = $drsConfig.VmotionRate
+
+            if ($null -ne $drsConfig.Option) {
+                $options = $drsConfig.Option
+
+                $result.DrsDistribution = ($options | Where-Object { $_.Key -eq $this.DrsDistributionSettingName }).Value
+                $result.MemoryLoadBalancing = ($options | Where-Object { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
+                $result.CPUOverCommitment = ($options | Where-Object { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
+            }
+            else {
+                $result.DrsDistribution = $null
+                $result.MemoryLoadBalancing = $null
+                $result.CPUOverCommitment = $null
+            }
+        }
+        else {
+            $result.Name = $this.Name
+            $result.Ensure = [Ensure]::Absent
+            $result.DrsEnabled = $this.DrsEnabled
+            $result.DrsAutomationLevel = $this.DrsAutomationLevel
+            $result.DrsMigrationThreshold = $this.DrsMigrationThreshold
+            $result.DrsDistribution = $this.DrsDistribution
+            $result.MemoryLoadBalancing = $this.MemoryLoadBalancing
+            $result.CPUOverCommitment = $this.CPUOverCommitment
+        }
+    }
+}
+
+[DscResource()]
+class HACluster : DatacenterInventoryBaseDSC {
+    HACluster() {
+        $this.InventoryItemFolderType = [FolderType]::Host
+    }
+
+    <#
+    .DESCRIPTION
+
+    Indicates that VMware HA (High Availability) is enabled.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $HAEnabled
+
+    <#
+    .DESCRIPTION
+
+    Indicates that virtual machines cannot be powered on if they violate availability constraints.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $HAAdmissionControlEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies a configured failover level.
+    This is the number of physical host failures that can be tolerated without impacting the ability to meet minimum thresholds for all running virtual machines.
+    The valid values range from 1 to 4.
+    #>
+    [DscProperty()]
+    [nullable[int]] $HAFailoverLevel
+
+    <#
+    .DESCRIPTION
+
+    Indicates that the virtual machine should be powered off if a host determines that it is isolated from the rest of the compute resource.
+    The valid values are PowerOff, DoNothing, Shutdown and Unset.
+    #>
+    [DscProperty()]
+    [HAIsolationResponse] $HAIsolationResponse = [HAIsolationResponse]::Unset
+
+    <#
+    .DESCRIPTION
+
+    Specifies the cluster HA restart priority. The valid values are Disabled, Low, Medium, High and Unset.
+    VMware HA is a feature that detects failed virtual machines and automatically restarts them on alternative ESX hosts.
+    #>
+    [DscProperty()]
+    [HARestartPriority] $HARestartPriority = [HARestartPriority]::Unset
+
+    hidden [string] $HAEnabledParameterName = 'HAEnabled'
+    hidden [string] $HAAdmissionControlEnabledParameterName = 'HAAdmissionControlEnabled'
+    hidden [string] $HAFailoverLevelParameterName = 'HAFailoverLevel'
+    hidden [string] $HAIsolationResponseParameterName = 'HAIsolationResponse'
+    hidden [string] $HARestartPriorityParemeterName = 'HARestartPriority'
+
+    [void] Set() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $this.AddCluster($clusterLocation)
+                }
+                else {
+                    $this.UpdateCluster($cluster)
+                }
+            }
+            else {
+                if ($null -ne $cluster) {
+                    $this.RemoveCluster($cluster)
+                }
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $cluster) {
+                    $result = $false
+                }
+                else {
+                    $result = !$this.ShouldUpdateCluster($cluster)
+                }
+            }
+            else {
+                $result = ($null -eq $cluster)
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [HACluster] Get() {
+        try {
+            $result = [HACluster]::new()
+            $result.Server = $this.Server
+            $result.Location = $this.Location
+            $result.DatacenterName = $this.DatacenterName
+            $result.DatacenterLocation = $this.DatacenterLocation
+
+            $this.ConnectVIServer()
+
+            $datacenter = $this.GetDatacenter()
+            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
+            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
+            $cluster = $this.GetInventoryItem($clusterLocation)
+
+            $this.PopulateResult($cluster, $result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Cluster should be updated.
+    #>
+    [bool] ShouldUpdateCluster($cluster) {
+        $shouldUpdateCluster = @(
+            $this.ShouldUpdateDscResourceSetting('HAEnabled', $cluster.HAEnabled, $this.HAEnabled),
+            $this.ShouldUpdateDscResourceSetting('HAAdmissionControlEnabled', $cluster.HAAdmissionControlEnabled, $this.HAAdmissionControlEnabled),
+            $this.ShouldUpdateDscResourceSetting('HAFailoverLevel', $cluster.HAFailoverLevel, $this.HAFailoverLevel),
+            $this.ShouldUpdateDscResourceSetting('HAIsolationResponse', [string] $cluster.HAIsolationResponse, $this.HAIsolationResponse.ToString()),
+            $this.ShouldUpdateDscResourceSetting('HARestartPriority', [string] $cluster.HARestartPriority, $this.HARestartPriority.ToString())
+        )
+
+        return ($shouldUpdateCluster -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the parameters for the New-Cluster and Set-Cluster cmdlets.
+    #>
+    [void] PopulateClusterParams($clusterParams, $parameter, $desiredValue) {
+        <#
+            Special case where the desired value is enum type. These type of properties
+            should be added as parameters to the cmdlet only when their value is not equal to Unset.
+            Unset means that the property was not specified in the Configuration.
+        #>
+        if ($desiredValue -is [HAIsolationResponse] -or $desiredValue -is [HARestartPriority]) {
+            if ($desiredValue -ne 'Unset') {
+                $clusterParams.$parameter = $desiredValue.ToString()
+            }
+
+            return
+        }
+
+        if ($null -ne $desiredValue) {
+            $clusterParams.$parameter = $desiredValue
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns the populated Cluster parameters.
+    #>
+    [hashtable] GetClusterParams() {
+        $clusterParams = @{}
+
+        $clusterParams.Server = $this.Connection
+        $clusterParams.Confirm = $false
+        $clusterParams.ErrorAction = 'Stop'
+
+        $this.PopulateClusterParams($clusterParams, $this.HAEnabledParameterName, $this.HAEnabled)
+
+        # High Availability settings cannot be passed to the cmdlets if 'HAEnabled' is $false.
+        if ($null -eq $this.HAEnabled -or $this.HAEnabled) {
+            $this.PopulateClusterParams($clusterParams, $this.HAAdmissionControlEnabledParameterName, $this.HAAdmissionControlEnabled)
+            $this.PopulateClusterParams($clusterParams, $this.HAFailoverLevelParameterName, $this.HAFailoverLevel)
+            $this.PopulateClusterParams($clusterParams, $this.HAIsolationResponseParameterName, $this.HAIsolationResponse)
+            $this.PopulateClusterParams($clusterParams, $this.HARestartPriorityParemeterName, $this.HARestartPriority)
+        }
+
+        return $clusterParams
+    }
+
+    <#
+    .DESCRIPTION
+
+    Creates a new Cluster with the specified properties at the specified location.
+    #>
+    [void] AddCluster($clusterLocation) {
+        $clusterParams = $this.GetClusterParams()
+        $clusterParams.Name = $this.Name
+        $clusterParams.Location = $clusterLocation
+
+        try {
+            New-Cluster @clusterParams
+        }
+        catch {
+            throw "Cannot create Cluster $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the Cluster with the specified properties.
+    #>
+    [void] UpdateCluster($cluster) {
+        $clusterParams = $this.GetClusterParams()
+
+        try {
+            $cluster | Set-Cluster @clusterParams
+        }
+        catch {
+            throw "Cannot update Cluster $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Removes the Cluster from the specified Datacenter.
+    #>
+    [void] RemoveCluster($cluster) {
+        try {
+            $cluster | Remove-Cluster -Server $this.Connection -Confirm:$false -ErrorAction Stop
+        }
+        catch {
+            throw "Cannot remove Cluster $($this.Name). For more information: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Cluster from the server.
+    #>
+    [void] PopulateResult($cluster, $result) {
+        if ($null -ne $cluster) {
+            $result.Name = $cluster.Name
+            $result.Ensure = [Ensure]::Present
+            $result.HAEnabled = $cluster.HAEnabled
+            $result.HAAdmissionControlEnabled = $cluster.HAAdmissionControlEnabled
+            $result.HAFailoverLevel = $cluster.HAFailoverLevel
+            $result.HAIsolationResponse = $cluster.HAIsolationResponse.ToString()
+            $result.HARestartPriority = $cluster.HARestartPriority.ToString()
+        }
+        else {
+            $result.Name = $this.Name
+            $result.Ensure = [Ensure]::Absent
+            $result.HAEnabled = $this.HAEnabled
+            $result.HAAdmissionControlEnabled = $this.HAAdmissionControlEnabled
+            $result.HAFailoverLevel = $this.HAFailoverLevel
+            $result.HAIsolationResponse = $this.HAIsolationResponse
+            $result.HARestartPriority = $this.HARestartPriority
+        }
+    }
+}
+
+[DscResource()]
 class NfsDatastore : DatastoreBaseDSC {
     <#
     .DESCRIPTION
@@ -11560,6 +14130,17 @@ class NfsDatastore : DatastoreBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -11583,12 +14164,33 @@ class NfsDatastore : DatastoreBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -11614,12 +14216,33 @@ class NfsDatastore : DatastoreBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [NfsDatastore] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [NfsDatastore]::new()
 
             $this.ConnectVIServer()
@@ -11633,6 +14256,16 @@ class NfsDatastore : DatastoreBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -11691,6 +14324,17 @@ class VmfsDatastore : DatastoreBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -11715,12 +14359,33 @@ class VmfsDatastore : DatastoreBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
@@ -11747,12 +14412,33 @@ class VmfsDatastore : DatastoreBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VmfsDatastore] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VmfsDatastore]::new()
 
             $this.ConnectVIServer()
@@ -11768,6 +14454,16 @@ class VmfsDatastore : DatastoreBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -11832,6 +14528,2455 @@ class VmfsDatastore : DatastoreBaseDSC {
         }
 
         $this.PopulateResult($result, $datastore)
+    }
+}
+
+[DscResource()]
+class VMHostAcceptanceLevel : EsxCliBaseDSC {
+    VMHostAcceptanceLevel() {
+        $this.EsxCliCommand = 'software.acceptance'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the acceptance level of the VMHost. Valid values are VMwareCertified, VMwareAccepted, PartnerSupported and CommunitySupported.
+    #>
+    [DscProperty(Mandatory)]
+    [AcceptanceLevel] $Level
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            # The 'Level' value needs to be converted to a string type before being passed to the base class method.
+            $modifyVMHostAcceptanceLevelMethodArguments = @{
+                level = $this.Level.ToString()
+            }
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName, $modifyVMHostAcceptanceLevelMethodArguments)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldUpdateDscResourceSetting('Level', [string] $esxCliGetMethodResult, $this.Level.ToString())
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostAcceptanceLevel] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostAcceptanceLevel]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+        $result.Level = $esxCliGetMethodResult
+    }
+}
+
+[DscResource()]
+class VMHostDCUIKeyboard : EsxCliBaseDSC {
+    VMHostDCUIKeyboard() {
+        $this.EsxCliCommand = 'system.settings.keyboard.layout'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the name of the Direct Console User Interface Keyboard Layout.
+    #>
+    [DscProperty(Mandatory)]
+    [string] $Layout
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldUpdateDscResourceSetting('Layout', [string] $esxCliGetMethodResult, $this.Layout)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostDCUIKeyboard] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostDCUIKeyboard]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+        $result.Layout = $esxCliGetMethodResult
+    }
+}
+
+[DscResource()]
+class VMHostNetworkCoreDump : EsxCliBaseDSC {
+    VMHostNetworkCoreDump() {
+        $this.EsxCliCommand = 'system.coredump.network'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to enable network coredump.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Enable
+
+    <#
+    .DESCRIPTION
+
+    Specifies the active interface to be used for the network coredump.
+    #>
+    [DscProperty()]
+    [string] $InterfaceName
+
+    <#
+    .DESCRIPTION
+
+    Specifies the IP address of the coredump server (IPv4 or IPv6).
+    #>
+    [DscProperty()]
+    [string] $ServerIp
+
+    <#
+    .DESCRIPTION
+
+    Specifies the port on which the coredump server is listening.
+    #>
+    [DscProperty()]
+    [nullable[long]] $ServerPort
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            <#
+            The 'Enable' argument of the 'set' method of the command should be passed separately from the other method arguments.
+            So if any of the other method arguments is passed, the method of the command should be invoked twice - the first time
+            without 'Enable' and the second time only with 'Enable' argument.
+            #>
+            if ($null -ne $this.Enable) {
+                if (![string]::IsNullOrEmpty($this.InterfaceName) -or ![string]::IsNullOrEmpty($this.ServerIp) -or $null -ne $this.ServerPort) {
+                    <#
+                    The desired 'Enable' value must be set to $null, so that the base class can ignore it when constructing the arguments of the method of the command.
+                    The value is stored in a separate variable, so that it can be used when the second invocation of the command method occurs.
+                    #>
+                    $enableArgumentDesiredValue = $this.Enable
+                    $this.Enable = $null
+
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+
+                    # The property value is restored to its initial value.
+                    $this.Enable = $enableArgumentDesiredValue
+
+                    # All property values except the desired 'Enable' value should be set to $null, because the command method was invoked with them already and their values are not needed.
+                    $this.InterfaceName = $null
+                    $this.ServerIp = $null
+                    $this.ServerPort = $null
+
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+                }
+                else {
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+                }
+            }
+            else {
+                $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldModifyVMHostNetworkCoreDumpConfiguration($esxCliGetMethodResult)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostNetworkCoreDump] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostNetworkCoreDump]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the VMHost network coredump configuration should be modified.
+    #>
+    [bool] ShouldModifyVMHostNetworkCoreDumpConfiguration($esxCliGetMethodResult) {
+        $shouldModifyVMHostNetworkCoreDumpConfiguration = @(
+            $this.ShouldUpdateDscResourceSetting('Enable', [System.Convert]::ToBoolean($esxCliGetMethodResult.Enabled), $this.Enable),
+            $this.ShouldUpdateDscResourceSetting('InterfaceName', [string] $esxCliGetMethodResult.HostVNic, $this.InterfaceName),
+            $this.ShouldUpdateDscResourceSetting('ServerIp', [string] $esxCliGetMethodResult.NetworkServerIP, $this.ServerIp),
+            $this.ShouldUpdateDscResourceSetting('ServerPort', [long] $esxCliGetMethodResult.NetworkServerPort, $this.ServerPort)
+        )
+
+        return ($shouldModifyVMHostNetworkCoreDumpConfiguration -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+        $result.Enable = [System.Convert]::ToBoolean($esxCliGetMethodResult.Enabled)
+        $result.InterfaceName = $esxCliGetMethodResult.HostVNic
+        $result.ServerIp = $esxCliGetMethodResult.NetworkServerIP
+        $result.ServerPort = [long] $esxCliGetMethodResult.NetworkServerPort
+    }
+}
+
+[DscResource()]
+class VMHostSharedSwapSpace : EsxCliBaseDSC {
+    VMHostSharedSwapSpace() {
+        $this.EsxCliCommand = 'sched.swap.system'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies if the Datastore option should be enabled or not.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $DatastoreEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies the name of the Datastore used by the Datastore option.
+    #>
+    [DscProperty()]
+    [string] $DatastoreName
+
+    <#
+    .DESCRIPTION
+
+    Specifies the order of the Datastore option in the preference of the options of the system-wide shared swap space.
+    #>
+    [DscProperty()]
+    [nullable[long]] $DatastoreOrder
+
+    <#
+    .DESCRIPTION
+
+    Specifies if the host cache option should be enabled or not.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $HostCacheEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies the order of the host cache option in the preference of the options of the system-wide shared swap space.
+    #>
+    [DscProperty()]
+    [nullable[long]] $HostCacheOrder
+
+    <#
+    .DESCRIPTION
+
+    Specifies if the host local swap option should be enabled or not.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $HostLocalSwapEnabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies the order of the host local swap option in the preference of the options of the system-wide shared swap space.
+    #>
+    [DscProperty()]
+    [nullable[long]] $HostLocalSwapOrder
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $modifyVMHostSharedSwapSpaceMethodArguments = @{}
+            if ($null -ne $this.DatastoreName) { $modifyVMHostSharedSwapSpaceMethodArguments.datastorename = $this.DatastoreName }
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName, $modifyVMHostSharedSwapSpaceMethodArguments)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldModifySystemWideSharedSwapSpaceConfiguration($esxCliGetMethodResult)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostSharedSwapSpace] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostSharedSwapSpace]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the system-wide shared swap space configuration should be modified.
+    #>
+    [bool] ShouldModifySystemWideSharedSwapSpaceConfiguration($esxCliGetMethodResult) {
+        $shouldModifySystemWideSharedSwapSpaceConfiguration = @(
+            $this.ShouldUpdateDscResourceSetting('DatastoreEnabled', [System.Convert]::ToBoolean($esxCliGetMethodResult.DatastoreEnabled), $this.DatastoreEnabled),
+            $this.ShouldUpdateDscResourceSetting('DatastoreName', [string] $esxCliGetMethodResult.DatastoreName, $this.DatastoreName),
+            $this.ShouldUpdateDscResourceSetting('DatastoreOrder', [long] $esxCliGetMethodResult.DatastoreOrder, $this.DatastoreOrder),
+            $this.ShouldUpdateDscResourceSetting('HostCacheEnabled', [System.Convert]::ToBoolean($esxCliGetMethodResult.HostcacheEnabled), $this.HostCacheEnabled),
+            $this.ShouldUpdateDscResourceSetting('HostCacheOrder', [long] $esxCliGetMethodResult.HostcacheOrder, $this.HostCacheOrder),
+            $this.ShouldUpdateDscResourceSetting('HostLocalSwapOrder', [long] $esxCliGetMethodResult.HostlocalswapOrder, $this.HostLocalSwapOrder),
+            $this.ShouldUpdateDscResourceSetting(
+                'HostLocalSwapEnabled',
+                [System.Convert]::ToBoolean($esxCliGetMethodResult.HostlocalswapEnabled),
+                $this.HostLocalSwapEnabled
+            )
+        )
+
+        return ($shouldModifySystemWideSharedSwapSpaceConfiguration -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+        $result.DatastoreEnabled = [System.Convert]::ToBoolean($esxCliGetMethodResult.DatastoreEnabled)
+        $result.DatastoreName = $esxCliGetMethodResult.DatastoreName
+        $result.DatastoreOrder = [long] $esxCliGetMethodResult.DatastoreOrder
+        $result.HostCacheEnabled = [System.Convert]::ToBoolean($esxCliGetMethodResult.HostcacheEnabled)
+        $result.HostCacheOrder = [long] $esxCliGetMethodResult.HostcacheOrder
+        $result.HostLocalSwapEnabled = [System.Convert]::ToBoolean($esxCliGetMethodResult.HostlocalswapEnabled)
+        $result.HostLocalSwapOrder = [long] $esxCliGetMethodResult.HostlocalswapOrder
+    }
+}
+
+[DscResource()]
+class VMHostSNMPAgent : EsxCliBaseDSC {
+    VMHostSNMPAgent() {
+        $this.EsxCliCommand = 'system.snmp'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the default authentication protocol. Valid values are none, MD5, SHA1.
+    #>
+    [DscProperty()]
+    [string] $Authentication
+
+    <#
+    .DESCRIPTION
+
+    Specifies up to ten communities each no more than 64 characters. Format is: 'community1[,community2,...]'. This overwrites previous settings.
+    #>
+    [DscProperty()]
+    [string] $Communities
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to start or stop the SNMP service.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Enable
+
+    <#
+    .DESCRIPTION
+
+    Specifies the SNMPv3 engine id. Must be between 10 and 32 hexadecimal characters. 0x or 0X are stripped if found as well as colons (:).
+    #>
+    [DscProperty()]
+    [string] $EngineId
+
+    <#
+    .DESCRIPTION
+
+    Specifies where to source hardware events - IPMI sensors or CIM Indications. Valid values are indications and sensors.
+    #>
+    [DscProperty()]
+    [string] $Hwsrc
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to support large storage for 'hrStorageAllocationUnits' * 'hrStorageSize'. Controls how the agent reports 'hrStorageAllocationUnits', 'hrStorageSize' and 'hrStorageUsed' in 'hrStorageTable'.
+    Setting this directive to $true to support large storage with small allocation units, the agent re-calculates these values so they all fit into 'int' and 'hrStorageAllocationUnits' * 'hrStorageSize' gives real size
+    of the storage. Setting this directive to $false turns off this calculation and the agent reports real 'hrStorageAllocationUnits', but it might report wrong 'hrStorageSize' for large storage because the value won't fit
+    into 'int'.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $LargeStorage
+
+    <#
+    .DESCRIPTION
+
+    Specifies the SNMP agent syslog logging level. Valid values are debug, info, warning and error.
+    #>
+    [DscProperty()]
+    [string] $LogLevel
+
+    <#
+    .DESCRIPTION
+
+    Specifies a comma separated list of trap oids for traps not to be sent by the SNMP agent. Use the property 'reset' to clear this setting.
+    #>
+    [DscProperty()]
+    [string] $NoTraps
+
+    <#
+    .DESCRIPTION
+
+    Specifies the UDP port to poll SNMP agent on. The default is 'udp/161'. May not use ports 32768 to 40959.
+    #>
+    [DscProperty()]
+    [nullable[long]] $Port
+
+    <#
+    .DESCRIPTION
+
+    Specifies the default privacy protocol. Valid values are none and AES128.
+    #>
+    [DscProperty()]
+    [string] $Privacy
+
+    <#
+    .DESCRIPTION
+
+    Specifies up to five inform user ids. Format is: 'user/auth-proto/-|auth-hash/priv-proto/-|priv-hash/engine-id[,...]', where user is 32 chars max. 'auth-proto' is 'none', 'MD5' or 'SHA1',
+    'priv-proto' is 'none' or 'AES'. '-' indicates no hash. 'engine-id' is hex string '0x0-9a-f' up to 32 chars max.
+    #>
+    [DscProperty()]
+    [string] $RemoteUsers
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to return SNMP agent configuration to factory defaults.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Reset
+
+    <#
+    .DESCRIPTION
+
+    Specifies the System contact as presented in 'sysContact.0'. Up to 255 characters.
+    #>
+    [DscProperty()]
+    [string] $SysContact
+
+    <#
+    .DESCRIPTION
+
+    Specifies the System location as presented in 'sysLocation.0'. Up to 255 characters.
+    #>
+    [DscProperty()]
+    [string] $SysLocation
+
+    <#
+    .DESCRIPTION
+
+    Specifies up to three targets to send SNMPv1 traps to. Format is: 'ip-or-hostname[@port]/community[,...]'. The default port is 'udp/162'.
+    #>
+    [DscProperty()]
+    [string] $Targets
+
+    <#
+    .DESCRIPTION
+
+    Specifies up to five local users. Format is: 'user/-|auth-hash/-|priv-hash/model[,...]', where user is 32 chars max. '-' indicates no hash. Model is one of 'none', 'auth' or 'priv'.
+    #>
+    [DscProperty()]
+    [string] $Users
+
+    <#
+    .DESCRIPTION
+
+    Specifies up to three SNMPv3 notification targets. Format is: 'ip-or-hostname[@port]/remote-user/security-level/trap|inform[,...]'.
+    #>
+    [DscProperty()]
+    [string] $V3Targets
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $modifyVMHostSNMPAgentMethodArguments = @{}
+            if ($null -ne $this.NoTraps) { $modifyVMHostSNMPAgentMethodArguments.notraps = $this.NoTraps }
+            if ($null -ne $this.SysContact) { $modifyVMHostSNMPAgentMethodArguments.syscontact = $this.SysContact }
+            if ($null -ne $this.SysLocation) { $modifyVMHostSNMPAgentMethodArguments.syslocation = $this.SysLocation }
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName, $modifyVMHostSNMPAgentMethodArguments)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldModifyVMHostSNMPAgent($esxCliGetMethodResult)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostSNMPAgent] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostSNMPAgent]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the VMHost SNMP Agent should be modified.
+    #>
+    [bool] ShouldModifyVMHostSNMPAgent($esxCliGetMethodResult) {
+        $shouldModifyVMHostSNMPAgent = @(
+            $this.ShouldUpdateDscResourceSetting('Authentication', [string] $esxCliGetMethodResult.authentication, $this.Authentication),
+            $this.ShouldUpdateDscResourceSetting('Communities', [string] $esxCliGetMethodResult.communities, $this.Communities),
+            $this.ShouldUpdateDscResourceSetting('Enable', [System.Convert]::ToBoolean($esxCliGetMethodResult.enable), $this.Enable),
+            $this.ShouldUpdateDscResourceSetting('EngineId', [string] $esxCliGetMethodResult.engineid, $this.EngineId),
+            $this.ShouldUpdateDscResourceSetting('Hwsrc', [string] $esxCliGetMethodResult.hwsrc, $this.Hwsrc),
+            $this.ShouldUpdateDscResourceSetting('LargeStorage', [System.Convert]::ToBoolean($esxCliGetMethodResult.largestorage), $this.LargeStorage),
+            $this.ShouldUpdateDscResourceSetting('LogLevel', [string] $esxCliGetMethodResult.loglevel, $this.LogLevel),
+            $this.ShouldUpdateDscResourceSetting('NoTraps', [string] $esxCliGetMethodResult.notraps, $this.NoTraps),
+            $this.ShouldUpdateDscResourceSetting('Port', [int] $esxCliGetMethodResult.port, $this.Port),
+            $this.ShouldUpdateDscResourceSetting('Privacy', [string] $esxCliGetMethodResult.privacy, $this.Privacy),
+            $this.ShouldUpdateDscResourceSetting('RemoteUsers', [string] $esxCliGetMethodResult.remoteusers, $this.RemoteUsers),
+            $this.ShouldUpdateDscResourceSetting('SysContact', [string] $esxCliGetMethodResult.syscontact, $this.SysContact),
+            $this.ShouldUpdateDscResourceSetting('SysLocation', [string] $esxCliGetMethodResult.syslocation, $this.SysLocation),
+            $this.ShouldUpdateDscResourceSetting('Targets', [string] $esxCliGetMethodResult.targets, $this.Targets),
+            $this.ShouldUpdateDscResourceSetting('Users', [string] $esxCliGetMethodResult.users, $this.Users),
+            $this.ShouldUpdateDscResourceSetting('V3Targets', [string] $esxCliGetMethodResult.v3targets, $this.V3Targets),
+            $this.ShouldUpdateDscResourceSetting('Reset', $false, $this.Reset)
+        )
+
+        return ($shouldModifyVMHostSNMPAgent -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+        $result.Reset = $this.Reset
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+        $result.Authentication = $esxCliGetMethodResult.authentication
+        $result.Communities = $esxCliGetMethodResult.communities
+        $result.Enable = [System.Convert]::ToBoolean($esxCliGetMethodResult.enable)
+        $result.EngineId = $esxCliGetMethodResult.engineid
+        $result.Hwsrc = $esxCliGetMethodResult.hwsrc
+        $result.LargeStorage = [System.Convert]::ToBoolean($esxCliGetMethodResult.largestorage)
+        $result.LogLevel = $esxCliGetMethodResult.loglevel
+        $result.NoTraps = $esxCliGetMethodResult.notraps
+        $result.Port = [int] $esxCliGetMethodResult.port
+        $result.Privacy = $esxCliGetMethodResult.privacy
+        $result.RemoteUsers = $esxCliGetMethodResult.remoteusers
+        $result.SysContact = $esxCliGetMethodResult.syscontact
+        $result.SysLocation = $esxCliGetMethodResult.syslocation
+        $result.Targets = $esxCliGetMethodResult.targets
+        $result.Users = $esxCliGetMethodResult.users
+        $result.V3Targets = $esxCliGetMethodResult.v3targets
+    }
+}
+
+[DscResource()]
+class VMHostSoftwareDevice : EsxCliBaseDSC {
+    VMHostSoftwareDevice() {
+        $this.EsxCliCommand = 'device.software'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the device identifier from the device specification for the software device driver. Valid input is in reverse domain name format (e.g. com.company.device...).
+    #>
+    [DscProperty(Key)]
+    [string] $DeviceIdentifier
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the software device should be present or absent.
+    #>
+    [DscProperty(Mandatory = $true)]
+    [Ensure] $Ensure
+
+    <#
+    .DESCRIPTION
+
+    Specifies the unique number to address this instance of the device, if multiple instances of the same device identifier are added. Valid values are integer in the range 0-31. Default is 0.
+    #>
+    [DscProperty()]
+    [nullable[long]] $InstanceAddress
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $softwareDevice = $this.GetVMHostSoftwareDevice()
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $softwareDevice) {
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliAddMethodName)
+                }
+            }
+            else {
+                if ($null -ne $softwareDevice) {
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliRemoveMethodName)
+                }
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $result = $this.IsVMHostSoftwareDeviceInDesiredState()
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostSoftwareDevice] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostSoftwareDevice]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Retrieves the Software device with the specified id and instance address if it exists.
+    #>
+    [PSObject] GetVMHostSoftwareDevice() {
+        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+        $softwareDeviceInstanceAddress = if ($null -ne $this.InstanceAddress) { $this.InstanceAddress } else { 0 }
+        $softwareDevice = $esxCliListMethodResult | Where-Object -FilterScript { $_.DeviceID -eq $this.DeviceIdentifier -and [long] $_.Instance -eq $softwareDeviceInstanceAddress }
+
+        return $softwareDevice
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Software device is in a Desired State depending on the value of the 'Ensure' property.
+    #>
+    [bool] IsVMHostSoftwareDeviceInDesiredState() {
+        $softwareDevice = $this.GetVMHostSoftwareDevice()
+
+        $result = $false
+        if ($this.Ensure -eq [Ensure]::Present) {
+            $result = ($null -ne $softwareDevice)
+        }
+        else {
+            $result = ($null -eq $softwareDevice)
+        }
+
+        return $result
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+
+        $softwareDevice = $this.GetVMHostSoftwareDevice()
+        if ($null -ne $softwareDevice) {
+            $result.DeviceIdentifier = $softwareDevice.DeviceID
+            $result.InstanceAddress = [long] $softwareDevice.Instance
+            $result.Ensure = [Ensure]::Present
+        }
+        else {
+            $result.DeviceIdentifier = $this.DeviceIdentifier
+            $result.InstanceAddress = $this.InstanceAddress
+            $result.Ensure = [Ensure]::Absent
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVMKernelActiveDumpFile : EsxCliBaseDSC {
+    VMHostVMKernelActiveDumpFile() {
+        $this.EsxCliCommand = 'system.coredump.file'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the VMKernel dump file should be enabled or disabled.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Enable
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to select the best available file using the smart selection algorithm. Can only be used when 'Enabled' property is specified with '$true' value.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Smart
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldModifyVMKernelDumpFile($esxCliGetMethodResult)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostVMKernelActiveDumpFile] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostVMKernelActiveDumpFile]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the VMKernel dump file should be modified.
+    #>
+    [bool] ShouldModifyVMKernelDumpFile($esxCliGetMethodResult) {
+        $result = $null
+
+        if ($null -ne $this.Enable) {
+            if ($this.Enable) { $result = [string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
+            else { $result = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
+        }
+        else {
+            $result = $false
+        }
+
+        return $result
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+        $result.Smart = $this.Smart
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+        $result.Enable = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active)
+    }
+}
+
+[DscResource()]
+class VMHostVMKernelActiveDumpPartition : EsxCliBaseDSC {
+    VMHostVMKernelActiveDumpPartition() {
+        $this.EsxCliCommand = 'system.coredump.partition'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the VMKernel dump partition should be enabled or disabled.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Enable
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to select the best available partition using the smart selection algorithm. Can only be used when 'Enabled' property is specified with '$true' value.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Smart
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+
+            $result = !$this.ShouldModifyVMKernelDumpPartition($esxCliGetMethodResult)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostVMKernelActiveDumpPartition] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostVMKernelActiveDumpPartition]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the VMKernel dump partition should be modified.
+    #>
+    [bool] ShouldModifyVMKernelDumpPartition($esxCliGetMethodResult) {
+        $result = $null
+
+        if ($null -ne $this.Enable) {
+            if ($this.Enable) { $result = [string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
+            else { $result = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
+        }
+        else {
+            $result = $false
+        }
+
+        return $result
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+        $result.Smart = $this.Smart
+
+        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
+        $result.Enable = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active)
+    }
+}
+
+[DscResource()]
+class VMHostVMKernelDumpFile : EsxCliBaseDSC {
+    VMHostVMKernelDumpFile() {
+        $this.EsxCliCommand = 'system.coredump.file'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the name of the Datastore for the dump file.
+    #>
+    [DscProperty(Key)]
+    [string] $DatastoreName
+
+    <#
+    .DESCRIPTION
+
+    Specifies the file name of the dump file.
+    #>
+    [DscProperty(Key)]
+    [string] $FileName
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the VMKernel dump Vmfs file should be present or absent.
+    #>
+    [DscProperty(Mandatory = $true)]
+    [Ensure] $Ensure
+
+    <#
+    .DESCRIPTION
+
+    Specifies the size in MB of the dump file. If not provided, a default size for the current machine is calculated.
+    #>
+    [DscProperty()]
+    [nullable[long]] $Size
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to deactivate and unconfigure the dump file being removed. This option is required if the file is active.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Force
+
+    hidden [string] $CouldNotRetrieveFileSystemsInformationMessage = "Could not retrieve information about File Systems on VMHost {0}. For more information: {1}"
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $addVMKernelDumpFileMethodArguments = @{
+                    datastore = $this.DatastoreName
+                    file = $this.FileName
+                }
+
+                $this.ExecuteEsxCliModifyMethod($this.EsxCliAddMethodName, $addVMKernelDumpFileMethodArguments)
+            }
+            else {
+                $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+                $vmKernelDumpFile = $this.GetVMKernelDumpFile($esxCliListMethodResult)
+                $removeVMKernelDumpFileMethodArguments = @{
+                    file = $vmKernelDumpFile.Path
+                }
+
+                $this.ExecuteEsxCliModifyMethod($this.EsxCliRemoveMethodName, $removeVMKernelDumpFileMethodArguments)
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+            $vmKernelDumpFile = $this.GetVMKernelDumpFile($esxCliListMethodResult)
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($vmKernelDumpFile.Count -ne 0)
+            }
+            else {
+                $result = ($vmKernelDumpFile.Count -eq 0)
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostVMKernelDumpFile] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostVMKernelDumpFile]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Translates the Datastore name from a volume UUID to volume name, if required.
+    #>
+    [string] TranslateDatastoreName($datastoreName) {
+        $foundDatastoreName = $null
+        $fileSystemsList = $null
+
+        try {
+            $fileSystemsList = Invoke-EsxCliCommandMethod -EsxCli $this.EsxCli -EsxCliCommandMethod 'storage.filesystem.list.Invoke({0})' -EsxCliCommandMethodArguments @{}
+        }
+        catch {
+            throw ($this.CouldNotRetrieveFileSystemsInformationMessage -f $this.Name, $_.Exception.Message)
+        }
+
+        foreach ($fileSystem in $fileSystemsList) {
+            if ($fileSystem.UUID -eq $datastoreName) {
+                $foundDatastoreName = $fileSystem.VolumeName
+                break
+            }
+
+            if ($fileSystem.VolumeName -eq $datastoreName) {
+                $foundDatastoreName = $fileSystem.VolumeName
+                break
+            }
+        }
+
+        return $foundDatastoreName
+    }
+
+    <#
+    .DESCRIPTION
+
+    Retrieves the name of the specified dump file.
+    #>
+    [string] GetDumpFileName($dumpFile) {
+        $fileParts = $dumpFile -Split '\.'
+        return $fileParts[0]
+    }
+
+    <#
+    .DESCRIPTION
+
+    Converts the passed bytes value to MB value.
+    #>
+    [double] ConvertBytesValueToMBValue($bytesValue) {
+        return [Math]::Round($bytesValue / 1MB)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Retrieves the VMKernel dump file if it exists.
+    #>
+    [PSObject] GetVMKernelDumpFile($esxCliListMethodResult) {
+        $foundDumpFile = @{}
+        $result = @()
+
+        foreach ($dumpFile in $esxCliListMethodResult) {
+            $dumpFileParts = $dumpFile.Path -Split '/'
+            $dumpFileDatastoreName = $this.TranslateDatastoreName($dumpFileParts[3])
+            $dumpFileName = $this.GetDumpFileName($dumpFileParts[5])
+
+            $result += ($this.DatastoreName -eq $dumpFileDatastoreName)
+            $result += ($this.FileName -eq $dumpFileName)
+
+            if ($null -ne $this.Size) {
+                $result += ($this.Size -eq $this.ConvertBytesValueToMBValue($dumpFile.Size))
+            }
+
+            if ($result -NotContains $false) {
+                $foundDumpFile.Path = $dumpFile.Path
+                $foundDumpFile.Datastore = $dumpFileDatastoreName
+                $foundDumpFile.File = $dumpFileName
+                $foundDumpFile.Size = $this.ConvertBytesValueToMBValue($dumpFile.Size)
+
+                break
+            }
+
+            $result = @()
+        }
+
+        return $foundDumpFile
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+        $result.Force = $this.Force
+
+        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+        $vmKernelDumpFile = $this.GetVMKernelDumpFile($esxCliListMethodResult)
+
+        if ($vmKernelDumpFile.Count -ne 0) {
+            $result.DatastoreName = $vmKernelDumpFile.Datastore
+            $result.FileName = $vmKernelDumpFile.File
+            $result.Size = $vmKernelDumpFile.Size
+            $result.Ensure = [Ensure]::Present
+        }
+        else {
+            $result.DatastoreName = $this.DatastoreName
+            $result.FileName = $this.FileName
+            $result.Size = $this.Size
+            $result.Ensure = [Ensure]::Absent
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVMKernelModule : EsxCliBaseDSC {
+    VMHostVMKernelModule() {
+        $this.EsxCliCommand = 'system.module'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the name of the VMKernel module.
+    #>
+    [DscProperty(Key)]
+    [string] $Module
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the module should be enabled or disabled.
+    #>
+    [DscProperty(Mandatory)]
+    [bool] $Enabled
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to skip the VMkernel module validity checks.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Force
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+            $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+
+            $result = !$this.ShouldModifyVMKernelModule($esxCliListMethodResult)
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostVMKernelModule] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostVMKernelModule]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the specified VMKernel module should be modified.
+    #>
+    [bool] ShouldModifyVMKernelModule($esxCliListMethodResult) {
+        $vmKernelModule = $esxCliListMethodResult | Where-Object -FilterScript { $_.Name -eq $this.Module }
+        return $this.ShouldUpdateDscResourceSetting('Enabled', [System.Convert]::ToBoolean($vmKernelModule.IsEnabled), $this.Enabled)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+        $result.Force = $this.Force
+
+        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+        $vmKernelModule = $esxCliListMethodResult | Where-Object -FilterScript { $_.Name -eq $this.Module }
+
+        $result.Module = $vmKernelModule.Name
+        $result.Enabled = [System.Convert]::ToBoolean($vmKernelModule.IsEnabled)
+    }
+}
+
+[DscResource()]
+class VMHostvSANNetworkConfiguration : EsxCliBaseDSC {
+    VMHostvSANNetworkConfiguration() {
+        $this.EsxCliCommand = 'vsan.network.ip'
+    }
+
+    <#
+    .DESCRIPTION
+
+    Specifies the name of the interface.
+    #>
+    [DscProperty(Key)]
+    [string] $InterfaceName
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the IP interface of the vSAN network configuration should be present or absent.
+    #>
+    [DscProperty(Mandatory = $true)]
+    [Ensure] $Ensure
+
+    <#
+    .DESCRIPTION
+
+    Specifies the IPv4 multicast address for the agent group.
+    #>
+    [DscProperty()]
+    [string] $AgentMcAddr
+
+    <#
+    .DESCRIPTION
+
+    Specifies the IPv6 multicast address for the agent group.
+    #>
+    [DscProperty()]
+    [string] $AgentV6McAddr
+
+    <#
+    .DESCRIPTION
+
+    Specifies the multicast address port for the agent group.
+    #>
+    [DscProperty()]
+    [nullable[long]] $AgentMcPort
+
+    <#
+    .DESCRIPTION
+
+    Specifies the unicast address port for the VMHost unicast channel.
+    #>
+    [DscProperty()]
+    [nullable[long]] $HostUcPort
+
+    <#
+    .DESCRIPTION
+
+    Specifies the IPv4 multicast address for the master group.
+    #>
+    [DscProperty()]
+    [string] $MasterMcAddr
+
+    <#
+    .DESCRIPTION
+
+    Specifies the IPv6 multicast address for the master group.
+    #>
+    [DscProperty()]
+    [string] $MasterV6McAddr
+
+    <#
+    .DESCRIPTION
+
+    Specifies the multicast address port for the master group.
+    #>
+    [DscProperty()]
+    [nullable[long]] $MasterMcPort
+
+    <#
+    .DESCRIPTION
+
+    Specifies the time-to-live for multicast packets.
+    #>
+    [DscProperty()]
+    [nullable[long]] $MulticastTtl
+
+    <#
+    .DESCRIPTION
+
+    Specifies the network transmission type of the vSAN traffic through a virtual network adapter. Supported values are vsan and witness. Type 'vsan' means general vSAN transmission, which is used for both
+    data and witness transmission, if there is no virtual adapter configured with 'witness' traffic type; Type 'witness' indicates that, vSAN vmknic is used for vSAN witness transmission.
+    Once a virtual adapter is configured with 'witness' traffic type, vSAN witness data transmission will stop using virtual adapter with 'vsan' traffic type, and use first dicovered virtual adapter with 'witness' traffic type.
+    Multiple traffic types can be provided in format -T type1 -T type2. Default value is 'vsan', if the property is not specified.
+    #>
+    [DscProperty()]
+    [string[]] $TrafficType
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether to notify vSAN subsystem of the removal of the IP Interface, even if is not configured.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Force
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $vSanNetworkConfigurationIPInterface = $this.GetvSanNetworkConfigurationIPInterface()
+            if ($this.Ensure -eq [Ensure]::Present) {
+                if ($null -eq $vSanNetworkConfigurationIPInterface) {
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliAddMethodName)
+                }
+            }
+            else {
+                if ($null -ne $vSanNetworkConfigurationIPInterface) {
+                    $this.ExecuteEsxCliModifyMethod($this.EsxCliRemoveMethodName)
+                }
+            }
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $result = $this.IsvSanNetworkConfigurationIPInterfaceInDesiredState()
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    [VMHostvSANNetworkConfiguration] Get() {
+        try {
+            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostvSANNetworkConfiguration]::new()
+
+            $this.ConnectVIServer()
+
+            $vmHost = $this.GetVMHost()
+            $this.GetEsxCli($vmHost)
+
+            $this.PopulateResult($result, $vmHost)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Retrieves the IP interface with the specified name of the vSAN network configuration.
+    #>
+    [PSObject] GetvSanNetworkConfigurationIPInterface() {
+        <#
+        The 'list' method of the command is not on the same element as the 'add' and 'remove' methods. So the different methods
+        need to be executed with different commands.
+        #>
+        $initialEsxCliCommand = $this.EsxCliCommand
+        $this.EsxCliCommand = 'vsan.network'
+
+        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+
+        # The command needs to be restored to its initial value, so that it can be used by the 'add' and 'remove' methods.
+        $this.EsxCliCommand = $initialEsxCliCommand
+
+        return ($esxCliListMethodResult | Where-Object -FilterScript { $_.VmkNicName -eq $this.InterfaceName })
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the vSan network configuration IP interface is in a Desired State depending on the value of the 'Ensure' property.
+    #>
+    [bool] IsvSanNetworkConfigurationIPInterfaceInDesiredState() {
+        $vSanNetworkConfigurationIPInterface = $this.GetvSanNetworkConfigurationIPInterface()
+
+        $result = $false
+        if ($this.Ensure -eq [Ensure]::Present) {
+            $result = ($null -ne $vSanNetworkConfigurationIPInterface)
+        }
+        else {
+            $result = ($null -eq $vSanNetworkConfigurationIPInterface)
+        }
+
+        return $result
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get method.
+    #>
+    [void] PopulateResult($result, $vmHost) {
+        $result.Server = $this.Connection.Name
+        $result.Name = $vmHost.Name
+        $result.Force = $this.Force
+
+        $vSanNetworkConfigurationIPInterface = $this.GetvSanNetworkConfigurationIPInterface()
+        if ($null -ne $vSanNetworkConfigurationIPInterface) {
+            $result.InterfaceName = $vSanNetworkConfigurationIPInterface.VmkNicName
+            $result.AgentMcAddr = $vSanNetworkConfigurationIPInterface.AgentGroupMulticastAddress
+            $result.AgentMcPort = [long] $vSanNetworkConfigurationIPInterface.AgentGroupMulticastPort
+            $result.AgentV6McAddr = $vSanNetworkConfigurationIPInterface.AgentGroupIPv6MulticastAddress
+            $result.HostUcPort = [long] $vSanNetworkConfigurationIPInterface.HostUnicastChannelBoundPort
+            $result.MasterMcAddr = $vSanNetworkConfigurationIPInterface.MasterGroupMulticastAddress
+            $result.MasterMcPort = [long] $vSanNetworkConfigurationIPInterface.MasterGroupMulticastPort
+            $result.MasterV6McAddr = $vSanNetworkConfigurationIPInterface.MasterGroupIPv6MulticastAddress
+            $result.MulticastTtl = [long] $vSanNetworkConfigurationIPInterface.MulticastTTL
+            $result.TrafficType = $vSanNetworkConfigurationIPInterface.TrafficType
+            $result.Ensure = [Ensure]::Present
+        }
+        else {
+            $result.InterfaceName = $this.InterfaceName
+            $result.AgentMcAddr = $this.AgentMcAddr
+            $result.AgentMcPort = $this.AgentMcPort
+            $result.AgentV6McAddr = $this.AgentV6McAddr
+            $result.HostUcPort = $this.HostUcPort
+            $result.MasterMcAddr = $this.MasterMcAddr
+            $result.MasterMcPort = $this.MasterMcPort
+            $result.MasterV6McAddr = $this.MasterV6McAddr
+            $result.MulticastTtl = $this.MulticastTtl
+            $result.TrafficType = $this.TrafficType
+            $result.Ensure = [Ensure]::Absent
+        }
     }
 }
 
@@ -12761,1249 +17906,107 @@ class VMHostVssPortGroupTeaming : VMHostVssPortGroupBaseDSC {
 }
 
 [DscResource()]
-class VMHostAcceptanceLevel : EsxCliBaseDSC {
-    VMHostAcceptanceLevel() {
-        $this.EsxCliCommand = 'software.acceptance'
-    }
+class VMHostVss : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The maximum transmission unit (MTU) associated with this virtual switch in bytes.
+    #>
+    [DscProperty()]
+    [nullable[int]] $Mtu
 
     <#
     .DESCRIPTION
 
-    Specifies the acceptance level of the VMHost. Valid values are VMwareCertified, VMwareAccepted, PartnerSupported and CommunitySupported.
+    The virtual switch key.
     #>
-    [DscProperty(Mandatory)]
-    [AcceptanceLevel] $Level
+    [DscProperty(NotConfigurable)]
+    [string] $Key
+
+    <#
+    .DESCRIPTION
+
+    The number of ports that this virtual switch currently has.
+    #>
+    [DscProperty(NotConfigurable)]
+    [int] $NumPorts
+
+    <#
+    .DESCRIPTION
+
+    The number of ports that are available on this virtual switch.
+    #>
+    [DscProperty(NotConfigurable)]
+    [int] $NumPortsAvailable
+
+    <#
+    .DESCRIPTION
+
+    The set of physical network adapters associated with this bridge.
+    #>
+    [DscProperty(NotConfigurable)]
+    [string[]] $Pnic
+
+    <#
+    .DESCRIPTION
+
+    The list of port groups configured for this virtual switch.
+    #>
+    [DscProperty(NotConfigurable)]
+    [string[]] $PortGroup
 
     [void] Set() {
         try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            # The 'Level' value needs to be converted to a string type before being passed to the base class method.
-            $modifyVMHostAcceptanceLevelMethodArguments = @{
-                level = $this.Level.ToString()
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
             }
 
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName, $modifyVMHostAcceptanceLevelMethodArguments)
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVss($vmHost)
         }
         finally {
             $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
         }
     }
 
     [bool] Test() {
         try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldUpdateDscResourceSetting('Level', [string] $esxCliGetMethodResult, $this.Level.ToString())
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostAcceptanceLevel] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostAcceptanceLevel]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-        $result.Level = $esxCliGetMethodResult
-    }
-}
-
-[DscResource()]
-class VMHostDCUIKeyboard : EsxCliBaseDSC {
-    VMHostDCUIKeyboard() {
-        $this.EsxCliCommand = 'system.settings.keyboard.layout'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies the name of the Direct Console User Interface Keyboard Layout.
-    #>
-    [DscProperty(Mandatory)]
-    [string] $Layout
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldUpdateDscResourceSetting('Layout', [string] $esxCliGetMethodResult, $this.Layout)
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostDCUIKeyboard] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostDCUIKeyboard]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-        $result.Layout = $esxCliGetMethodResult
-    }
-}
-
-[DscResource()]
-class VMHostNetworkCoreDump : EsxCliBaseDSC {
-    VMHostNetworkCoreDump() {
-        $this.EsxCliCommand = 'system.coredump.network'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to enable network coredump.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Enable
-
-    <#
-    .DESCRIPTION
-
-    Specifies the active interface to be used for the network coredump.
-    #>
-    [DscProperty()]
-    [string] $InterfaceName
-
-    <#
-    .DESCRIPTION
-
-    Specifies the IP address of the coredump server (IPv4 or IPv6).
-    #>
-    [DscProperty()]
-    [string] $ServerIp
-
-    <#
-    .DESCRIPTION
-
-    Specifies the port on which the coredump server is listening.
-    #>
-    [DscProperty()]
-    [nullable[long]] $ServerPort
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            <#
-            The 'Enable' argument of the 'set' method of the command should be passed separately from the other method arguments.
-            So if any of the other method arguments is passed, the method of the command should be invoked twice - the first time
-            without 'Enable' and the second time only with 'Enable' argument.
-            #>
-            if ($null -ne $this.Enable) {
-                if (![string]::IsNullOrEmpty($this.InterfaceName) -or ![string]::IsNullOrEmpty($this.ServerIp) -or $null -ne $this.ServerPort) {
-                    <#
-                    The desired 'Enable' value must be set to $null, so that the base class can ignore it when constructing the arguments of the method of the command.
-                    The value is stored in a separate variable, so that it can be used when the second invocation of the command method occurs.
-                    #>
-                    $enableArgumentDesiredValue = $this.Enable
-                    $this.Enable = $null
-
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-
-                    # The property value is restored to its initial value.
-                    $this.Enable = $enableArgumentDesiredValue
-
-                    # All property values except the desired 'Enable' value should be set to $null, because the command method was invoked with them already and their values are not needed.
-                    $this.InterfaceName = $null
-                    $this.ServerIp = $null
-                    $this.ServerPort = $null
-
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-                }
-                else {
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-                }
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
             }
-            else {
-                $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
 
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
+            Write-LogToFile @writeToLogFilesplat
 
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldModifyVMHostNetworkCoreDumpConfiguration($esxCliGetMethodResult)
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostNetworkCoreDump] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostNetworkCoreDump]::new()
 
             $this.ConnectVIServer()
-
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the VMHost network coredump configuration should be modified.
-    #>
-    [bool] ShouldModifyVMHostNetworkCoreDumpConfiguration($esxCliGetMethodResult) {
-        $shouldModifyVMHostNetworkCoreDumpConfiguration = @(
-            $this.ShouldUpdateDscResourceSetting('Enable', [System.Convert]::ToBoolean($esxCliGetMethodResult.Enabled), $this.Enable),
-            $this.ShouldUpdateDscResourceSetting('InterfaceName', [string] $esxCliGetMethodResult.HostVNic, $this.InterfaceName),
-            $this.ShouldUpdateDscResourceSetting('ServerIp', [string] $esxCliGetMethodResult.NetworkServerIP, $this.ServerIp),
-            $this.ShouldUpdateDscResourceSetting('ServerPort', [long] $esxCliGetMethodResult.NetworkServerPort, $this.ServerPort)
-        )
-
-        return ($shouldModifyVMHostNetworkCoreDumpConfiguration -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-        $result.Enable = [System.Convert]::ToBoolean($esxCliGetMethodResult.Enabled)
-        $result.InterfaceName = $esxCliGetMethodResult.HostVNic
-        $result.ServerIp = $esxCliGetMethodResult.NetworkServerIP
-        $result.ServerPort = [long] $esxCliGetMethodResult.NetworkServerPort
-    }
-}
-
-[DscResource()]
-class VMHostSharedSwapSpace : EsxCliBaseDSC {
-    VMHostSharedSwapSpace() {
-        $this.EsxCliCommand = 'sched.swap.system'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies if the Datastore option should be enabled or not.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $DatastoreEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies the name of the Datastore used by the Datastore option.
-    #>
-    [DscProperty()]
-    [string] $DatastoreName
-
-    <#
-    .DESCRIPTION
-
-    Specifies the order of the Datastore option in the preference of the options of the system-wide shared swap space.
-    #>
-    [DscProperty()]
-    [nullable[long]] $DatastoreOrder
-
-    <#
-    .DESCRIPTION
-
-    Specifies if the host cache option should be enabled or not.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $HostCacheEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies the order of the host cache option in the preference of the options of the system-wide shared swap space.
-    #>
-    [DscProperty()]
-    [nullable[long]] $HostCacheOrder
-
-    <#
-    .DESCRIPTION
-
-    Specifies if the host local swap option should be enabled or not.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $HostLocalSwapEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies the order of the host local swap option in the preference of the options of the system-wide shared swap space.
-    #>
-    [DscProperty()]
-    [nullable[long]] $HostLocalSwapOrder
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $modifyVMHostSharedSwapSpaceMethodArguments = @{}
-            if ($null -ne $this.DatastoreName) { $modifyVMHostSharedSwapSpaceMethodArguments.datastorename = $this.DatastoreName }
-
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName, $modifyVMHostSharedSwapSpaceMethodArguments)
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldModifySystemWideSharedSwapSpaceConfiguration($esxCliGetMethodResult)
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostSharedSwapSpace] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostSharedSwapSpace]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the system-wide shared swap space configuration should be modified.
-    #>
-    [bool] ShouldModifySystemWideSharedSwapSpaceConfiguration($esxCliGetMethodResult) {
-        $shouldModifySystemWideSharedSwapSpaceConfiguration = @(
-            $this.ShouldUpdateDscResourceSetting('DatastoreEnabled', [System.Convert]::ToBoolean($esxCliGetMethodResult.DatastoreEnabled), $this.DatastoreEnabled),
-            $this.ShouldUpdateDscResourceSetting('DatastoreName', [string] $esxCliGetMethodResult.DatastoreName, $this.DatastoreName),
-            $this.ShouldUpdateDscResourceSetting('DatastoreOrder', [long] $esxCliGetMethodResult.DatastoreOrder, $this.DatastoreOrder),
-            $this.ShouldUpdateDscResourceSetting('HostCacheEnabled', [System.Convert]::ToBoolean($esxCliGetMethodResult.HostcacheEnabled), $this.HostCacheEnabled),
-            $this.ShouldUpdateDscResourceSetting('HostCacheOrder', [long] $esxCliGetMethodResult.HostcacheOrder, $this.HostCacheOrder),
-            $this.ShouldUpdateDscResourceSetting('HostLocalSwapOrder', [long] $esxCliGetMethodResult.HostlocalswapOrder, $this.HostLocalSwapOrder),
-            $this.ShouldUpdateDscResourceSetting(
-                'HostLocalSwapEnabled',
-                [System.Convert]::ToBoolean($esxCliGetMethodResult.HostlocalswapEnabled),
-                $this.HostLocalSwapEnabled
-            )
-        )
-
-        return ($shouldModifySystemWideSharedSwapSpaceConfiguration -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-        $result.DatastoreEnabled = [System.Convert]::ToBoolean($esxCliGetMethodResult.DatastoreEnabled)
-        $result.DatastoreName = $esxCliGetMethodResult.DatastoreName
-        $result.DatastoreOrder = [long] $esxCliGetMethodResult.DatastoreOrder
-        $result.HostCacheEnabled = [System.Convert]::ToBoolean($esxCliGetMethodResult.HostcacheEnabled)
-        $result.HostCacheOrder = [long] $esxCliGetMethodResult.HostcacheOrder
-        $result.HostLocalSwapEnabled = [System.Convert]::ToBoolean($esxCliGetMethodResult.HostlocalswapEnabled)
-        $result.HostLocalSwapOrder = [long] $esxCliGetMethodResult.HostlocalswapOrder
-    }
-}
-
-[DscResource()]
-class VMHostSNMPAgent : EsxCliBaseDSC {
-    VMHostSNMPAgent() {
-        $this.EsxCliCommand = 'system.snmp'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies the default authentication protocol. Valid values are none, MD5, SHA1.
-    #>
-    [DscProperty()]
-    [string] $Authentication
-
-    <#
-    .DESCRIPTION
-
-    Specifies up to ten communities each no more than 64 characters. Format is: 'community1[,community2,...]'. This overwrites previous settings.
-    #>
-    [DscProperty()]
-    [string] $Communities
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to start or stop the SNMP service.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Enable
-
-    <#
-    .DESCRIPTION
-
-    Specifies the SNMPv3 engine id. Must be between 10 and 32 hexadecimal characters. 0x or 0X are stripped if found as well as colons (:).
-    #>
-    [DscProperty()]
-    [string] $EngineId
-
-    <#
-    .DESCRIPTION
-
-    Specifies where to source hardware events - IPMI sensors or CIM Indications. Valid values are indications and sensors.
-    #>
-    [DscProperty()]
-    [string] $Hwsrc
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to support large storage for 'hrStorageAllocationUnits' * 'hrStorageSize'. Controls how the agent reports 'hrStorageAllocationUnits', 'hrStorageSize' and 'hrStorageUsed' in 'hrStorageTable'.
-    Setting this directive to $true to support large storage with small allocation units, the agent re-calculates these values so they all fit into 'int' and 'hrStorageAllocationUnits' * 'hrStorageSize' gives real size
-    of the storage. Setting this directive to $false turns off this calculation and the agent reports real 'hrStorageAllocationUnits', but it might report wrong 'hrStorageSize' for large storage because the value won't fit
-    into 'int'.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $LargeStorage
-
-    <#
-    .DESCRIPTION
-
-    Specifies the SNMP agent syslog logging level. Valid values are debug, info, warning and error.
-    #>
-    [DscProperty()]
-    [string] $LogLevel
-
-    <#
-    .DESCRIPTION
-
-    Specifies a comma separated list of trap oids for traps not to be sent by the SNMP agent. Use the property 'reset' to clear this setting.
-    #>
-    [DscProperty()]
-    [string] $NoTraps
-
-    <#
-    .DESCRIPTION
-
-    Specifies the UDP port to poll SNMP agent on. The default is 'udp/161'. May not use ports 32768 to 40959.
-    #>
-    [DscProperty()]
-    [nullable[long]] $Port
-
-    <#
-    .DESCRIPTION
-
-    Specifies the default privacy protocol. Valid values are none and AES128.
-    #>
-    [DscProperty()]
-    [string] $Privacy
-
-    <#
-    .DESCRIPTION
-
-    Specifies up to five inform user ids. Format is: 'user/auth-proto/-|auth-hash/priv-proto/-|priv-hash/engine-id[,...]', where user is 32 chars max. 'auth-proto' is 'none', 'MD5' or 'SHA1',
-    'priv-proto' is 'none' or 'AES'. '-' indicates no hash. 'engine-id' is hex string '0x0-9a-f' up to 32 chars max.
-    #>
-    [DscProperty()]
-    [string] $RemoteUsers
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to return SNMP agent configuration to factory defaults.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Reset
-
-    <#
-    .DESCRIPTION
-
-    Specifies the System contact as presented in 'sysContact.0'. Up to 255 characters.
-    #>
-    [DscProperty()]
-    [string] $SysContact
-
-    <#
-    .DESCRIPTION
-
-    Specifies the System location as presented in 'sysLocation.0'. Up to 255 characters.
-    #>
-    [DscProperty()]
-    [string] $SysLocation
-
-    <#
-    .DESCRIPTION
-
-    Specifies up to three targets to send SNMPv1 traps to. Format is: 'ip-or-hostname[@port]/community[,...]'. The default port is 'udp/162'.
-    #>
-    [DscProperty()]
-    [string] $Targets
-
-    <#
-    .DESCRIPTION
-
-    Specifies up to five local users. Format is: 'user/-|auth-hash/-|priv-hash/model[,...]', where user is 32 chars max. '-' indicates no hash. Model is one of 'none', 'auth' or 'priv'.
-    #>
-    [DscProperty()]
-    [string] $Users
-
-    <#
-    .DESCRIPTION
-
-    Specifies up to three SNMPv3 notification targets. Format is: 'ip-or-hostname[@port]/remote-user/security-level/trap|inform[,...]'.
-    #>
-    [DscProperty()]
-    [string] $V3Targets
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $modifyVMHostSNMPAgentMethodArguments = @{}
-            if ($null -ne $this.NoTraps) { $modifyVMHostSNMPAgentMethodArguments.notraps = $this.NoTraps }
-            if ($null -ne $this.SysContact) { $modifyVMHostSNMPAgentMethodArguments.syscontact = $this.SysContact }
-            if ($null -ne $this.SysLocation) { $modifyVMHostSNMPAgentMethodArguments.syslocation = $this.SysLocation }
-
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName, $modifyVMHostSNMPAgentMethodArguments)
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldModifyVMHostSNMPAgent($esxCliGetMethodResult)
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostSNMPAgent] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostSNMPAgent]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the VMHost SNMP Agent should be modified.
-    #>
-    [bool] ShouldModifyVMHostSNMPAgent($esxCliGetMethodResult) {
-        $shouldModifyVMHostSNMPAgent = @(
-            $this.ShouldUpdateDscResourceSetting('Authentication', [string] $esxCliGetMethodResult.authentication, $this.Authentication),
-            $this.ShouldUpdateDscResourceSetting('Communities', [string] $esxCliGetMethodResult.communities, $this.Communities),
-            $this.ShouldUpdateDscResourceSetting('Enable', [System.Convert]::ToBoolean($esxCliGetMethodResult.enable), $this.Enable),
-            $this.ShouldUpdateDscResourceSetting('EngineId', [string] $esxCliGetMethodResult.engineid, $this.EngineId),
-            $this.ShouldUpdateDscResourceSetting('Hwsrc', [string] $esxCliGetMethodResult.hwsrc, $this.Hwsrc),
-            $this.ShouldUpdateDscResourceSetting('LargeStorage', [System.Convert]::ToBoolean($esxCliGetMethodResult.largestorage), $this.LargeStorage),
-            $this.ShouldUpdateDscResourceSetting('LogLevel', [string] $esxCliGetMethodResult.loglevel, $this.LogLevel),
-            $this.ShouldUpdateDscResourceSetting('NoTraps', [string] $esxCliGetMethodResult.notraps, $this.NoTraps),
-            $this.ShouldUpdateDscResourceSetting('Port', [int] $esxCliGetMethodResult.port, $this.Port),
-            $this.ShouldUpdateDscResourceSetting('Privacy', [string] $esxCliGetMethodResult.privacy, $this.Privacy),
-            $this.ShouldUpdateDscResourceSetting('RemoteUsers', [string] $esxCliGetMethodResult.remoteusers, $this.RemoteUsers),
-            $this.ShouldUpdateDscResourceSetting('SysContact', [string] $esxCliGetMethodResult.syscontact, $this.SysContact),
-            $this.ShouldUpdateDscResourceSetting('SysLocation', [string] $esxCliGetMethodResult.syslocation, $this.SysLocation),
-            $this.ShouldUpdateDscResourceSetting('Targets', [string] $esxCliGetMethodResult.targets, $this.Targets),
-            $this.ShouldUpdateDscResourceSetting('Users', [string] $esxCliGetMethodResult.users, $this.Users),
-            $this.ShouldUpdateDscResourceSetting('V3Targets', [string] $esxCliGetMethodResult.v3targets, $this.V3Targets),
-            $this.ShouldUpdateDscResourceSetting('Reset', $false, $this.Reset)
-        )
-
-        return ($shouldModifyVMHostSNMPAgent -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-        $result.Reset = $this.Reset
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-        $result.Authentication = $esxCliGetMethodResult.authentication
-        $result.Communities = $esxCliGetMethodResult.communities
-        $result.Enable = [System.Convert]::ToBoolean($esxCliGetMethodResult.enable)
-        $result.EngineId = $esxCliGetMethodResult.engineid
-        $result.Hwsrc = $esxCliGetMethodResult.hwsrc
-        $result.LargeStorage = [System.Convert]::ToBoolean($esxCliGetMethodResult.largestorage)
-        $result.LogLevel = $esxCliGetMethodResult.loglevel
-        $result.NoTraps = $esxCliGetMethodResult.notraps
-        $result.Port = [int] $esxCliGetMethodResult.port
-        $result.Privacy = $esxCliGetMethodResult.privacy
-        $result.RemoteUsers = $esxCliGetMethodResult.remoteusers
-        $result.SysContact = $esxCliGetMethodResult.syscontact
-        $result.SysLocation = $esxCliGetMethodResult.syslocation
-        $result.Targets = $esxCliGetMethodResult.targets
-        $result.Users = $esxCliGetMethodResult.users
-        $result.V3Targets = $esxCliGetMethodResult.v3targets
-    }
-}
-
-[DscResource()]
-class VMHostSoftwareDevice : EsxCliBaseDSC {
-    VMHostSoftwareDevice() {
-        $this.EsxCliCommand = 'device.software'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies the device identifier from the device specification for the software device driver. Valid input is in reverse domain name format (e.g. com.company.device...).
-    #>
-    [DscProperty(Key)]
-    [string] $DeviceIdentifier
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the software device should be present or absent.
-    #>
-    [DscProperty(Mandatory = $true)]
-    [Ensure] $Ensure
-
-    <#
-    .DESCRIPTION
-
-    Specifies the unique number to address this instance of the device, if multiple instances of the same device identifier are added. Valid values are integer in the range 0-31. Default is 0.
-    #>
-    [DscProperty()]
-    [nullable[long]] $InstanceAddress
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $softwareDevice = $this.GetVMHostSoftwareDevice()
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $softwareDevice) {
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliAddMethodName)
-                }
-            }
-            else {
-                if ($null -ne $softwareDevice) {
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliRemoveMethodName)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $result = $this.IsVMHostSoftwareDeviceInDesiredState()
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostSoftwareDevice] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostSoftwareDevice]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Software device with the specified id and instance address if it exists.
-    #>
-    [PSObject] GetVMHostSoftwareDevice() {
-        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
-        $softwareDeviceInstanceAddress = if ($null -ne $this.InstanceAddress) { $this.InstanceAddress } else { 0 }
-        $softwareDevice = $esxCliListMethodResult | Where-Object -FilterScript { $_.DeviceID -eq $this.DeviceIdentifier -and [long] $_.Instance -eq $softwareDeviceInstanceAddress }
-
-        return $softwareDevice
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Software device is in a Desired State depending on the value of the 'Ensure' property.
-    #>
-    [bool] IsVMHostSoftwareDeviceInDesiredState() {
-        $softwareDevice = $this.GetVMHostSoftwareDevice()
-
-        $result = $false
-        if ($this.Ensure -eq [Ensure]::Present) {
-            $result = ($null -ne $softwareDevice)
-        }
-        else {
-            $result = ($null -eq $softwareDevice)
-        }
-
-        return $result
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-
-        $softwareDevice = $this.GetVMHostSoftwareDevice()
-        if ($null -ne $softwareDevice) {
-            $result.DeviceIdentifier = $softwareDevice.DeviceID
-            $result.InstanceAddress = [long] $softwareDevice.Instance
-            $result.Ensure = [Ensure]::Present
-        }
-        else {
-            $result.DeviceIdentifier = $this.DeviceIdentifier
-            $result.InstanceAddress = $this.InstanceAddress
-            $result.Ensure = [Ensure]::Absent
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVMKernelActiveDumpFile : EsxCliBaseDSC {
-    VMHostVMKernelActiveDumpFile() {
-        $this.EsxCliCommand = 'system.coredump.file'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the VMKernel dump file should be enabled or disabled.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Enable
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to select the best available file using the smart selection algorithm. Can only be used when 'Enabled' property is specified with '$true' value.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Smart
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldModifyVMKernelDumpFile($esxCliGetMethodResult)
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostVMKernelActiveDumpFile] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostVMKernelActiveDumpFile]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the VMKernel dump file should be modified.
-    #>
-    [bool] ShouldModifyVMKernelDumpFile($esxCliGetMethodResult) {
-        $result = $null
-
-        if ($null -ne $this.Enable) {
-            if ($this.Enable) { $result = [string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
-            else { $result = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
-        }
-        else {
-            $result = $false
-        }
-
-        return $result
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-        $result.Smart = $this.Smart
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-        $result.Enable = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active)
-    }
-}
-
-[DscResource()]
-class VMHostVMKernelActiveDumpPartition : EsxCliBaseDSC {
-    VMHostVMKernelActiveDumpPartition() {
-        $this.EsxCliCommand = 'system.coredump.partition'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the VMKernel dump partition should be enabled or disabled.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Enable
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to select the best available partition using the smart selection algorithm. Can only be used when 'Enabled' property is specified with '$true' value.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Smart
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-
-            $result = !$this.ShouldModifyVMKernelDumpPartition($esxCliGetMethodResult)
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostVMKernelActiveDumpPartition] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostVMKernelActiveDumpPartition]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            $this.PopulateResult($result, $vmHost)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the VMKernel dump partition should be modified.
-    #>
-    [bool] ShouldModifyVMKernelDumpPartition($esxCliGetMethodResult) {
-        $result = $null
-
-        if ($null -ne $this.Enable) {
-            if ($this.Enable) { $result = [string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
-            else { $result = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active) }
-        }
-        else {
-            $result = $false
-        }
-
-        return $result
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-        $result.Smart = $this.Smart
-
-        $esxCliGetMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliGetMethodName)
-        $result.Enable = ![string]::IsNullOrEmpty($esxCliGetMethodResult.Active)
-    }
-}
-
-[DscResource()]
-class VMHostVMKernelDumpFile : EsxCliBaseDSC {
-    VMHostVMKernelDumpFile() {
-        $this.EsxCliCommand = 'system.coredump.file'
-    }
-
-    <#
-    .DESCRIPTION
-
-    Specifies the name of the Datastore for the dump file.
-    #>
-    [DscProperty(Key)]
-    [string] $DatastoreName
-
-    <#
-    .DESCRIPTION
-
-    Specifies the file name of the dump file.
-    #>
-    [DscProperty(Key)]
-    [string] $FileName
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the VMKernel dump Vmfs file should be present or absent.
-    #>
-    [DscProperty(Mandatory = $true)]
-    [Ensure] $Ensure
-
-    <#
-    .DESCRIPTION
-
-    Specifies the size in MB of the dump file. If not provided, a default size for the current machine is calculated.
-    #>
-    [DscProperty()]
-    [nullable[long]] $Size
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to deactivate and unconfigure the dump file being removed. This option is required if the file is active.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Force
-
-    hidden [string] $CouldNotRetrieveFileSystemsInformationMessage = "Could not retrieve information about File Systems on VMHost {0}. For more information: {1}"
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $addVMKernelDumpFileMethodArguments = @{
-                    datastore = $this.DatastoreName
-                    file = $this.FileName
-                }
-
-                $this.ExecuteEsxCliModifyMethod($this.EsxCliAddMethodName, $addVMKernelDumpFileMethodArguments)
-            }
-            else {
-                $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
-                $vmKernelDumpFile = $this.GetVMKernelDumpFile($esxCliListMethodResult)
-                $removeVMKernelDumpFileMethodArguments = @{
-                    file = $vmKernelDumpFile.Path
-                }
-
-                $this.ExecuteEsxCliModifyMethod($this.EsxCliRemoveMethodName, $removeVMKernelDumpFileMethodArguments)
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
-            $vmKernelDumpFile = $this.GetVMKernelDumpFile($esxCliListMethodResult)
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
 
             $result = $null
             if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($vmKernelDumpFile.Count -ne 0)
+                $result = ($null -ne $vss -and $this.Equals($vss))
             }
             else {
-                $result = ($vmKernelDumpFile.Count -eq 0)
+                $result = ($null -eq $vss)
             }
 
             $this.WriteDscResourceState($result)
@@ -14012,200 +18015,252 @@ class VMHostVMKernelDumpFile : EsxCliBaseDSC {
         }
         finally {
             $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
         }
     }
 
-    [VMHostVMKernelDumpFile] Get() {
+    [VMHostVss] Get() {
         try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostVMKernelDumpFile]::new()
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $result = [VMHostVss]::new()
+            $result.Server = $this.Server
 
             $this.ConnectVIServer()
-
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
+            $this.GetNetworkSystem($vmHost)
 
-            $this.PopulateResult($result, $vmHost)
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.Key) { 'Present' } else { 'Absent' }
 
             return $result
         }
         finally {
             $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
         }
     }
 
     <#
     .DESCRIPTION
 
-    Translates the Datastore name from a volume UUID to volume name, if required.
+    Returns a boolean value indicating if the VMHostVss should be updated.
     #>
-    [string] TranslateDatastoreName($datastoreName) {
-        $foundDatastoreName = $null
-        $fileSystemsList = $null
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
-        try {
-            $fileSystemsList = Invoke-EsxCliCommandMethod -EsxCli $this.EsxCli -EsxCliCommandMethod 'storage.filesystem.list.Invoke({0})' -EsxCliCommandMethodArguments @{}
-        }
-        catch {
-            throw ($this.CouldNotRetrieveFileSystemsInformationMessage -f $this.Name, $_.Exception.Message)
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
         }
 
-        foreach ($fileSystem in $fileSystemsList) {
-            if ($fileSystem.UUID -eq $datastoreName) {
-                $foundDatastoreName = $fileSystem.VolumeName
-                break
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssTest = @(
+            $this.ShouldUpdateDscResourceSetting('VssName', $vss.Name, $this.VssName),
+            $this.ShouldUpdateDscResourceSetting('Mtu', $vss.Mtu, $this.Mtu)
+        )
+
+        return ($vssTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVss($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssConfigArgs = @{
+            Name = $this.VssName
+            Mtu = $this.Mtu
+        }
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($null -ne $vss) {
+                if ($this.Equals($vss)) {
+                    return
+                }
+                $vssConfigArgs.Add('Operation', 'edit')
             }
-
-            if ($fileSystem.VolumeName -eq $datastoreName) {
-                $foundDatastoreName = $fileSystem.VolumeName
-                break
+            else {
+                $vssConfigArgs.Add('Operation', 'add')
             }
-        }
-
-        return $foundDatastoreName
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the name of the specified dump file.
-    #>
-    [string] GetDumpFileName($dumpFile) {
-        $fileParts = $dumpFile -Split '\.'
-        return $fileParts[0]
-    }
-
-    <#
-    .DESCRIPTION
-
-    Converts the passed bytes value to MB value.
-    #>
-    [double] ConvertBytesValueToMBValue($bytesValue) {
-        return [Math]::Round($bytesValue / 1MB)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the VMKernel dump file if it exists.
-    #>
-    [PSObject] GetVMKernelDumpFile($esxCliListMethodResult) {
-        $foundDumpFile = @{}
-        $result = @()
-
-        foreach ($dumpFile in $esxCliListMethodResult) {
-            $dumpFileParts = $dumpFile.Path -Split '/'
-            $dumpFileDatastoreName = $this.TranslateDatastoreName($dumpFileParts[3])
-            $dumpFileName = $this.GetDumpFileName($dumpFileParts[5])
-
-            $result += ($this.DatastoreName -eq $dumpFileDatastoreName)
-            $result += ($this.FileName -eq $dumpFileName)
-
-            if ($null -ne $this.Size) {
-                $result += ($this.Size -eq $this.ConvertBytesValueToMBValue($dumpFile.Size))
-            }
-
-            if ($result -NotContains $false) {
-                $foundDumpFile.Path = $dumpFile.Path
-                $foundDumpFile.Datastore = $dumpFileDatastoreName
-                $foundDumpFile.File = $dumpFileName
-                $foundDumpFile.Size = $this.ConvertBytesValueToMBValue($dumpFile.Size)
-
-                break
-            }
-
-            $result = @()
-        }
-
-        return $foundDumpFile
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-        $result.Force = $this.Force
-
-        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
-        $vmKernelDumpFile = $this.GetVMKernelDumpFile($esxCliListMethodResult)
-
-        if ($vmKernelDumpFile.Count -ne 0) {
-            $result.DatastoreName = $vmKernelDumpFile.Datastore
-            $result.FileName = $vmKernelDumpFile.File
-            $result.Size = $vmKernelDumpFile.Size
-            $result.Ensure = [Ensure]::Present
         }
         else {
-            $result.DatastoreName = $this.DatastoreName
-            $result.FileName = $this.FileName
-            $result.Size = $this.Size
-            $result.Ensure = [Ensure]::Absent
+            if ($null -eq $vss) {
+                return
+            }
+            $vssConfigArgs.Add('Operation', 'remove')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssConfig $vssConfigArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the virtual switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSS) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSS.Key = $currentVss.Key
+            $vmHostVSS.Mtu = $currentVss.Mtu
+            $vmHostVSS.VssName = $currentVss.Name
+            $vmHostVSS.NumPortsAvailable = $currentVss.NumPortsAvailable
+            $vmHostVSS.Pnic = $currentVss.Pnic
+            $vmHostVSS.PortGroup = $currentVss.PortGroup
+        }
+        else{
+            $vmHostVSS.Key = [string]::Empty
+            $vmHostVSS.Mtu = $this.Mtu
+            $vmHostVSS.VssName = $this.VssName
         }
     }
 }
 
 [DscResource()]
-class VMHostVMKernelModule : EsxCliBaseDSC {
-    VMHostVMKernelModule() {
-        $this.EsxCliCommand = 'system.module'
-    }
-
+class VMHostVssBridge : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
-    Specifies the name of the VMKernel module.
-    #>
-    [DscProperty(Key)]
-    [string] $Module
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the module should be enabled or disabled.
-    #>
-    [DscProperty(Mandatory)]
-    [bool] $Enabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to skip the VMkernel module validity checks.
+    The list of keys of the physical network adapters to be bridged.
     #>
     [DscProperty()]
-    [nullable[bool]] $Force
+    [string[]] $NicDevice
+
+    <#
+    .DESCRIPTION
+
+    The beacon configuration to probe for the validity of a link.
+    If this is set, beacon probing is configured and will be used.
+    If this is not set, beacon probing is disabled.
+    Determines how often, in seconds, a beacon should be sent.
+    #>
+    [DscProperty()]
+    [nullable[int]] $BeaconInterval
+
+    <#
+    .DESCRIPTION
+
+    The link discovery protocol, whether to advertise or listen.
+    #>
+    [DscProperty()]
+    [LinkDiscoveryProtocolOperation] $LinkDiscoveryProtocolOperation = [LinkDiscoveryProtocolOperation]::Unset
+
+    <#
+    .DESCRIPTION
+
+    The link discovery protocol type.
+    #>
+    [DscProperty()]
+    [LinkDiscoveryProtocolProtocol] $LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
 
     [void] Set() {
         try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $this.ConnectVIServer()
-
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
+            $this.GetNetworkSystem($vmHost)
 
-            $this.ExecuteEsxCliModifyMethod($this.EsxCliSetMethodName)
+            $this.UpdateVssBridge($vmHost)
         }
         finally {
             $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
         }
     }
 
     [bool] Test() {
         try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $this.ConnectVIServer()
-
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
-            $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
 
-            $result = !$this.ShouldModifyVMKernelModule($esxCliListMethodResult)
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.NicDevice = @()
+                $this.BeaconInterval = 0
+                $this.LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
 
             $this.WriteDscResourceState($result)
 
@@ -14213,198 +18268,1314 @@ class VMHostVMKernelModule : EsxCliBaseDSC {
         }
         finally {
             $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
         }
     }
 
-    [VMHostVMKernelModule] Get() {
+    [VMHostVssBridge] Get() {
         try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostVMKernelModule]::new()
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $result = [VMHostVssBridge]::new()
+            $result.Server = $this.Server
 
             $this.ConnectVIServer()
-
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
+            $this.GetNetworkSystem($vmHost)
 
-            $this.PopulateResult($result, $vmHost)
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
 
             return $result
         }
         finally {
             $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
         }
     }
 
     <#
     .DESCRIPTION
 
-    Checks if the specified VMKernel module should be modified.
+    Returns a boolean value indicating if the VMHostVssBridge should to be updated.
     #>
-    [bool] ShouldModifyVMKernelModule($esxCliListMethodResult) {
-        $vmKernelModule = $esxCliListMethodResult | Where-Object -FilterScript { $_.Name -eq $this.Module }
-        return $this.ShouldUpdateDscResourceSetting('Enabled', [System.Convert]::ToBoolean($vmKernelModule.IsEnabled), $this.Enabled)
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssBridgeTest = @(
+            $this.ShouldUpdateArraySetting('NicDevice', $vss.Spec.Bridge.NicDevice, $this.NicDevice),
+            $this.ShouldUpdateDscResourceSetting('BeaconInterval', $vss.Spec.Bridge.Beacon.Interval, $this.BeaconInterval),
+            $this.ShouldUpdateDscResourceSetting(
+                'LinkDiscoveryProtocolProtocol',
+                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol,
+                $this.LinkDiscoveryProtocolProtocol.ToString()
+            ),
+            $this.ShouldUpdateDscResourceSetting(
+                'LinkDiscoveryProtocolOperation',
+                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation,
+                $this.LinkDiscoveryProtocolOperation.ToString()
+            )
+        )
+
+        return ($vssBridgeTest -NotContains $true)
     }
 
     <#
     .DESCRIPTION
 
-    Populates the result returned from the Get method.
+    Updates the Bridge configuration of the virtual switch.
     #>
-    [void] PopulateResult($result, $vmHost) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-        $result.Force = $this.Force
+    [void] UpdateVssBridge($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
-        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
-        $vmKernelModule = $esxCliListMethodResult | Where-Object -FilterScript { $_.Name -eq $this.Module }
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
 
-        $result.Module = $vmKernelModule.Name
-        $result.Enabled = [System.Convert]::ToBoolean($vmKernelModule.IsEnabled)
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssBridgeArgs = @{
+            Name = $this.VssName
+            NicDevice = $this.NicDevice
+        }
+
+        # The Bridge configuration of the Standard Switch should be populated only when the Nic devices are passed.
+        if ($this.NicDevice.Count -gt 0) {
+            if ($null -ne $this.BeaconInterval) { $vssBridgeArgs.BeaconInterval = $this.BeaconInterval }
+            if ($this.LinkDiscoveryProtocolProtocol -ne [LinkDiscoveryProtocolProtocol]::Unset) {
+                $vssBridgeArgs.Add('LinkDiscoveryProtocolProtocol', $this.LinkDiscoveryProtocolProtocol.ToString())
+                $vssBridgeArgs.Add('LinkDiscoveryProtocolOperation', $this.LinkDiscoveryProtocolOperation.ToString())
+            }
+        }
+
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+        }
+        else {
+            $vssBridgeArgs.NicDevice = @()
+        }
+        $vssBridgeArgs.Add('Operation', 'edit')
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssBridgeConfig $vssBridgeArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Bridge Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Bridge settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSBridge) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSBridge.VssName = $currentVss.Name
+            $vmHostVSSBridge.NicDevice = $currentVss.Spec.Bridge.NicDevice
+            $vmHostVSSBridge.BeaconInterval = $currentVss.Spec.Bridge.Beacon.Interval
+
+            if ($null -ne $currentVss.Spec.Bridge.linkDiscoveryProtocolConfig) {
+                $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation.ToString()
+                $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol.ToString()
+            }
+        }
+        else {
+            $vmHostVSSBridge.VssName = $this.VssName
+            $vmHostVSSBridge.NicDevice = $this.NicDevice
+            $vmHostVSSBridge.BeaconInterval = $this.BeaconInterval
+            $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $this.LinkDiscoveryProtocolOperation
+            $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $this.LinkDiscoveryProtocolProtocol
+        }
     }
 }
 
 [DscResource()]
-class VMHostvSANNetworkConfiguration : EsxCliBaseDSC {
-    VMHostvSANNetworkConfiguration() {
-        $this.EsxCliCommand = 'vsan.network.ip'
+class VMHostVssSecurity : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not all traffic is seen on the port.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $AllowPromiscuous
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not the virtual network adapter should be
+    allowed to send network traffic with a different MAC address than that of
+    the virtual network adapter.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $ForgedTransmits
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not the Media Access Control (MAC) address
+    can be changed.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $MacChanges
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssSecurity($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.AllowPromiscuous = $false
+                $this.ForgedTransmits = $true
+                $this.MacChanges = $true
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssSecurity] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $result = [VMHostVssSecurity]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
     }
 
     <#
     .DESCRIPTION
 
-    Specifies the name of the interface.
+    Returns a boolean value indicating if the VMHostVssSecurity should to be updated.
     #>
-    [DscProperty(Key)]
-    [string] $InterfaceName
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssSecurityTest = @(
+            $this.ShouldUpdateDscResourceSetting('AllowPromiscuous', $vss.Spec.Policy.Security.AllowPromiscuous, $this.AllowPromiscuous),
+            $this.ShouldUpdateDscResourceSetting('ForgedTransmits', $vss.Spec.Policy.Security.ForgedTransmits, $this.ForgedTransmits),
+            $this.ShouldUpdateDscResourceSetting('MacChanges', $vss.Spec.Policy.Security.MacChanges, $this.MacChanges)
+        )
+
+        return ($vssSecurityTest -NotContains $true)
+    }
 
     <#
     .DESCRIPTION
 
-    Specifies whether the IP interface of the vSAN network configuration should be present or absent.
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVssSecurity($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssSecurityArgs = @{
+            Name = $this.VssName
+            AllowPromiscuous = $this.AllowPromiscuous
+            ForgedTransmits = $this.ForgedTransmits
+            MacChanges = $this.MacChanges
+        }
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+            $vssSecurityArgs.Add('Operation', 'edit')
+        }
+        else {
+            $vssSecurityArgs.AllowPromiscuous = $false
+            $vssSecurityArgs.ForgedTransmits = $true
+            $vssSecurityArgs.MacChanges = $true
+            $vssSecurityArgs.Add('Operation', 'edit')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssSecurityConfig $vssSecurityArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Security Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSSecurity) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSSecurity.VssName = $currentVss.Name
+            $vmHostVSSSecurity.AllowPromiscuous = $currentVss.Spec.Policy.Security.AllowPromiscuous
+            $vmHostVSSSecurity.ForgedTransmits = $currentVss.Spec.Policy.Security.ForgedTransmits
+            $vmHostVSSSecurity.MacChanges = $currentVss.Spec.Policy.Security.MacChanges
+        }
+        else {
+            $vmHostVSSSecurity.VssName = $this.VssName
+            $vmHostVSSSecurity.AllowPromiscuous = $this.AllowPromiscuous
+            $vmHostVSSSecurity.ForgedTransmits = $this.ForgedTransmits
+            $vmHostVSSSecurity.MacChanges = $this.MacChanges
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVssShaping : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The average bandwidth in bits per second if shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $AverageBandwidth
+
+    <#
+    .DESCRIPTION
+
+    The maximum burst size allowed in bytes if shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $BurstSize
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not traffic shaper is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $Enabled
+
+    <#
+    .DESCRIPTION
+
+    The peak bandwidth during bursts in bits per second if traffic shaping is enabled on the port.
+    #>
+    [DscProperty()]
+    [nullable[long]] $PeakBandwidth
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssShaping($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.AverageBandwidth = 100000
+                $this.BurstSize = 100000
+                $this.Enabled = $false
+                $this.PeakBandwidth = 100000
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssShaping] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $result = [VMHostVssShaping]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVssShaping should to be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssShapingTest = @(
+            $this.ShouldUpdateDscResourceSetting('AverageBandwidth', $vss.Spec.Policy.ShapingPolicy.AverageBandwidth, $this.AverageBandwidth),
+            $this.ShouldUpdateDscResourceSetting('BurstSize', $vss.Spec.Policy.ShapingPolicy.BurstSize, $this.BurstSize),
+            $this.ShouldUpdateDscResourceSetting('Enabled', $vss.Spec.Policy.ShapingPolicy.Enabled, $this.Enabled),
+            $this.ShouldUpdateDscResourceSetting('PeakBandwidth', $vss.Spec.Policy.ShapingPolicy.PeakBandwidth, $this.PeakBandwidth)
+        )
+
+        return ($vssShapingTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVssShaping($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssShapingArgs = @{
+            Name = $this.VssName
+            AverageBandwidth = $this.AverageBandwidth
+            BurstSize = $this.BurstSize
+            Enabled = $this.Enabled
+            PeakBandwidth = $this.PeakBandwidth
+        }
+        $vss = $this.GetVss()
+
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+            $vssShapingArgs.Add('Operation', 'edit')
+        }
+        else {
+            $vssShapingArgs.AverageBandwidth = 100000
+            $vssShapingArgs.BurstSize = 100000
+            $vssShapingArgs.Enabled = $false
+            $vssShapingArgs.PeakBandwidth = 100000
+            $vssShapingArgs.Add('Operation', 'edit')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssShapingConfig $vssShapingArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Shaping Policy Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSShaping) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSShaping.VssName = $currentVss.Name
+            $vmHostVSSShaping.AverageBandwidth = $currentVss.Spec.Policy.ShapingPolicy.AverageBandwidth
+            $vmHostVSSShaping.BurstSize = $currentVss.Spec.Policy.ShapingPolicy.BurstSize
+            $vmHostVSSShaping.Enabled = $currentVss.Spec.Policy.ShapingPolicy.Enabled
+            $vmHostVSSShaping.PeakBandwidth = $currentVss.Spec.Policy.ShapingPolicy.PeakBandwidth
+        }
+        else {
+            $vmHostVSSShaping.VssName = $this.Name
+            $vmHostVSSShaping.AverageBandwidth = $this.AverageBandwidth
+            $vmHostVSSShaping.BurstSize = $this.BurstSize
+            $vmHostVSSShaping.Enabled = $this.Enabled
+            $vmHostVSSShaping.PeakBandwidth = $this.PeakBandwidth
+        }
+    }
+}
+
+[DscResource()]
+class VMHostVssTeaming : VMHostVssBaseDSC {
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not to enable beacon probing
+    as a method to validate the link status of a physical network adapter.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $CheckBeacon
+
+    <#
+    .DESCRIPTION
+
+    List of active network adapters used for load balancing.
+    #>
+    [DscProperty()]
+    [string[]] $ActiveNic
+
+    <#
+    .DESCRIPTION
+
+    Standby network adapters used for failover.
+    #>
+    [DscProperty()]
+    [string[]] $StandbyNic
+
+    <#
+    .DESCRIPTION
+
+    Flag to specify whether or not to notify the physical switch if a link fails.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $NotifySwitches
+
+    <#
+    .DESCRIPTION
+
+    Network adapter teaming policy.
+    #>
+    [DscProperty()]
+    [NicTeamingPolicy] $Policy = [NicTeamingPolicy]::Unset
+
+    <#
+    .DESCRIPTION
+
+    The flag to indicate whether or not to use a rolling policy when restoring links.
+    #>
+    [DscProperty()]
+    [nullable[bool]] $RollingOrder
+
+    hidden [string] $PhysicalNicNotInBridgeMessage = "Physical network adapter {0} is not in the bridge with standard switch {1}."
+
+    [void] Set() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $this.UpdateVssTeaming($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+            $vss = $this.GetVss()
+
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vss -and $this.Equals($vss))
+            }
+            else {
+                $this.CheckBeacon = $false
+                $this.ActiveNic = @()
+                $this.StandbyNic = @()
+                $this.NotifySwitches = $true
+                $this.Policy = [NicTeamingPolicy]::Loadbalance_srcid
+                $this.RollingOrder = $false
+
+                $result = ($null -eq $vss -or $this.Equals($vss))
+            }
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostVssTeaming] Get() {
+        try {
+            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
+            $result = [VMHostVssTeaming]::new()
+            $result.Server = $this.Server
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $this.GetNetworkSystem($vmHost)
+
+            $result.Name = $vmHost.Name
+            $this.PopulateResult($vmHost, $result)
+
+            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Returns a boolean value indicating if the VMHostVssTeaming should to be updated.
+    #>
+    [bool] Equals($vss) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $vssTeamingTest = @(
+            $this.ShouldUpdateDscResourceSetting('CheckBeacon', $vss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon, $this.CheckBeacon),
+            $this.ShouldUpdateDscResourceSetting('NotifySwitches', $vss.Spec.Policy.NicTeaming.NotifySwitches, $this.NotifySwitches),
+            $this.ShouldUpdateDscResourceSetting('RollingOrder', $vss.Spec.Policy.NicTeaming.RollingOrder, $this.RollingOrder),
+            $this.ShouldUpdateDscResourceSetting('Policy', [string] $vss.Spec.Policy.NicTeaming.Policy, $this.Policy.ToString().ToLower()),
+            $this.ShouldUpdateArraySetting('ActiveNic', $vss.Spec.Policy.NicTeaming.NicOrder.ActiveNic, $this.ActiveNic),
+            $this.ShouldUpdateArraySetting('StandbyNic', $vss.Spec.Policy.NicTeaming.NicOrder.StandbyNic, $this.StandbyNic)
+        )
+
+        return ($vssTeamingTest -NotContains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Validates that all provided physical network adapters: (ActiveNic and StandbyNic) are in the bridge
+    with the specified standard switch.
+    #>
+    [void] ValidatePhysicalNetworkAdapters() {
+        $physicalNics = $this.ActiveNic + $this.StandbyNic
+
+        if ($physicalNics.Length -gt 0) {
+            $standardSwitch = $this.GetVss()
+            foreach ($physicalNic in $physicalNics) {
+                if (!($standardSwitch.Spec.Bridge.NicDevice -Contains $physicalNic)) {
+                    throw ($this.PhysicalNicNotInBridgeMessage -f $physicalNic, $standardSwitch.Name)
+                }
+            }
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Updates the configuration of the virtual switch.
+    #>
+    [void] UpdateVssTeaming($vmHost) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+        $this.ValidatePhysicalNetworkAdapters()
+
+        $vssTeamingArgs = @{
+            Name = $this.VssName
+            ActiveNic = $this.ActiveNic
+            StandbyNic = $this.StandbyNic
+            NotifySwitches = $this.NotifySwitches
+            RollingOrder = $this.RollingOrder
+        }
+
+        if ($null -ne $this.CheckBeacon) { $vssTeamingArgs.CheckBeacon = $this.CheckBeacon }
+        if ($this.Policy -ne [NicTeamingPolicy]::Unset) { $vssTeamingArgs.Policy = $this.Policy.ToString().ToLower() }
+
+        $vss = $this.GetVss()
+        if ($this.Ensure -eq 'Present') {
+            if ($this.Equals($vss)) {
+                return
+            }
+            $vssTeamingArgs.Add('Operation', 'edit')
+        }
+        else {
+            $vssTeamingArgs.CheckBeacon = $false
+            $vssTeamingArgs.ActiveNic = @()
+            $vssTeamingArgs.StandbyNic = @()
+            $vssTeamingArgs.NotifySwitches = $true
+            $vssTeamingArgs.Policy = ([NicTeamingPolicy]::Loadbalance_srcid).ToString().ToLower()
+            $vssTeamingArgs.RollingOrder = $false
+            $vssTeamingArgs.Add('Operation', 'edit')
+        }
+
+        try {
+            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssTeamingConfig $vssTeamingArgs -ErrorAction Stop
+        }
+        catch {
+            throw "The Virtual Switch Teaming Policy Config could not be updated: $($_.Exception.Message)"
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
+    #>
+    [void] PopulateResult($vmHost, $vmHostVSSTeaming) {
+        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
+        $currentVss = $this.GetVss()
+
+        if ($null -ne $currentVss) {
+            $vmHostVSSTeaming.VssName = $currentVss.Name
+            $vmHostVSSTeaming.CheckBeacon = $currentVss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon
+            $vmHostVSSTeaming.ActiveNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.ActiveNic
+            $vmHostVSSTeaming.StandbyNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.StandbyNic
+            $vmHostVSSTeaming.NotifySwitches = $currentVss.Spec.Policy.NicTeaming.NotifySwitches
+            $vmHostVSSTeaming.Policy = [NicTeamingPolicy]$currentVss.Spec.Policy.NicTeaming.Policy
+            $vmHostVSSTeaming.RollingOrder = $currentVss.Spec.Policy.NicTeaming.RollingOrder
+        }
+        else {
+            $vmHostVSSTeaming.VssName = $this.Name
+            $vmHostVSSTeaming.CheckBeacon = $this.CheckBeacon
+            $vmHostVSSTeaming.ActiveNic = $this.ActiveNic
+            $vmHostVSSTeaming.StandbyNic = $this.StandbyNic
+            $vmHostVSSTeaming.NotifySwitches = $this.NotifySwitches
+            $vmHostVSSTeaming.Policy = $this.Policy
+            $vmHostVSSTeaming.RollingOrder = $this.RollingOrder
+        }
+    }
+}
+
+[DscResource()]
+class VMHostGraphics : VMHostGraphicsBaseDSC {
+    <#
+    .DESCRIPTION
+
+    Specifies the default graphics type for the specified VMHost.
+    #>
+    [DscProperty(Mandatory)]
+    [GraphicsType] $GraphicsType
+
+    <#
+    .DESCRIPTION
+
+    Specifies the policy for assigning shared passthrough VMs to a host graphics device.
+    #>
+    [DscProperty(Mandatory)]
+    [SharedPassthruAssignmentPolicy] $SharedPassthruAssignmentPolicy
+
+    [void] Set() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
+            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
+            $this.RestartVMHost($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            return !$this.ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostGraphics] Get() {
+        try {
+            $result = [VMHostGraphics]::new()
+            $result.Server = $this.Server
+            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            $result.Name = $vmHost.Name
+            $result.GraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
+            $result.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Checks if the Graphics Configuration needs to be updated with the desired values.
+    #>
+    [bool] ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager) {
+        $shouldUpdateGraphicsConfiguration = @(
+            $this.ShouldUpdateDscResourceSetting(
+                'GraphicsType',
+                [string] $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType,
+                $this.GraphicsType.ToString()
+            ),
+            $this.ShouldUpdateDscResourceSetting(
+                'SharedPassthruAssignmentPolicy',
+                [string] $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy,
+                $this.SharedPassthruAssignmentPolicy.ToString()
+            )
+        )
+
+        return ($shouldUpdateGraphicsConfiguration -Contains $true)
+    }
+
+    <#
+    .DESCRIPTION
+
+    Performs an update on the Graphics Configuration of the specified VMHost.
+    #>
+    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
+        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
+
+        $vmHostGraphicsConfig.HostDefaultGraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
+        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $this.ConvertEnumValueToServerValue($this.SharedPassthruAssignmentPolicy)
+
+        try {
+            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
+        }
+        catch {
+            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
+        }
+    }
+}
+
+[DscResource()]
+class VMHostGraphicsDevice : VMHostGraphicsBaseDSC {
+    <#
+    .DESCRIPTION
+
+    Specifies the Graphics device identifier (ex. PCI ID).
+    #>
+    [DscProperty(Key)]
+    [string] $Id
+
+    <#
+    .DESCRIPTION
+
+    Specifies the graphics type for the specified Device in 'Id' property.
+    #>
+    [DscProperty(Mandatory)]
+    [GraphicsType] $GraphicsType
+
+    [void] Set() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+
+            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
+            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
+            $this.RestartVMHost($vmHost)
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [bool] Test() {
+    	try {
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
+
+            $result = !$this.ShouldUpdateDscResourceSetting(
+                'GraphicsType',
+                [string] $foundDevice.GraphicsType,
+                $this.GraphicsType.ToString()
+            )
+
+            $this.WriteDscResourceState($result)
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    [VMHostGraphicsDevice] Get() {
+        try {
+            $result = [VMHostGraphicsDevice]::new()
+            $result.Server = $this.Server
+            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
+
+            $this.ConnectVIServer()
+            $vmHost = $this.GetVMHost()
+            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
+            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
+
+            $result.Name = $vmHost.Name
+            $result.Id = $foundDevice.DeviceId
+            $result.GraphicsType = $foundDevice.GraphicsType
+
+            return $result
+        }
+        finally {
+            $this.DisconnectVIServer()
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Retrieves the Graphics Device with the specified Id from the server.
+    #>
+    [PSObject] GetGraphicsDevice($vmHostGraphicsManager) {
+        $foundDevice = $vmHostGraphicsManager.GraphicsConfig.DeviceType | Where-Object { $_.DeviceId -eq $this.Id }
+        if ($null -eq $foundDevice) {
+            throw "Device $($this.Id) was not found in the available Graphics devices."
+        }
+
+        return $foundDevice
+    }
+
+    <#
+    .DESCRIPTION
+
+    Performs an update on the Graphics Configuration of the specified VMHost by changing the Graphics Type for the
+    specified Device.
+    #>
+    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
+        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
+
+        $vmHostGraphicsConfig.HostDefaultGraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
+        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
+        $vmHostGraphicsConfig.DeviceType = @()
+
+        $vmHostGraphicsConfigDeviceType = New-Object VMware.Vim.HostGraphicsConfigDeviceType
+        $vmHostGraphicsConfigDeviceType.DeviceId = $this.Id
+        $vmHostGraphicsConfigDeviceType.GraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
+
+        $vmHostGraphicsConfig.DeviceType += $vmHostGraphicsConfigDeviceType
+
+        try {
+            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
+        }
+        catch {
+            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
+        }
+    }
+}
+
+[DscResource()]
+class VMHostIPRoute : VMHostBaseDSC {
+    <#
+    .DESCRIPTION
+
+    Specifies the gateway IPv4/IPv6 address of the route.
+    #>
+    [DscProperty(Key)]
+    [string] $Gateway
+
+    <#
+    .DESCRIPTION
+
+    Specifies the destination IPv4/IPv6 address of the route.
+    #>
+    [DscProperty(Key)]
+    [string] $Destination
+
+    <#
+    .DESCRIPTION
+
+    Specifies the prefix length of the destination IP address. For IPv4, the valid values are from 0 to 32, and for IPv6 - from 0 to 128.
+    #>
+    [DscProperty(Key)]
+    [int] $PrefixLength
+
+    <#
+    .DESCRIPTION
+
+    Specifies whether the IPv4/IPv6 route should be present or absent.
     #>
     [DscProperty(Mandatory = $true)]
     [Ensure] $Ensure
 
-    <#
-    .DESCRIPTION
+    hidden [string] $CreateVMHostIPRouteMessage = "Creating IP Route with Gateway address {0} and Destination address {1} on VMHost {2}."
+    hidden [string] $RemoveVMHostIPRouteMessage = "Removing IP Route with Gateway address {0} and Destination address {1} on VMHost {2}."
 
-    Specifies the IPv4 multicast address for the agent group.
-    #>
-    [DscProperty()]
-    [string] $AgentMcAddr
-
-    <#
-    .DESCRIPTION
-
-    Specifies the IPv6 multicast address for the agent group.
-    #>
-    [DscProperty()]
-    [string] $AgentV6McAddr
-
-    <#
-    .DESCRIPTION
-
-    Specifies the multicast address port for the agent group.
-    #>
-    [DscProperty()]
-    [nullable[long]] $AgentMcPort
-
-    <#
-    .DESCRIPTION
-
-    Specifies the unicast address port for the VMHost unicast channel.
-    #>
-    [DscProperty()]
-    [nullable[long]] $HostUcPort
-
-    <#
-    .DESCRIPTION
-
-    Specifies the IPv4 multicast address for the master group.
-    #>
-    [DscProperty()]
-    [string] $MasterMcAddr
-
-    <#
-    .DESCRIPTION
-
-    Specifies the IPv6 multicast address for the master group.
-    #>
-    [DscProperty()]
-    [string] $MasterV6McAddr
-
-    <#
-    .DESCRIPTION
-
-    Specifies the multicast address port for the master group.
-    #>
-    [DscProperty()]
-    [nullable[long]] $MasterMcPort
-
-    <#
-    .DESCRIPTION
-
-    Specifies the time-to-live for multicast packets.
-    #>
-    [DscProperty()]
-    [nullable[long]] $MulticastTtl
-
-    <#
-    .DESCRIPTION
-
-    Specifies the network transmission type of the vSAN traffic through a virtual network adapter. Supported values are vsan and witness. Type 'vsan' means general vSAN transmission, which is used for both
-    data and witness transmission, if there is no virtual adapter configured with 'witness' traffic type; Type 'witness' indicates that, vSAN vmknic is used for vSAN witness transmission.
-    Once a virtual adapter is configured with 'witness' traffic type, vSAN witness data transmission will stop using virtual adapter with 'vsan' traffic type, and use first dicovered virtual adapter with 'witness' traffic type.
-    Multiple traffic types can be provided in format -T type1 -T type2. Default value is 'vsan', if the property is not specified.
-    #>
-    [DscProperty()]
-    [string[]] $TrafficType
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether to notify vSAN subsystem of the removal of the IP Interface, even if is not configured.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Force
+    hidden [string] $CouldNotCreateVMHostIPRouteMessage = "Could not create IP Route with Gateway address {0} and Destination address {1} on VMHost {2}. For more information: {3}"
+    hidden [string] $CouldNotRemoveVMHostIPRouteMessage = "Could not remove IP Route with Gateway address {0} and Destination address {1} on VMHost {2}. For more information: {3}"
 
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
+            $vmHostIPRoute = $this.GetVMHostIPRoute($vmHost)
 
-            $vSanNetworkConfigurationIPInterface = $this.GetvSanNetworkConfigurationIPInterface()
             if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $vSanNetworkConfigurationIPInterface) {
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliAddMethodName)
+                if ($null -eq $vmHostIPRoute) {
+                    $this.NewVMHostIPRoute($vmHost)
                 }
             }
             else {
-                if ($null -ne $vSanNetworkConfigurationIPInterface) {
-                    $this.ExecuteEsxCliModifyMethod($this.EsxCliRemoveMethodName)
+                if ($null -ne $vmHostIPRoute) {
+                    $this.RemoveVMHostIPRoute($vmHostIPRoute)
                 }
             }
         }
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
+            $vmHostIPRoute = $this.GetVMHostIPRoute($vmHost)
 
-            $result = $this.IsvSanNetworkConfigurationIPInterfaceInDesiredState()
+            $result = $null
+            if ($this.Ensure -eq [Ensure]::Present) {
+                $result = ($null -ne $vmHostIPRoute)
+            }
+            else {
+                $result = ($null -eq $vmHostIPRoute)
+            }
 
             $this.WriteDscResourceState($result)
 
@@ -14413,67 +19584,138 @@ class VMHostvSANNetworkConfiguration : EsxCliBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
-    [VMHostvSANNetworkConfiguration] Get() {
+    [VMHostIPRoute] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostvSANNetworkConfiguration]::new()
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            $result = [VMHostIPRoute]::new()
 
             $this.ConnectVIServer()
 
             $vmHost = $this.GetVMHost()
-            $this.GetEsxCli($vmHost)
+            $vmHostIPRoute = $this.GetVMHostIPRoute($vmHost)
 
-            $this.PopulateResult($result, $vmHost)
+            $this.PopulateResult($result, $vmHostIPRoute)
 
             return $result
         }
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     <#
     .DESCRIPTION
 
-    Retrieves the IP interface with the specified name of the vSAN network configuration.
+    Retrieves the configured IPv4/IPv6 route with the specified Gateway and Destination addresses if it exists.
     #>
-    [PSObject] GetvSanNetworkConfigurationIPInterface() {
-        <#
-        The 'list' method of the command is not on the same element as the 'add' and 'remove' methods. So the different methods
-        need to be executed with different commands.
-        #>
-        $initialEsxCliCommand = $this.EsxCliCommand
-        $this.EsxCliCommand = 'vsan.network'
-
-        $esxCliListMethodResult = $this.ExecuteEsxCliRetrievalMethod($this.EsxCliListMethodName)
-
-        # The command needs to be restored to its initial value, so that it can be used by the 'add' and 'remove' methods.
-        $this.EsxCliCommand = $initialEsxCliCommand
-
-        return ($esxCliListMethodResult | Where-Object -FilterScript { $_.VmkNicName -eq $this.InterfaceName })
+    [PSObject] GetVMHostIPRoute($vmHost) {
+        return (Get-VMHostRoute -Server $this.Connection -VMHost $vmHost -ErrorAction SilentlyContinue -Verbose:$false |
+                Where-Object -FilterScript { $_.Gateway -eq $this.Gateway -and $_.Destination -eq $this.Destination -and $_.PrefixLength -eq $this.PrefixLength })
     }
 
     <#
     .DESCRIPTION
 
-    Checks if the vSan network configuration IP interface is in a Desired State depending on the value of the 'Ensure' property.
+    Creates a new IP route with the specified Gateway and Destination addresses.
     #>
-    [bool] IsvSanNetworkConfigurationIPInterfaceInDesiredState() {
-        $vSanNetworkConfigurationIPInterface = $this.GetvSanNetworkConfigurationIPInterface()
-
-        $result = $false
-        if ($this.Ensure -eq [Ensure]::Present) {
-            $result = ($null -ne $vSanNetworkConfigurationIPInterface)
+    [void] NewVMHostIPRoute($vmHost) {
+        $newVMHostRouteParams = @{
+            Server = $this.Connection
+            VMHost = $vmHost
+            Gateway = $this.Gateway
+            Destination = $this.Destination
+            PrefixLength = $this.PrefixLength
+            Confirm = $false
+            ErrorAction = 'Stop'
+            Verbose = $false
         }
-        else {
-            $result = ($null -eq $vSanNetworkConfigurationIPInterface)
+
+        try {
+            Write-VerboseLog -Message $this.CreateVMHostIPRouteMessage -Arguments @($this.Gateway, $this.Destination, $vmHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.CreateVMHostIPRouteMessage
+                Arguments = @($this.Gateway, $this.Destination, $vmHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            New-VMHostRoute @newVMHostRouteParams
+        }
+        catch {
+            throw ($this.CouldNotCreateVMHostIPRouteMessage -f $this.Gateway, $this.Destination, $vmHost.Name, $_.Exception.Message)
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
+    Removes the IP route with the specified Gateway and Destination addresses.
+    #>
+    [void] RemoveVMHostIPRoute($vmHostIPRoute) {
+        $removeVMHostRouteParams = @{
+            VMHostRoute = $vmHostIPRoute
+            Confirm = $false
+            ErrorAction = 'Stop'
+            Verbose = $false
         }
 
-        return $result
+        try {
+            Write-VerboseLog -Message $this.RemoveVMHostIPRouteMessage -Arguments @($this.Gateway, $this.Destination, $this.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RemoveVMHostIPRouteMessage
+                Arguments = @($this.Gateway, $this.Destination, $this.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+            Remove-VMHostRoute @removeVMHostRouteParams
+        }
+        catch {
+            throw ($this.CouldNotRemoveVMHostIPRouteMessage -f $this.Gateway, $this.Destination, $this.Name, $_.Exception.Message)
+        }
     }
 
     <#
@@ -14481,37 +19723,21 @@ class VMHostvSANNetworkConfiguration : EsxCliBaseDSC {
 
     Populates the result returned from the Get method.
     #>
-    [void] PopulateResult($result, $vmHost) {
+    [void] PopulateResult($result, $vmHostIPRoute) {
         $result.Server = $this.Connection.Name
-        $result.Name = $vmHost.Name
-        $result.Force = $this.Force
+        $result.Name = $this.Name
 
-        $vSanNetworkConfigurationIPInterface = $this.GetvSanNetworkConfigurationIPInterface()
-        if ($null -ne $vSanNetworkConfigurationIPInterface) {
-            $result.InterfaceName = $vSanNetworkConfigurationIPInterface.VmkNicName
-            $result.AgentMcAddr = $vSanNetworkConfigurationIPInterface.AgentGroupMulticastAddress
-            $result.AgentMcPort = [long] $vSanNetworkConfigurationIPInterface.AgentGroupMulticastPort
-            $result.AgentV6McAddr = $vSanNetworkConfigurationIPInterface.AgentGroupIPv6MulticastAddress
-            $result.HostUcPort = [long] $vSanNetworkConfigurationIPInterface.HostUnicastChannelBoundPort
-            $result.MasterMcAddr = $vSanNetworkConfigurationIPInterface.MasterGroupMulticastAddress
-            $result.MasterMcPort = [long] $vSanNetworkConfigurationIPInterface.MasterGroupMulticastPort
-            $result.MasterV6McAddr = $vSanNetworkConfigurationIPInterface.MasterGroupIPv6MulticastAddress
-            $result.MulticastTtl = [long] $vSanNetworkConfigurationIPInterface.MulticastTTL
-            $result.TrafficType = $vSanNetworkConfigurationIPInterface.TrafficType
+        if ($null -ne $vmHostIPRoute) {
             $result.Ensure = [Ensure]::Present
+            $result.Gateway = $vmHostIPRoute.Gateway
+            $result.Destination = $vmHostIPRoute.Destination
+            $result.PrefixLength = $vmHostIPRoute.PrefixLength
         }
         else {
-            $result.InterfaceName = $this.InterfaceName
-            $result.AgentMcAddr = $this.AgentMcAddr
-            $result.AgentMcPort = $this.AgentMcPort
-            $result.AgentV6McAddr = $this.AgentV6McAddr
-            $result.HostUcPort = $this.HostUcPort
-            $result.MasterMcAddr = $this.MasterMcAddr
-            $result.MasterMcPort = $this.MasterMcPort
-            $result.MasterV6McAddr = $this.MasterV6McAddr
-            $result.MulticastTtl = $this.MulticastTtl
-            $result.TrafficType = $this.TrafficType
             $result.Ensure = [Ensure]::Absent
+            $result.Gateway = $this.Gateway
+            $result.Destination = $this.Destination
+            $result.PrefixLength = $this.PrefixLength
         }
     }
 }
@@ -14567,6 +19793,17 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsvCenter()
 
@@ -14591,12 +19828,33 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $this.ConnectVIServer()
             $this.EnsureConnectionIsvCenter()
@@ -14629,12 +19887,33 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostVDSwitchMigration] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostVDSwitchMigration]::new()
 
             $this.ConnectVIServer()
@@ -14650,6 +19929,16 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -14669,6 +19958,17 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
 
         try {
             Write-VerboseLog -Message $this.RetrieveVDSwitchMessage -Arguments @($this.VdsName, $this.Connection.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.RetrieveVDSwitchMessage
+                Arguments = @($this.VdsName, $this.Connection.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $getVDSwitchParams = @{
                 Server = $this.Connection
                 Name = $this.VdsName
@@ -14827,6 +20127,17 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
             if ($null -eq $distributedPortGroup) {
                 try {
                     Write-VerboseLog -Message $this.CreateVDPortGroupMessage -Arguments @($distributedPortGroupName, $distributedSwitch.Name)
+
+                    $writeToLogFilesplat = @{
+                        Connection = $this.Connection.Name
+                        ResourceName = $this.GetType().ToString()
+                        LogType = 'Verbose'
+                        Message = $this.CreateVDPortGroupMessage
+                        Arguments = @($distributedPortGroupName, $distributedSwitch.Name)
+                    }
+
+                    Write-LogToFile @writeToLogFilesplat
+
                     $newVDPortGroupParams = @{
                         Server = $this.Connection
                         Name = $distributedPortGroupName
@@ -14878,6 +20189,17 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
     [void] AddVMHostToDistributedSwitch($distributedSwitch) {
         try {
             Write-VerboseLog -Message $this.AddVDSwitchToVMHostMessage -Arguments @($distributedSwitch.Name, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.AddVDSwitchToVMHostMessage
+                Arguments = @($distributedSwitch.Name, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $addVDSwitchVMHostParams = @{
                 Server = $this.Connection
                 VDSwitch = $distributedSwitch
@@ -14901,6 +20223,16 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
     [void] AddPhysicalNetworkAdaptersToDistributedSwitch($physicalNetworkAdapters, $distributedSwitch) {
         if ($null -eq $this.MigratePhysicalNicsOnly -or !$this.MigratePhysicalNicsOnly) {
             Write-WarningLog -Message $this.MigratePhysicalNicsOnlyNotSpecified
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Warning'
+                Message = $this.MigratePhysicalNicsOnlyNotSpecified
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             return
         }
 
@@ -14909,6 +20241,20 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
                 ($physicalNetworkAdapters.Name -Join ', '),
                 $distributedSwitch.Name
             )
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.AddPhysicalNicsToVDSwitchMessage
+                Arguments = @(
+                    ($physicalNetworkAdapters.Name -Join ', '),
+                    $distributedSwitch.Name
+                )
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $addVDSwitchPhysicalNetworkAdapterParams = $this.GetAddVDSwitchPhysicalNetworkAdapterParams($distributedSwitch, $physicalNetworkAdapters)
 
             Add-VDSwitchPhysicalNetworkAdapter @addVDSwitchPhysicalNetworkAdapterParams
@@ -14938,6 +20284,21 @@ class VMHostVDSwitchMigration : VMHostNetworkMigrationBaseDSC {
                 ($vmKernelNetworkAdapters.Name -Join ', '),
                 $distributedSwitch.Name
             )
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.AddPhysicalNicsAndVMKernelNicsToVDSwitchMessage
+                Arguments = @(
+                    ($physicalNetworkAdapters.Name -Join ', '),
+                    ($vmKernelNetworkAdapters.Name -Join ', '),
+                    $distributedSwitch.Name
+                )
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $addVDSwitchPhysicalNetworkAdapterParams = $this.GetAddVDSwitchPhysicalNetworkAdapterParams(
                 $distributedSwitch,
                 $physicalNetworkAdapters,
@@ -15502,6 +20863,17 @@ class VMHostVdsNic : VMHostNicBaseDSC {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsvCenter()
 
@@ -15524,12 +20896,33 @@ class VMHostVdsNic : VMHostNicBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.EnsureConnectionIsvCenter()
 
@@ -15556,12 +20949,33 @@ class VMHostVdsNic : VMHostNicBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostVdsNic] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostVdsNic]::new()
 
             $this.ConnectVIServer()
@@ -15590,6 +21004,16 @@ class VMHostVdsNic : VMHostNicBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -15784,2041 +21208,6 @@ class VMHostVssNic : VMHostNicBaseDSC {
             catch {
                 throw "Could not retrieve Virtual Switch $($this.VssName) of VMHost $($this.VMHost.Name). For more information: $($_.Exception.Message)"
             }
-        }
-    }
-}
-
-[DscResource()]
-class VMHostIPRoute : VMHostBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies the gateway IPv4/IPv6 address of the route.
-    #>
-    [DscProperty(Key)]
-    [string] $Gateway
-
-    <#
-    .DESCRIPTION
-
-    Specifies the destination IPv4/IPv6 address of the route.
-    #>
-    [DscProperty(Key)]
-    [string] $Destination
-
-    <#
-    .DESCRIPTION
-
-    Specifies the prefix length of the destination IP address. For IPv4, the valid values are from 0 to 32, and for IPv6 - from 0 to 128.
-    #>
-    [DscProperty(Key)]
-    [int] $PrefixLength
-
-    <#
-    .DESCRIPTION
-
-    Specifies whether the IPv4/IPv6 route should be present or absent.
-    #>
-    [DscProperty(Mandatory = $true)]
-    [Ensure] $Ensure
-
-    hidden [string] $CreateVMHostIPRouteMessage = "Creating IP Route with Gateway address {0} and Destination address {1} on VMHost {2}."
-    hidden [string] $RemoveVMHostIPRouteMessage = "Removing IP Route with Gateway address {0} and Destination address {1} on VMHost {2}."
-
-    hidden [string] $CouldNotCreateVMHostIPRouteMessage = "Could not create IP Route with Gateway address {0} and Destination address {1} on VMHost {2}. For more information: {3}"
-    hidden [string] $CouldNotRemoveVMHostIPRouteMessage = "Could not remove IP Route with Gateway address {0} and Destination address {1} on VMHost {2}. For more information: {3}"
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $vmHostIPRoute = $this.GetVMHostIPRoute($vmHost)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $vmHostIPRoute) {
-                    $this.NewVMHostIPRoute($vmHost)
-                }
-            }
-            else {
-                if ($null -ne $vmHostIPRoute) {
-                    $this.RemoveVMHostIPRoute($vmHostIPRoute)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $vmHostIPRoute = $this.GetVMHostIPRoute($vmHost)
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vmHostIPRoute)
-            }
-            else {
-                $result = ($null -eq $vmHostIPRoute)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    [VMHostIPRoute] Get() {
-        try {
-            Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
-            $result = [VMHostIPRoute]::new()
-
-            $this.ConnectVIServer()
-
-            $vmHost = $this.GetVMHost()
-            $vmHostIPRoute = $this.GetVMHostIPRoute($vmHost)
-
-            $this.PopulateResult($result, $vmHostIPRoute)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-            Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the configured IPv4/IPv6 route with the specified Gateway and Destination addresses if it exists.
-    #>
-    [PSObject] GetVMHostIPRoute($vmHost) {
-        return (Get-VMHostRoute -Server $this.Connection -VMHost $vmHost -ErrorAction SilentlyContinue -Verbose:$false |
-                Where-Object -FilterScript { $_.Gateway -eq $this.Gateway -and $_.Destination -eq $this.Destination -and $_.PrefixLength -eq $this.PrefixLength })
-    }
-
-    <#
-    .DESCRIPTION
-
-    Creates a new IP route with the specified Gateway and Destination addresses.
-    #>
-    [void] NewVMHostIPRoute($vmHost) {
-        $newVMHostRouteParams = @{
-            Server = $this.Connection
-            VMHost = $vmHost
-            Gateway = $this.Gateway
-            Destination = $this.Destination
-            PrefixLength = $this.PrefixLength
-            Confirm = $false
-            ErrorAction = 'Stop'
-            Verbose = $false
-        }
-
-        try {
-            Write-VerboseLog -Message $this.CreateVMHostIPRouteMessage -Arguments @($this.Gateway, $this.Destination, $vmHost.Name)
-            New-VMHostRoute @newVMHostRouteParams
-        }
-        catch {
-            throw ($this.CouldNotCreateVMHostIPRouteMessage -f $this.Gateway, $this.Destination, $vmHost.Name, $_.Exception.Message)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Removes the IP route with the specified Gateway and Destination addresses.
-    #>
-    [void] RemoveVMHostIPRoute($vmHostIPRoute) {
-        $removeVMHostRouteParams = @{
-            VMHostRoute = $vmHostIPRoute
-            Confirm = $false
-            ErrorAction = 'Stop'
-            Verbose = $false
-        }
-
-        try {
-            Write-VerboseLog -Message $this.RemoveVMHostIPRouteMessage -Arguments @($this.Gateway, $this.Destination, $this.Name)
-            Remove-VMHostRoute @removeVMHostRouteParams
-        }
-        catch {
-            throw ($this.CouldNotRemoveVMHostIPRouteMessage -f $this.Gateway, $this.Destination, $this.Name, $_.Exception.Message)
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get method.
-    #>
-    [void] PopulateResult($result, $vmHostIPRoute) {
-        $result.Server = $this.Connection.Name
-        $result.Name = $this.Name
-
-        if ($null -ne $vmHostIPRoute) {
-            $result.Ensure = [Ensure]::Present
-            $result.Gateway = $vmHostIPRoute.Gateway
-            $result.Destination = $vmHostIPRoute.Destination
-            $result.PrefixLength = $vmHostIPRoute.PrefixLength
-        }
-        else {
-            $result.Ensure = [Ensure]::Absent
-            $result.Gateway = $this.Gateway
-            $result.Destination = $this.Destination
-            $result.PrefixLength = $this.PrefixLength
-        }
-    }
-}
-
-[DscResource()]
-class VMHostGraphics : VMHostGraphicsBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies the default graphics type for the specified VMHost.
-    #>
-    [DscProperty(Mandatory)]
-    [GraphicsType] $GraphicsType
-
-    <#
-    .DESCRIPTION
-
-    Specifies the policy for assigning shared passthrough VMs to a host graphics device.
-    #>
-    [DscProperty(Mandatory)]
-    [SharedPassthruAssignmentPolicy] $SharedPassthruAssignmentPolicy
-
-    [void] Set() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
-            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
-            $this.RestartVMHost($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            return !$this.ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostGraphics] Get() {
-        try {
-            $result = [VMHostGraphics]::new()
-            $result.Server = $this.Server
-            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            $result.Name = $vmHost.Name
-            $result.GraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
-            $result.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Graphics Configuration needs to be updated with the desired values.
-    #>
-    [bool] ShouldUpdateGraphicsConfiguration($vmHostGraphicsManager) {
-        $shouldUpdateGraphicsConfiguration = @(
-            $this.ShouldUpdateDscResourceSetting(
-                'GraphicsType',
-                [string] $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType,
-                $this.GraphicsType.ToString()
-            ),
-            $this.ShouldUpdateDscResourceSetting(
-                'SharedPassthruAssignmentPolicy',
-                [string] $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy,
-                $this.SharedPassthruAssignmentPolicy.ToString()
-            )
-        )
-
-        return ($shouldUpdateGraphicsConfiguration -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Graphics Configuration of the specified VMHost.
-    #>
-    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
-        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
-
-        $vmHostGraphicsConfig.HostDefaultGraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
-        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $this.ConvertEnumValueToServerValue($this.SharedPassthruAssignmentPolicy)
-
-        try {
-            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
-        }
-        catch {
-            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
-        }
-    }
-}
-
-[DscResource()]
-class VMHostGraphicsDevice : VMHostGraphicsBaseDSC {
-    <#
-    .DESCRIPTION
-
-    Specifies the Graphics device identifier (ex. PCI ID).
-    #>
-    [DscProperty(Key)]
-    [string] $Id
-
-    <#
-    .DESCRIPTION
-
-    Specifies the graphics type for the specified Device in 'Id' property.
-    #>
-    [DscProperty(Mandatory)]
-    [GraphicsType] $GraphicsType
-
-    [void] Set() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-
-            $this.EnsureVMHostIsInMaintenanceMode($vmHost)
-            $this.UpdateGraphicsConfiguration($vmHostGraphicsManager)
-            $this.RestartVMHost($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-    	try {
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
-
-            $result = !$this.ShouldUpdateDscResourceSetting(
-                'GraphicsType',
-                [string] $foundDevice.GraphicsType,
-                $this.GraphicsType.ToString()
-            )
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostGraphicsDevice] Get() {
-        try {
-            $result = [VMHostGraphicsDevice]::new()
-            $result.Server = $this.Server
-            $result.RestartTimeoutMinutes = $this.RestartTimeoutMinutes
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $vmHostGraphicsManager = $this.GetVMHostGraphicsManager($vmHost)
-            $foundDevice = $this.GetGraphicsDevice($vmHostGraphicsManager)
-
-            $result.Name = $vmHost.Name
-            $result.Id = $foundDevice.DeviceId
-            $result.GraphicsType = $foundDevice.GraphicsType
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Retrieves the Graphics Device with the specified Id from the server.
-    #>
-    [PSObject] GetGraphicsDevice($vmHostGraphicsManager) {
-        $foundDevice = $vmHostGraphicsManager.GraphicsConfig.DeviceType | Where-Object { $_.DeviceId -eq $this.Id }
-        if ($null -eq $foundDevice) {
-            throw "Device $($this.Id) was not found in the available Graphics devices."
-        }
-
-        return $foundDevice
-    }
-
-    <#
-    .DESCRIPTION
-
-    Performs an update on the Graphics Configuration of the specified VMHost by changing the Graphics Type for the
-    specified Device.
-    #>
-    [void] UpdateGraphicsConfiguration($vmHostGraphicsManager) {
-        $vmHostGraphicsConfig = New-Object VMware.Vim.HostGraphicsConfig
-
-        $vmHostGraphicsConfig.HostDefaultGraphicsType = $vmHostGraphicsManager.GraphicsConfig.HostDefaultGraphicsType
-        $vmHostGraphicsConfig.SharedPassthruAssignmentPolicy = $vmHostGraphicsManager.GraphicsConfig.SharedPassthruAssignmentPolicy
-        $vmHostGraphicsConfig.DeviceType = @()
-
-        $vmHostGraphicsConfigDeviceType = New-Object VMware.Vim.HostGraphicsConfigDeviceType
-        $vmHostGraphicsConfigDeviceType.DeviceId = $this.Id
-        $vmHostGraphicsConfigDeviceType.GraphicsType = $this.ConvertEnumValueToServerValue($this.GraphicsType)
-
-        $vmHostGraphicsConfig.DeviceType += $vmHostGraphicsConfigDeviceType
-
-        try {
-            Update-GraphicsConfig -VMHostGraphicsManager $vmHostGraphicsManager -VMHostGraphicsConfig $vmHostGraphicsConfig
-        }
-        catch {
-            throw "The Graphics Configuration of VMHost $($this.Name) could not be updated: $($_.Exception.Message)"
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVss : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The maximum transmission unit (MTU) associated with this virtual switch in bytes.
-    #>
-    [DscProperty()]
-    [nullable[int]] $Mtu
-
-    <#
-    .DESCRIPTION
-
-    The virtual switch key.
-    #>
-    [DscProperty(NotConfigurable)]
-    [string] $Key
-
-    <#
-    .DESCRIPTION
-
-    The number of ports that this virtual switch currently has.
-    #>
-    [DscProperty(NotConfigurable)]
-    [int] $NumPorts
-
-    <#
-    .DESCRIPTION
-
-    The number of ports that are available on this virtual switch.
-    #>
-    [DscProperty(NotConfigurable)]
-    [int] $NumPortsAvailable
-
-    <#
-    .DESCRIPTION
-
-    The set of physical network adapters associated with this bridge.
-    #>
-    [DscProperty(NotConfigurable)]
-    [string[]] $Pnic
-
-    <#
-    .DESCRIPTION
-
-    The list of port groups configured for this virtual switch.
-    #>
-    [DscProperty(NotConfigurable)]
-    [string[]] $PortGroup
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $this.UpdateVss($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
-            }
-            else {
-                $result = ($null -eq $vss)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVss] Get() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVss]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
-
-            $result.Ensure = if ([string]::Empty -ne $result.Key) { 'Present' } else { 'Absent' }
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns a boolean value indicating if the VMHostVss should be updated.
-    #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssTest = @(
-            $this.ShouldUpdateDscResourceSetting('VssName', $vss.Name, $this.VssName),
-            $this.ShouldUpdateDscResourceSetting('Mtu', $vss.Mtu, $this.Mtu)
-        )
-
-        return ($vssTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the configuration of the virtual switch.
-    #>
-    [void] UpdateVss($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssConfigArgs = @{
-            Name = $this.VssName
-            Mtu = $this.Mtu
-        }
-        $vss = $this.GetVss()
-
-        if ($this.Ensure -eq 'Present') {
-            if ($null -ne $vss) {
-                if ($this.Equals($vss)) {
-                    return
-                }
-                $vssConfigArgs.Add('Operation', 'edit')
-            }
-            else {
-                $vssConfigArgs.Add('Operation', 'add')
-            }
-        }
-        else {
-            if ($null -eq $vss) {
-                return
-            }
-            $vssConfigArgs.Add('Operation', 'remove')
-        }
-
-        try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssConfig $vssConfigArgs -ErrorAction Stop
-        }
-        catch {
-            throw "The Virtual Switch Config could not be updated: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the virtual switch.
-    #>
-    [void] PopulateResult($vmHost, $vmHostVSS) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSS.Key = $currentVss.Key
-            $vmHostVSS.Mtu = $currentVss.Mtu
-            $vmHostVSS.VssName = $currentVss.Name
-            $vmHostVSS.NumPortsAvailable = $currentVss.NumPortsAvailable
-            $vmHostVSS.Pnic = $currentVss.Pnic
-            $vmHostVSS.PortGroup = $currentVss.PortGroup
-        }
-        else{
-            $vmHostVSS.Key = [string]::Empty
-            $vmHostVSS.Mtu = $this.Mtu
-            $vmHostVSS.VssName = $this.VssName
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVssBridge : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The list of keys of the physical network adapters to be bridged.
-    #>
-    [DscProperty()]
-    [string[]] $NicDevice
-
-    <#
-    .DESCRIPTION
-
-    The beacon configuration to probe for the validity of a link.
-    If this is set, beacon probing is configured and will be used.
-    If this is not set, beacon probing is disabled.
-    Determines how often, in seconds, a beacon should be sent.
-    #>
-    [DscProperty()]
-    [nullable[int]] $BeaconInterval
-
-    <#
-    .DESCRIPTION
-
-    The link discovery protocol, whether to advertise or listen.
-    #>
-    [DscProperty()]
-    [LinkDiscoveryProtocolOperation] $LinkDiscoveryProtocolOperation = [LinkDiscoveryProtocolOperation]::Unset
-
-    <#
-    .DESCRIPTION
-
-    The link discovery protocol type.
-    #>
-    [DscProperty()]
-    [LinkDiscoveryProtocolProtocol] $LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $this.UpdateVssBridge($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
-            }
-            else {
-                $this.NicDevice = @()
-                $this.BeaconInterval = 0
-                $this.LinkDiscoveryProtocolProtocol = [LinkDiscoveryProtocolProtocol]::Unset
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssBridge] Get() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssBridge]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
-
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns a boolean value indicating if the VMHostVssBridge should to be updated.
-    #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssBridgeTest = @(
-            $this.ShouldUpdateArraySetting('NicDevice', $vss.Spec.Bridge.NicDevice, $this.NicDevice),
-            $this.ShouldUpdateDscResourceSetting('BeaconInterval', $vss.Spec.Bridge.Beacon.Interval, $this.BeaconInterval),
-            $this.ShouldUpdateDscResourceSetting(
-                'LinkDiscoveryProtocolProtocol',
-                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol,
-                $this.LinkDiscoveryProtocolProtocol.ToString()
-            ),
-            $this.ShouldUpdateDscResourceSetting(
-                'LinkDiscoveryProtocolOperation',
-                [string] $vss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation,
-                $this.LinkDiscoveryProtocolOperation.ToString()
-            )
-        )
-
-        return ($vssBridgeTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the Bridge configuration of the virtual switch.
-    #>
-    [void] UpdateVssBridge($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssBridgeArgs = @{
-            Name = $this.VssName
-            NicDevice = $this.NicDevice
-        }
-
-        # The Bridge configuration of the Standard Switch should be populated only when the Nic devices are passed.
-        if ($this.NicDevice.Count -gt 0) {
-            if ($null -ne $this.BeaconInterval) { $vssBridgeArgs.BeaconInterval = $this.BeaconInterval }
-            if ($this.LinkDiscoveryProtocolProtocol -ne [LinkDiscoveryProtocolProtocol]::Unset) {
-                $vssBridgeArgs.Add('LinkDiscoveryProtocolProtocol', $this.LinkDiscoveryProtocolProtocol.ToString())
-                $vssBridgeArgs.Add('LinkDiscoveryProtocolOperation', $this.LinkDiscoveryProtocolOperation.ToString())
-            }
-        }
-
-        $vss = $this.GetVss()
-
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-        }
-        else {
-            $vssBridgeArgs.NicDevice = @()
-        }
-        $vssBridgeArgs.Add('Operation', 'edit')
-
-        try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssBridgeConfig $vssBridgeArgs -ErrorAction Stop
-        }
-        catch {
-            throw "The Virtual Switch Bridge Config could not be updated: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Bridge settings of the Virtual Switch.
-    #>
-    [void] PopulateResult($vmHost, $vmHostVSSBridge) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSSBridge.VssName = $currentVss.Name
-            $vmHostVSSBridge.NicDevice = $currentVss.Spec.Bridge.NicDevice
-            $vmHostVSSBridge.BeaconInterval = $currentVss.Spec.Bridge.Beacon.Interval
-
-            if ($null -ne $currentVss.Spec.Bridge.linkDiscoveryProtocolConfig) {
-                $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Operation.ToString()
-                $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $currentVss.Spec.Bridge.LinkDiscoveryProtocolConfig.Protocol.ToString()
-            }
-        }
-        else {
-            $vmHostVSSBridge.VssName = $this.VssName
-            $vmHostVSSBridge.NicDevice = $this.NicDevice
-            $vmHostVSSBridge.BeaconInterval = $this.BeaconInterval
-            $vmHostVSSBridge.LinkDiscoveryProtocolOperation = $this.LinkDiscoveryProtocolOperation
-            $vmHostVSSBridge.LinkDiscoveryProtocolProtocol = $this.LinkDiscoveryProtocolProtocol
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVssSecurity : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not all traffic is seen on the port.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $AllowPromiscuous
-
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not the virtual network adapter should be
-    allowed to send network traffic with a different MAC address than that of
-    the virtual network adapter.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $ForgedTransmits
-
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not the Media Access Control (MAC) address
-    can be changed.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $MacChanges
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $this.UpdateVssSecurity($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
-            }
-            else {
-                $this.AllowPromiscuous = $false
-                $this.ForgedTransmits = $true
-                $this.MacChanges = $true
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssSecurity] Get() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssSecurity]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
-
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns a boolean value indicating if the VMHostVssSecurity should to be updated.
-    #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssSecurityTest = @(
-            $this.ShouldUpdateDscResourceSetting('AllowPromiscuous', $vss.Spec.Policy.Security.AllowPromiscuous, $this.AllowPromiscuous),
-            $this.ShouldUpdateDscResourceSetting('ForgedTransmits', $vss.Spec.Policy.Security.ForgedTransmits, $this.ForgedTransmits),
-            $this.ShouldUpdateDscResourceSetting('MacChanges', $vss.Spec.Policy.Security.MacChanges, $this.MacChanges)
-        )
-
-        return ($vssSecurityTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the configuration of the virtual switch.
-    #>
-    [void] UpdateVssSecurity($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssSecurityArgs = @{
-            Name = $this.VssName
-            AllowPromiscuous = $this.AllowPromiscuous
-            ForgedTransmits = $this.ForgedTransmits
-            MacChanges = $this.MacChanges
-        }
-        $vss = $this.GetVss()
-
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-            $vssSecurityArgs.Add('Operation', 'edit')
-        }
-        else {
-            $vssSecurityArgs.AllowPromiscuous = $false
-            $vssSecurityArgs.ForgedTransmits = $true
-            $vssSecurityArgs.MacChanges = $true
-            $vssSecurityArgs.Add('Operation', 'edit')
-        }
-
-        try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssSecurityConfig $vssSecurityArgs -ErrorAction Stop
-        }
-        catch {
-            throw "The Virtual Switch Security Config could not be updated: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
-    #>
-    [void] PopulateResult($vmHost, $vmHostVSSSecurity) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSSSecurity.VssName = $currentVss.Name
-            $vmHostVSSSecurity.AllowPromiscuous = $currentVss.Spec.Policy.Security.AllowPromiscuous
-            $vmHostVSSSecurity.ForgedTransmits = $currentVss.Spec.Policy.Security.ForgedTransmits
-            $vmHostVSSSecurity.MacChanges = $currentVss.Spec.Policy.Security.MacChanges
-        }
-        else {
-            $vmHostVSSSecurity.VssName = $this.VssName
-            $vmHostVSSSecurity.AllowPromiscuous = $this.AllowPromiscuous
-            $vmHostVSSSecurity.ForgedTransmits = $this.ForgedTransmits
-            $vmHostVSSSecurity.MacChanges = $this.MacChanges
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVssShaping : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The average bandwidth in bits per second if shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $AverageBandwidth
-
-    <#
-    .DESCRIPTION
-
-    The maximum burst size allowed in bytes if shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $BurstSize
-
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not traffic shaper is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $Enabled
-
-    <#
-    .DESCRIPTION
-
-    The peak bandwidth during bursts in bits per second if traffic shaping is enabled on the port.
-    #>
-    [DscProperty()]
-    [nullable[long]] $PeakBandwidth
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $this.UpdateVssShaping($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
-            }
-            else {
-                $this.AverageBandwidth = 100000
-                $this.BurstSize = 100000
-                $this.Enabled = $false
-                $this.PeakBandwidth = 100000
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssShaping] Get() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssShaping]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
-
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns a boolean value indicating if the VMHostVssShaping should to be updated.
-    #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssShapingTest = @(
-            $this.ShouldUpdateDscResourceSetting('AverageBandwidth', $vss.Spec.Policy.ShapingPolicy.AverageBandwidth, $this.AverageBandwidth),
-            $this.ShouldUpdateDscResourceSetting('BurstSize', $vss.Spec.Policy.ShapingPolicy.BurstSize, $this.BurstSize),
-            $this.ShouldUpdateDscResourceSetting('Enabled', $vss.Spec.Policy.ShapingPolicy.Enabled, $this.Enabled),
-            $this.ShouldUpdateDscResourceSetting('PeakBandwidth', $vss.Spec.Policy.ShapingPolicy.PeakBandwidth, $this.PeakBandwidth)
-        )
-
-        return ($vssShapingTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the configuration of the virtual switch.
-    #>
-    [void] UpdateVssShaping($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssShapingArgs = @{
-            Name = $this.VssName
-            AverageBandwidth = $this.AverageBandwidth
-            BurstSize = $this.BurstSize
-            Enabled = $this.Enabled
-            PeakBandwidth = $this.PeakBandwidth
-        }
-        $vss = $this.GetVss()
-
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-            $vssShapingArgs.Add('Operation', 'edit')
-        }
-        else {
-            $vssShapingArgs.AverageBandwidth = 100000
-            $vssShapingArgs.BurstSize = 100000
-            $vssShapingArgs.Enabled = $false
-            $vssShapingArgs.PeakBandwidth = 100000
-            $vssShapingArgs.Add('Operation', 'edit')
-        }
-
-        try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssShapingConfig $vssShapingArgs -ErrorAction Stop
-        }
-        catch {
-            throw "The Virtual Switch Shaping Policy Config could not be updated: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
-    #>
-    [void] PopulateResult($vmHost, $vmHostVSSShaping) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSSShaping.VssName = $currentVss.Name
-            $vmHostVSSShaping.AverageBandwidth = $currentVss.Spec.Policy.ShapingPolicy.AverageBandwidth
-            $vmHostVSSShaping.BurstSize = $currentVss.Spec.Policy.ShapingPolicy.BurstSize
-            $vmHostVSSShaping.Enabled = $currentVss.Spec.Policy.ShapingPolicy.Enabled
-            $vmHostVSSShaping.PeakBandwidth = $currentVss.Spec.Policy.ShapingPolicy.PeakBandwidth
-        }
-        else {
-            $vmHostVSSShaping.VssName = $this.Name
-            $vmHostVSSShaping.AverageBandwidth = $this.AverageBandwidth
-            $vmHostVSSShaping.BurstSize = $this.BurstSize
-            $vmHostVSSShaping.Enabled = $this.Enabled
-            $vmHostVSSShaping.PeakBandwidth = $this.PeakBandwidth
-        }
-    }
-}
-
-[DscResource()]
-class VMHostVssTeaming : VMHostVssBaseDSC {
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not to enable beacon probing
-    as a method to validate the link status of a physical network adapter.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $CheckBeacon
-
-    <#
-    .DESCRIPTION
-
-    List of active network adapters used for load balancing.
-    #>
-    [DscProperty()]
-    [string[]] $ActiveNic
-
-    <#
-    .DESCRIPTION
-
-    Standby network adapters used for failover.
-    #>
-    [DscProperty()]
-    [string[]] $StandbyNic
-
-    <#
-    .DESCRIPTION
-
-    Flag to specify whether or not to notify the physical switch if a link fails.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $NotifySwitches
-
-    <#
-    .DESCRIPTION
-
-    Network adapter teaming policy.
-    #>
-    [DscProperty()]
-    [NicTeamingPolicy] $Policy = [NicTeamingPolicy]::Unset
-
-    <#
-    .DESCRIPTION
-
-    The flag to indicate whether or not to use a rolling policy when restoring links.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $RollingOrder
-
-    hidden [string] $PhysicalNicNotInBridgeMessage = "Physical network adapter {0} is not in the bridge with standard switch {1}."
-
-    [void] Set() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $this.UpdateVssTeaming($vmHost)
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-            $vss = $this.GetVss()
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                $result = ($null -ne $vss -and $this.Equals($vss))
-            }
-            else {
-                $this.CheckBeacon = $false
-                $this.ActiveNic = @()
-                $this.StandbyNic = @()
-                $this.NotifySwitches = $true
-                $this.Policy = [NicTeamingPolicy]::Loadbalance_srcid
-                $this.RollingOrder = $false
-
-                $result = ($null -eq $vss -or $this.Equals($vss))
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [VMHostVssTeaming] Get() {
-        try {
-            Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-            $result = [VMHostVssTeaming]::new()
-            $result.Server = $this.Server
-
-            $this.ConnectVIServer()
-            $vmHost = $this.GetVMHost()
-            $this.GetNetworkSystem($vmHost)
-
-            $result.Name = $vmHost.Name
-            $this.PopulateResult($vmHost, $result)
-
-            $result.Ensure = if ([string]::Empty -ne $result.VssName) { 'Present' } else { 'Absent' }
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns a boolean value indicating if the VMHostVssTeaming should to be updated.
-    #>
-    [bool] Equals($vss) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $vssTeamingTest = @(
-            $this.ShouldUpdateDscResourceSetting('CheckBeacon', $vss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon, $this.CheckBeacon),
-            $this.ShouldUpdateDscResourceSetting('NotifySwitches', $vss.Spec.Policy.NicTeaming.NotifySwitches, $this.NotifySwitches),
-            $this.ShouldUpdateDscResourceSetting('RollingOrder', $vss.Spec.Policy.NicTeaming.RollingOrder, $this.RollingOrder),
-            $this.ShouldUpdateDscResourceSetting('Policy', [string] $vss.Spec.Policy.NicTeaming.Policy, $this.Policy.ToString().ToLower()),
-            $this.ShouldUpdateArraySetting('ActiveNic', $vss.Spec.Policy.NicTeaming.NicOrder.ActiveNic, $this.ActiveNic),
-            $this.ShouldUpdateArraySetting('StandbyNic', $vss.Spec.Policy.NicTeaming.NicOrder.StandbyNic, $this.StandbyNic)
-        )
-
-        return ($vssTeamingTest -NotContains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Validates that all provided physical network adapters: (ActiveNic and StandbyNic) are in the bridge
-    with the specified standard switch.
-    #>
-    [void] ValidatePhysicalNetworkAdapters() {
-        $physicalNics = $this.ActiveNic + $this.StandbyNic
-
-        if ($physicalNics.Length -gt 0) {
-            $standardSwitch = $this.GetVss()
-            foreach ($physicalNic in $physicalNics) {
-                if (!($standardSwitch.Spec.Bridge.NicDevice -Contains $physicalNic)) {
-                    throw ($this.PhysicalNicNotInBridgeMessage -f $physicalNic, $standardSwitch.Name)
-                }
-            }
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the configuration of the virtual switch.
-    #>
-    [void] UpdateVssTeaming($vmHost) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $this.ValidatePhysicalNetworkAdapters()
-
-        $vssTeamingArgs = @{
-            Name = $this.VssName
-            ActiveNic = $this.ActiveNic
-            StandbyNic = $this.StandbyNic
-            NotifySwitches = $this.NotifySwitches
-            RollingOrder = $this.RollingOrder
-        }
-
-        if ($null -ne $this.CheckBeacon) { $vssTeamingArgs.CheckBeacon = $this.CheckBeacon }
-        if ($this.Policy -ne [NicTeamingPolicy]::Unset) { $vssTeamingArgs.Policy = $this.Policy.ToString().ToLower() }
-
-        $vss = $this.GetVss()
-        if ($this.Ensure -eq 'Present') {
-            if ($this.Equals($vss)) {
-                return
-            }
-            $vssTeamingArgs.Add('Operation', 'edit')
-        }
-        else {
-            $vssTeamingArgs.CheckBeacon = $false
-            $vssTeamingArgs.ActiveNic = @()
-            $vssTeamingArgs.StandbyNic = @()
-            $vssTeamingArgs.NotifySwitches = $true
-            $vssTeamingArgs.Policy = ([NicTeamingPolicy]::Loadbalance_srcid).ToString().ToLower()
-            $vssTeamingArgs.RollingOrder = $false
-            $vssTeamingArgs.Add('Operation', 'edit')
-        }
-
-        try {
-            Update-Network -NetworkSystem $this.vmHostNetworkSystem -VssTeamingConfig $vssTeamingArgs -ErrorAction Stop
-        }
-        catch {
-            throw "The Virtual Switch Teaming Policy Config could not be updated: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Security settings of the Virtual Switch.
-    #>
-    [void] PopulateResult($vmHost, $vmHostVSSTeaming) {
-        Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
-
-        $currentVss = $this.GetVss()
-
-        if ($null -ne $currentVss) {
-            $vmHostVSSTeaming.VssName = $currentVss.Name
-            $vmHostVSSTeaming.CheckBeacon = $currentVss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon
-            $vmHostVSSTeaming.ActiveNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.ActiveNic
-            $vmHostVSSTeaming.StandbyNic = $currentVss.Spec.Policy.NicTeaming.NicOrder.StandbyNic
-            $vmHostVSSTeaming.NotifySwitches = $currentVss.Spec.Policy.NicTeaming.NotifySwitches
-            $vmHostVSSTeaming.Policy = [NicTeamingPolicy]$currentVss.Spec.Policy.NicTeaming.Policy
-            $vmHostVSSTeaming.RollingOrder = $currentVss.Spec.Policy.NicTeaming.RollingOrder
-        }
-        else {
-            $vmHostVSSTeaming.VssName = $this.Name
-            $vmHostVSSTeaming.CheckBeacon = $this.CheckBeacon
-            $vmHostVSSTeaming.ActiveNic = $this.ActiveNic
-            $vmHostVSSTeaming.StandbyNic = $this.StandbyNic
-            $vmHostVSSTeaming.NotifySwitches = $this.NotifySwitches
-            $vmHostVSSTeaming.Policy = $this.Policy
-            $vmHostVSSTeaming.RollingOrder = $this.RollingOrder
-        }
-    }
-}
-
-[DscResource()]
-class DrsCluster : DatacenterInventoryBaseDSC {
-    DrsCluster() {
-        $this.InventoryItemFolderType = [FolderType]::Host
-    }
-
-    <#
-    .DESCRIPTION
-
-    Indicates that VMware DRS (Distributed Resource Scheduler) is enabled.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $DrsEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies a DRS (Distributed Resource Scheduler) automation level. The valid values are FullyAutomated, Manual, PartiallyAutomated, Disabled and Unset.
-    #>
-    [DscProperty()]
-    [DrsAutomationLevel] $DrsAutomationLevel = [DrsAutomationLevel]::Unset
-
-    <#
-    .DESCRIPTION
-
-    Threshold for generated ClusterRecommendations. DRS generates only those recommendations that are above the specified vmotionRate. Ratings vary from 1 to 5.
-    This setting applies to Manual, PartiallyAutomated, and FullyAutomated DRS Clusters.
-    #>
-    [DscProperty()]
-    [nullable[int]] $DrsMigrationThreshold
-
-    <#
-    .DESCRIPTION
-
-    For availability, distributes a more even number of virtual machines across hosts.
-    #>
-    [DscProperty()]
-    [nullable[int]] $DrsDistribution
-
-    <#
-    .DESCRIPTION
-
-    Load balance based on consumed memory of virtual machines rather than active memory.
-    This setting is recommended for clusters where host memory is not over-committed.
-    #>
-    [DscProperty()]
-    [nullable[int]] $MemoryLoadBalancing
-
-    <#
-    .DESCRIPTION
-
-    Controls CPU over-commitment in the cluster.
-    Min value is 0 and Max value is 500.
-    #>
-    [DscProperty()]
-    [nullable[int]] $CPUOverCommitment
-
-    hidden [string] $DrsEnabledConfigPropertyName = 'Enabled'
-    hidden [string] $DrsAutomationLevelConfigPropertyName = 'DefaultVmBehavior'
-    hidden [string] $DrsMigrationThresholdConfigPropertyName = 'VmotionRate'
-    hidden [string] $DrsDistributionSettingName = 'LimitVMsPerESXHostPercent'
-    hidden [string] $MemoryLoadBalancingSettingName = 'PercentIdleMBInMemDemand'
-    hidden [string] $CPUOverCommitmentSettingName = 'MaxVcpusPerClusterPct'
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $this.AddCluster($clusterLocation)
-                }
-                else {
-                    $this.UpdateCluster($cluster)
-                }
-            }
-            else {
-                if ($null -ne $cluster) {
-                    $this.RemoveCluster($cluster)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $result = $false
-                }
-                else {
-                    $result = !$this.ShouldUpdateCluster($cluster)
-                }
-            }
-            else {
-                $result = ($null -eq $cluster)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [DrsCluster] Get() {
-        try {
-            $result = [DrsCluster]::new()
-            $result.Server = $this.Server
-            $result.Location = $this.Location
-            $result.DatacenterName = $this.DatacenterName
-            $result.DatacenterLocation = $this.DatacenterLocation
-
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $this.PopulateResult($cluster, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Cluster should be updated.
-    #>
-    [bool] ShouldUpdateCluster($cluster) {
-        $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
-
-        $currentDrsDistributionOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.DrsDistributionSettingName }).Value
-        $currentMemoryLoadBalancingOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
-        $currentCPUOverCommitmentOption = ($drsConfig.Option | Where-Object -FilterScript { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
-
-        $shouldUpdateCluster = @(
-            $this.ShouldUpdateDscResourceSetting('DrsEnabled', $drsConfig.Enabled, $this.DrsEnabled),
-            $this.ShouldUpdateDscResourceSetting('DrsAutomationLevel', [string] $drsConfig.DefaultVmBehavior, $this.DrsAutomationLevel.ToString()),
-            $this.ShouldUpdateDscResourceSetting('DrsMigrationThreshold', $drsConfig.VmotionRate, $this.DrsMigrationThreshold),
-            $this.ShouldUpdateDscResourceSetting('DrsDistribution', $currentDrsDistributionOption, $this.DrsDistribution),
-            $this.ShouldUpdateDscResourceSetting('MemoryLoadBalancing', $currentMemoryLoadBalancingOption, $this.MemoryLoadBalancing),
-            $this.ShouldUpdateDscResourceSetting('CPUOverCommitment', $currentCPUOverCommitmentOption, $this.CPUOverCommitment)
-        )
-
-        return ($shouldUpdateCluster -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the DrsConfig property with the desired value.
-    #>
-    [void] PopulateDrsConfigProperty($drsConfig, $propertyName, $propertyValue) {
-        <#
-            Special case where the passed property value is enum type. These type of properties
-            should be populated only when their value is not equal to Unset.
-            Unset means that the property was not specified in the Configuration.
-        #>
-        if ($propertyValue -is [DrsAutomationLevel]) {
-            if ($propertyValue -ne [DrsAutomationLevel]::Unset) {
-                $drsConfig.$propertyName = $propertyValue.ToString()
-            }
-        }
-        elseif ($null -ne $propertyValue) {
-            $drsConfig.$propertyName = $propertyValue
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the Option array for the DrsConfig with the specified options in the Configuration.
-    #>
-    [PSObject] GetOptionsForDrsConfig($allOptions) {
-        $drsConfigOptions = @()
-
-        foreach ($key in $allOptions.Keys) {
-            if ($null -ne $allOptions.$key) {
-                $option = New-Object VMware.Vim.OptionValue
-
-                $option.Key = $key
-                $option.Value = $allOptions.$key.ToString()
-
-                $drsConfigOptions += $option
-            }
-        }
-
-        return $drsConfigOptions
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the populated Cluster Spec with the specified values in the Configuration.
-    #>
-    [PSObject] GetPopulatedClusterSpec() {
-        $clusterSpec = New-Object VMware.Vim.ClusterConfigSpecEx
-        $clusterSpec.DrsConfig = New-Object VMware.Vim.ClusterDrsConfigInfo
-
-        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsEnabledConfigPropertyName, $this.DrsEnabled)
-        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsAutomationLevelConfigPropertyName, $this.DrsAutomationLevel)
-        $this.PopulateDrsConfigProperty($clusterSpec.DrsConfig, $this.DrsMigrationThresholdConfigPropertyName, $this.DrsMigrationThreshold)
-
-        $allOptions = [ordered] @{
-            $this.DrsDistributionSettingName = $this.DrsDistribution
-            $this.MemoryLoadBalancingSettingName = $this.MemoryLoadBalancing
-            $this.CPUOverCommitmentSettingName = $this.CPUOverCommitment
-        }
-
-        $clusterSpec.DrsConfig.Option = $this.GetOptionsForDrsConfig($allOptions)
-
-        return $clusterSpec
-    }
-
-    <#
-    .DESCRIPTION
-
-    Creates a new Cluster with the specified properties at the specified location.
-    #>
-    [void] AddCluster($clusterLocation) {
-        $clusterSpec = $this.GetPopulatedClusterSpec()
-
-        try {
-            Add-Cluster -Folder $clusterLocation.ExtensionData -Name $this.Name -Spec $clusterSpec
-        }
-        catch {
-            throw "Server operation failed with the following error: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the Cluster with the specified properties.
-    #>
-    [void] UpdateCluster($cluster) {
-        $clusterSpec = $this.GetPopulatedClusterSpec()
-
-        try {
-            Update-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData -Spec $clusterSpec
-        }
-        catch {
-            throw "Server operation failed with the following error: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Removes the Cluster from the specified Datacenter.
-    #>
-    [void] RemoveCluster($cluster) {
-        try {
-            Remove-ClusterComputeResource -ClusterComputeResource $cluster.ExtensionData
-        }
-        catch {
-            throw "Server operation failed with the following error: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Cluster from the server.
-    #>
-    [void] PopulateResult($cluster, $result) {
-        if ($null -ne $cluster) {
-            $drsConfig = $cluster.ExtensionData.ConfigurationEx.DrsConfig
-
-            $result.Name = $cluster.Name
-            $result.Ensure = [Ensure]::Present
-            $result.DrsEnabled = $drsConfig.Enabled
-
-            if ($null -eq $drsConfig.DefaultVmBehavior) {
-                $result.DrsAutomationLevel = [DrsAutomationLevel]::Unset
-            }
-            else {
-                $result.DrsAutomationLevel = $drsConfig.DefaultVmBehavior.ToString()
-            }
-
-            $result.DrsMigrationThreshold = $drsConfig.VmotionRate
-
-            if ($null -ne $drsConfig.Option) {
-                $options = $drsConfig.Option
-
-                $result.DrsDistribution = ($options | Where-Object { $_.Key -eq $this.DrsDistributionSettingName }).Value
-                $result.MemoryLoadBalancing = ($options | Where-Object { $_.Key -eq $this.MemoryLoadBalancingSettingName }).Value
-                $result.CPUOverCommitment = ($options | Where-Object { $_.Key -eq $this.CPUOverCommitmentSettingName }).Value
-            }
-            else {
-                $result.DrsDistribution = $null
-                $result.MemoryLoadBalancing = $null
-                $result.CPUOverCommitment = $null
-            }
-        }
-        else {
-            $result.Name = $this.Name
-            $result.Ensure = [Ensure]::Absent
-            $result.DrsEnabled = $this.DrsEnabled
-            $result.DrsAutomationLevel = $this.DrsAutomationLevel
-            $result.DrsMigrationThreshold = $this.DrsMigrationThreshold
-            $result.DrsDistribution = $this.DrsDistribution
-            $result.MemoryLoadBalancing = $this.MemoryLoadBalancing
-            $result.CPUOverCommitment = $this.CPUOverCommitment
-        }
-    }
-}
-
-[DscResource()]
-class HACluster : DatacenterInventoryBaseDSC {
-    HACluster() {
-        $this.InventoryItemFolderType = [FolderType]::Host
-    }
-
-    <#
-    .DESCRIPTION
-
-    Indicates that VMware HA (High Availability) is enabled.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $HAEnabled
-
-    <#
-    .DESCRIPTION
-
-    Indicates that virtual machines cannot be powered on if they violate availability constraints.
-    #>
-    [DscProperty()]
-    [nullable[bool]] $HAAdmissionControlEnabled
-
-    <#
-    .DESCRIPTION
-
-    Specifies a configured failover level.
-    This is the number of physical host failures that can be tolerated without impacting the ability to meet minimum thresholds for all running virtual machines.
-    The valid values range from 1 to 4.
-    #>
-    [DscProperty()]
-    [nullable[int]] $HAFailoverLevel
-
-    <#
-    .DESCRIPTION
-
-    Indicates that the virtual machine should be powered off if a host determines that it is isolated from the rest of the compute resource.
-    The valid values are PowerOff, DoNothing, Shutdown and Unset.
-    #>
-    [DscProperty()]
-    [HAIsolationResponse] $HAIsolationResponse = [HAIsolationResponse]::Unset
-
-    <#
-    .DESCRIPTION
-
-    Specifies the cluster HA restart priority. The valid values are Disabled, Low, Medium, High and Unset.
-    VMware HA is a feature that detects failed virtual machines and automatically restarts them on alternative ESX hosts.
-    #>
-    [DscProperty()]
-    [HARestartPriority] $HARestartPriority = [HARestartPriority]::Unset
-
-    hidden [string] $HAEnabledParameterName = 'HAEnabled'
-    hidden [string] $HAAdmissionControlEnabledParameterName = 'HAAdmissionControlEnabled'
-    hidden [string] $HAFailoverLevelParameterName = 'HAFailoverLevel'
-    hidden [string] $HAIsolationResponseParameterName = 'HAIsolationResponse'
-    hidden [string] $HARestartPriorityParemeterName = 'HARestartPriority'
-
-    [void] Set() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $this.AddCluster($clusterLocation)
-                }
-                else {
-                    $this.UpdateCluster($cluster)
-                }
-            }
-            else {
-                if ($null -ne $cluster) {
-                    $this.RemoveCluster($cluster)
-                }
-            }
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [bool] Test() {
-        try {
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $result = $null
-            if ($this.Ensure -eq [Ensure]::Present) {
-                if ($null -eq $cluster) {
-                    $result = $false
-                }
-                else {
-                    $result = !$this.ShouldUpdateCluster($cluster)
-                }
-            }
-            else {
-                $result = ($null -eq $cluster)
-            }
-
-            $this.WriteDscResourceState($result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    [HACluster] Get() {
-        try {
-            $result = [HACluster]::new()
-            $result.Server = $this.Server
-            $result.Location = $this.Location
-            $result.DatacenterName = $this.DatacenterName
-            $result.DatacenterLocation = $this.DatacenterLocation
-
-            $this.ConnectVIServer()
-
-            $datacenter = $this.GetDatacenter()
-            $datacenterFolderName = "$($this.InventoryItemFolderType)Folder"
-            $clusterLocation = $this.GetInventoryItemLocationInDatacenter($datacenter, $datacenterFolderName)
-            $cluster = $this.GetInventoryItem($clusterLocation)
-
-            $this.PopulateResult($cluster, $result)
-
-            return $result
-        }
-        finally {
-            $this.DisconnectVIServer()
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Checks if the Cluster should be updated.
-    #>
-    [bool] ShouldUpdateCluster($cluster) {
-        $shouldUpdateCluster = @(
-            $this.ShouldUpdateDscResourceSetting('HAEnabled', $cluster.HAEnabled, $this.HAEnabled),
-            $this.ShouldUpdateDscResourceSetting('HAAdmissionControlEnabled', $cluster.HAAdmissionControlEnabled, $this.HAAdmissionControlEnabled),
-            $this.ShouldUpdateDscResourceSetting('HAFailoverLevel', $cluster.HAFailoverLevel, $this.HAFailoverLevel),
-            $this.ShouldUpdateDscResourceSetting('HAIsolationResponse', [string] $cluster.HAIsolationResponse, $this.HAIsolationResponse.ToString()),
-            $this.ShouldUpdateDscResourceSetting('HARestartPriority', [string] $cluster.HARestartPriority, $this.HARestartPriority.ToString())
-        )
-
-        return ($shouldUpdateCluster -Contains $true)
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the parameters for the New-Cluster and Set-Cluster cmdlets.
-    #>
-    [void] PopulateClusterParams($clusterParams, $parameter, $desiredValue) {
-        <#
-            Special case where the desired value is enum type. These type of properties
-            should be added as parameters to the cmdlet only when their value is not equal to Unset.
-            Unset means that the property was not specified in the Configuration.
-        #>
-        if ($desiredValue -is [HAIsolationResponse] -or $desiredValue -is [HARestartPriority]) {
-            if ($desiredValue -ne 'Unset') {
-                $clusterParams.$parameter = $desiredValue.ToString()
-            }
-
-            return
-        }
-
-        if ($null -ne $desiredValue) {
-            $clusterParams.$parameter = $desiredValue
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Returns the populated Cluster parameters.
-    #>
-    [hashtable] GetClusterParams() {
-        $clusterParams = @{}
-
-        $clusterParams.Server = $this.Connection
-        $clusterParams.Confirm = $false
-        $clusterParams.ErrorAction = 'Stop'
-
-        $this.PopulateClusterParams($clusterParams, $this.HAEnabledParameterName, $this.HAEnabled)
-
-        # High Availability settings cannot be passed to the cmdlets if 'HAEnabled' is $false.
-        if ($null -eq $this.HAEnabled -or $this.HAEnabled) {
-            $this.PopulateClusterParams($clusterParams, $this.HAAdmissionControlEnabledParameterName, $this.HAAdmissionControlEnabled)
-            $this.PopulateClusterParams($clusterParams, $this.HAFailoverLevelParameterName, $this.HAFailoverLevel)
-            $this.PopulateClusterParams($clusterParams, $this.HAIsolationResponseParameterName, $this.HAIsolationResponse)
-            $this.PopulateClusterParams($clusterParams, $this.HARestartPriorityParemeterName, $this.HARestartPriority)
-        }
-
-        return $clusterParams
-    }
-
-    <#
-    .DESCRIPTION
-
-    Creates a new Cluster with the specified properties at the specified location.
-    #>
-    [void] AddCluster($clusterLocation) {
-        $clusterParams = $this.GetClusterParams()
-        $clusterParams.Name = $this.Name
-        $clusterParams.Location = $clusterLocation
-
-        try {
-            New-Cluster @clusterParams
-        }
-        catch {
-            throw "Cannot create Cluster $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Updates the Cluster with the specified properties.
-    #>
-    [void] UpdateCluster($cluster) {
-        $clusterParams = $this.GetClusterParams()
-
-        try {
-            $cluster | Set-Cluster @clusterParams
-        }
-        catch {
-            throw "Cannot update Cluster $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Removes the Cluster from the specified Datacenter.
-    #>
-    [void] RemoveCluster($cluster) {
-        try {
-            $cluster | Remove-Cluster -Server $this.Connection -Confirm:$false -ErrorAction Stop
-        }
-        catch {
-            throw "Cannot remove Cluster $($this.Name). For more information: $($_.Exception.Message)"
-        }
-    }
-
-    <#
-    .DESCRIPTION
-
-    Populates the result returned from the Get() method with the values of the Cluster from the server.
-    #>
-    [void] PopulateResult($cluster, $result) {
-        if ($null -ne $cluster) {
-            $result.Name = $cluster.Name
-            $result.Ensure = [Ensure]::Present
-            $result.HAEnabled = $cluster.HAEnabled
-            $result.HAAdmissionControlEnabled = $cluster.HAAdmissionControlEnabled
-            $result.HAFailoverLevel = $cluster.HAFailoverLevel
-            $result.HAIsolationResponse = $cluster.HAIsolationResponse.ToString()
-            $result.HARestartPriority = $cluster.HARestartPriority.ToString()
-        }
-        else {
-            $result.Name = $this.Name
-            $result.Ensure = [Ensure]::Absent
-            $result.HAEnabled = $this.HAEnabled
-            $result.HAAdmissionControlEnabled = $this.HAAdmissionControlEnabled
-            $result.HAFailoverLevel = $this.HAFailoverLevel
-            $result.HAIsolationResponse = $this.HAIsolationResponse
-            $result.HARestartPriority = $this.HARestartPriority
         }
     }
 }

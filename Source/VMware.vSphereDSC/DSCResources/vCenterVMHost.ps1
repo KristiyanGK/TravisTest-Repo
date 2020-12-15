@@ -73,7 +73,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodStartMessage
@@ -124,7 +124,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SetMethodEndMessage
@@ -140,7 +140,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodStartMessage
@@ -180,7 +180,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.TestMethodEndMessage
@@ -196,7 +196,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodStartMessage
@@ -220,7 +220,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.GetMethodEndMessage
@@ -339,7 +339,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.AddVMHostTovCenterMessage -Arguments @($this.Name, $this.Connection.Name, $vmHostLocation.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.AddVMHostTovCenterMessage
@@ -374,7 +374,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.MoveVMHostToDestinationMessage -Arguments @($vmHost.Name, $vmHostLocation.Name, $this.Connection.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.MoveVMHostToDestinationMessage
@@ -408,7 +408,7 @@ class vCenterVMHost : DatacenterInventoryBaseDSC {
             Write-VerboseLog -Message $this.RemoveVMHostFromvCenterMessage -Arguments @($vmHost.Name, $this.Connection.Name)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.RemoveVMHostFromvCenterMessage

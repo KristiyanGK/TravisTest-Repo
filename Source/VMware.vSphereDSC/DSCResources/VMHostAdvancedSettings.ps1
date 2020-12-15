@@ -102,7 +102,7 @@ class VMHostAdvancedSettings : VMHostBaseDSC {
             Write-WarningLog -Message "Advanced Setting {0} does not exist for VMHost {1} and will be ignored." -Arguments @($advancedSettingName, $vmHostName)
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Warning'
                 Message = "Advanced Setting {0} does not exist for VMHost {1} and will be ignored."
@@ -156,7 +156,7 @@ class VMHostAdvancedSettings : VMHostBaseDSC {
             )
 
             $writeToLogFilesplat = @{
-                Connection = $this.Connection.Name
+                Connection = $this.ConnectionName
                 ResourceName = $this.GetType().ToString()
                 LogType = 'Verbose'
                 Message = $this.SettingIsNotInDesiredStateMessage
