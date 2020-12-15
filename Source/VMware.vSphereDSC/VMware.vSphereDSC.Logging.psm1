@@ -39,12 +39,11 @@ function Write-VerboseLog {
         [array] $Arguments
     )
 
-    if ($null -eq $Arguments) {
-        Write-Verbose -Message $message
+    if ($null -ne $Arguments) {
+        $Message = [string]::Format($Message, $Arguments)
     }
-    else {
-        Write-Verbose -Message ([string]::Format($Message, $Arguments))
-    }
+    
+    Write-Verbose -Message $Message
 }
 
 <#
@@ -73,10 +72,84 @@ function Write-WarningLog {
         [array] $Arguments
     )
 
-    if ($null -eq $Arguments) {
-        Write-Warning -Message $message
+    if ($null -ne $Arguments) {
+        $Message = [string]::Format($Message, $Arguments)
     }
-    else {
-        Write-Warning -Message ([string]::Format($Message, $Arguments))
+    
+    Write-Warning -Message $Message
+}
+
+<#
+.SYNOPSIS
+Saves the messages to a log file.
+
+.DESCRIPTION
+Saves the messages to a log file, because Invoke-DscResource runs this in a separate runspace
+where the streams are not accessable.
+
+.PARAMETER Message
+Specifies the message to write to the file.
+
+.PARAMETER LogType
+Type of the stream: Verbose, Warning etc..
+
+.PARAMETER Connection
+Connection to the vCenter server.
+
+.PARAMETER ResourceName
+Name of the DSC Resource.
+
+.PARAMETER Arguments
+Specifies the arguments that are needed for formatting the message using [string]::Format method.
+The message is expected to be a format string that expects the given arguments.
+#>
+function Write-LogToFile {
+    Param(
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Message,
+
+        [Parameter(Mandatory = $true)]
+        [string]
+        $LogType,
+
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Connection,
+
+        [Parameter(Mandatory = $true)]
+        [string]
+        $ResourceName,
+
+        [Parameter()]
+        [array] $Arguments
+
+    )
+
+    # do nothing in case no temp folder is available
+    if ($null -eq $env:TEMP) {
+        return
     }
+
+    if ($null -ne $Arguments) {
+        $Message = [string]::Format($Message, $Arguments)
+    }
+
+    # create file in the following format
+    $logFilePath = Join-Path -Path $env:TEMP -ChildPath "__VMware.vSphereDSC_$($Connection)_$($ResourceName)_$($LogType).TMP"
+
+    if (-not (Test-Path -Path $logFilePath -PathType 'Leaf')) {
+        $file = New-Item -Path $logFilePath -ItemType 'File' -Force -ErrorAction 'SilentlyContinue'
+
+        # exit function if file is not created
+        if ($null -eq $file) {
+            return
+        }
+    }
+    
+    $content = Get-Content -Path $logFilePath -Raw
+
+    $content += $Message
+
+    Set-Content -Path $logFilePath -Value $content -Force -ErrorAction 'SilentlyContinue'
 }

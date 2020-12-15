@@ -266,6 +266,10 @@ class DscConfigurationCompiler {
     Compiles the DSC Configuration and returns an configuration object
     #>
     [VmwDscConfiguration] CompileDscConfiguration() {
+        Write-Verbose "Starting compilation process"
+
+        Write-Verbose "Validating ConfigurationData"
+        
         # validate the configurationData
         $this.ValidateConfigurationData()
 
@@ -275,10 +279,14 @@ class DscConfigurationCompiler {
         # parse and compile the configuration
         $dscItems = $this.CompileDscConfigurationUtil($configCommand, $this.CustomParams)
 
+        Write-Verbose "Handling nodes"
+
         # combine nodes of same instanceName and bundle nodeless resources
         $dscNodes = $this.CombineNodes($dscItems)
 
         for ($i = 0; $i -lt $dscNodes.Length; $i++) {
+            Write-Verbose ("Ordering DSC Resources of node: " + $dscNodes[$i].InstanceName)
+
             # parse the dsc resources and their dependencies into a sorted array
             $dscNodes[$i].Resources = $this.OrderResources($dscNodes[$i].Resources)
         }
@@ -411,8 +419,12 @@ class DscConfigurationCompiler {
     hidden [DscItem[]] CompileDscConfigurationUtil([System.Management.Automation.ConfigurationInfo] $ConfigCommand, [Hashtable] $CustomParams) {
         $dscConfigurationParser = [DscConfigurationParser]::new()
 
+        Write-Verbose "Parsing configuration block of $($ConfigCommand.Name)"
+
         # parse the configuration, run Import-DscResource statements and retrieve the found resources/nested configurations
         $parseResult = $dscConfigurationParser.ParseDscConfiguration($configCommand)
+
+        Write-Verbose "Preparing functions for dsc resources and nodes"
 
         $resources = $parseResult.ResourceNameToInfo
         $foundDscResourcesList = New-Object -TypeName 'System.Collections.ArrayList'
@@ -433,10 +445,14 @@ class DscConfigurationCompiler {
         # create functions for nodes and resources to be used in InvokeWithContext
         $functionsToDefine = $this.CreateFunctionsToDefine($foundDscResourcesList.ToArray())
 
+        Write-Verbose "Preparing default variables and variables from ConfigurationData"
+
         # create variable objects for InvokeWithContext from ConfigurationData and common dsc configuration variables
         $variablesToDefine = $this.CreateVariablesToDefine()
 
         $configScriptBlock = $parseResult.ScriptBlock
+
+        Write-Verbose "Executing Configuration scriptblock to extract resources and nodes"
 
         $dscItems = $configScriptBlock.InvokeWithContext($functionsToDefine, $variablesToDefine, $CustomParams)
 
@@ -622,15 +638,23 @@ class DscConfigurationCompiler {
             $dscResources = . $ScriptBlock
 
             $type = Get-PSCallStack | Select-Object -First 1 -ExpandProperty Command
-            $vmwNodeResult = $null
+            $vmwNodeResult = New-Object -TypeName 'System.Collections.ArrayList'
 
-            if ($type -eq 'Node') {
-                $vmwNodeResult = [VmwDscNode]::new($Connections, $dscResources)
-            } elseif ($type -eq 'vSphereNode') {
-                $vmwNodeResult = [VmwVsphereDscNode]::new($Connections, $dscResources)
+            # when multipe connections are specified for a node blocke
+            # each connection gets made into a different node object
+            foreach ($connection in $Connections) {
+                $nodeObject = $null
+
+                if ($type -eq 'Node') {
+                    $nodeObject = [VmwDscNode]::new($connection, $dscResources)
+                } elseif ($type -eq 'vSphereNode') {
+                    $nodeObject = [VmwVsphereDscNode]::new($connection, $dscResources)
+                }
+
+                $vmwNodeResult.Add($nodeObject) | Out-Null
             }
-            
-            $vmwNodeResult
+
+            $vmwNodeResult.ToArray()
         }
 
         $functionsToDefine['Node'] = $nodeLogicScriptBlock
@@ -966,6 +990,63 @@ class DscTestMethodDetailedResult : BaseDscMethodResult {
 
 <#
 .DESCRIPTION
+Type used for checking uniqueness of dsc resource key properties
+#>
+class DscKeyPropertyResourceCheck {
+    [string] $DscResourceType
+      
+    # can contain only string, int, enum values, because only properties of those types can be keys
+    [Hashtable] $KeyPropertiesToValues
+
+    DscKeyPropertyResourceCheck([string] $DscResourceType, [Hashtable] $KeyPropertiesToValues) {
+        $this.DscResourceType = $DscResourceType
+        $this.KeyPropertiesToValues = $KeyPropertiesToValues
+    }
+
+    [bool] Equals([Object] $other) {
+        $comparisonResult = $true
+        $other = $other -as [DscKeyPropertyResourceCheck]
+
+        if (-not $this.DscResourceType.Equals($other.DscResourceType)) {
+            $comparisonResult = $false
+        } else {
+            foreach ($key in $this.KeyPropertiesToValues.Keys) {
+                if ((-not $other.KeyPropertiesToValues.ContainsKey($key)) -or (-not $this.KeyPropertiesToValues[$key].Equals($other.KeyPropertiesToValues[$key]))) {
+                    $comparisonResult = $false
+                    break
+                }
+            }
+        }
+
+        return $comparisonResult
+    }
+
+    [int] GetHashCode() {
+        $hash = $this.CalculateHashCode()
+
+        return $hash
+    }
+
+    <#
+    .DESCRIPTION
+    Calculates the hashcode via the Get-KeyPropertyResourceCheckDotNetHashCode cmdlet, because
+    it uses a custom c# type that is created during runtime and can't be used inside a class due to it
+    raising a parse error.
+    #>
+    [int] CalculateHashCode() {
+        $splat = @{
+            ResourceType = $this.ResourceType
+            KeyPropertiesToValues = $this.KeyPropertiesToValues
+        }
+
+        $hash = Get-KeyPropertyResourceCheckDotNetHashCode @splat
+
+        return $hash
+    }
+}
+
+<#
+.DESCRIPTION
 Executes Configuration objects created from New-VmwDscConfiguration cmdlet.
 #>
 class DscConfigurationRunner {
@@ -989,7 +1070,9 @@ class DscConfigurationRunner {
         $invokeResult = New-Object 'System.Collections.ArrayList'
 
         foreach ($node in $this.ValidNodes) {
-            Write-Progress "Invoking node with name: $($node.InstanceName)"
+            Write-Verbose "Invoking node with name: $($node.InstanceName)"
+
+            $this.ValidateDscKeyProperties($node.Resources)
             
             $result = $this.InvokeNodeResources($node.Resources)
 
@@ -1027,20 +1110,20 @@ class DscConfigurationRunner {
 
         $validVsphereNodes = New-Object 'System.Collections.ArrayList'
 
-        $defaultViServers = $this.GetDefaultViServers()
+        $viServersHashtable = $this.GetDefaultViServers()
 
         # check if any connections are established
-        if ($null -eq $defaultViServers -or $defaultViServers.Count -eq 0) {
+        if ($null -eq $viServersHashtable -or $viServersHashtable.Count -eq 0) {
             throw $Script:NoVsphereConnectionsFoundException
         }
 
         foreach ($vSphereNode in $vSphereNodes) {
             $warningMessage = [string]::Empty
 
-            if (-not $defaultViServers.ContainsKey($vSphereNode.InstanceName)) {
+            if (-not $viServersHashtable.ContainsKey($vSphereNode.InstanceName)) {
                 $warningMessage = ($Script:NoVsphereConnectionsFoundForNodeWarning -f $vSphereNode.InstanceName)
             } else {
-                $this.SetResourcesConnection($vSphereNode.Resources, $defaultViServers, $vSphereNode.InstanceName)
+                $this.SetResourcesConnection($vSphereNode.Resources, $viServersHashtable, $vSphereNode.InstanceName)
 
                 $validVsphereNodes.Add($vSphereNode) | Out-Null
             }
@@ -1059,12 +1142,12 @@ class DscConfigurationRunner {
     .DESCRIPTION
     Sets the connection property of vSphereNode resources and composite resources.
     #>
-    hidden [void] SetResourcesConnection([VmwDscResource[]] $Resources, [HashTable] $DefaultViServers, [string] $nodeInstanceName) {
+    hidden [void] SetResourcesConnection([VmwDscResource[]] $Resources, [HashTable] $ViServers, [string] $nodeInstanceName) {
         foreach ($resource in $Resources) {
             if ($resource.GetIsComposite()) {
-                $this.SetResourcesConnection($resource.GetInnerResources(), $DefaultViServers, $nodeInstanceName)
+                $this.SetResourcesConnection($resource.GetInnerResources(), $ViServers, $nodeInstanceName)
             } else {
-                $resource.Property['Connection'] = $defaultViServers[$nodeInstanceName]
+                $resource.Property['Connection'] = $ViServers[$nodeInstanceName]
             }
         }
     }
@@ -1106,44 +1189,180 @@ class DscConfigurationRunner {
             Property = $DscResource.Property
         }
 
-        Write-Progress "Invoking resource with id: $($DscResource.GetId())"
+        Write-Verbose "Invoking resource with id: $($DscResource.GetId())"
 
         $invokeResult = $null
 
+        # ignore progress from internal Get-DscResource in Invoke-DscResource 
         $oldProgressPref = (Get-Variable 'ProgressPreference').Value
         Set-Variable -Name 'ProgressPreference' -Value 'SilentlyContinue' -Scope 'Global'
 
-        if ($this.DscMethod -eq 'Test') {
-            try {
+        try {
+            if ($this.DscMethod -eq 'Test' -or $this.DscMethod -eq 'Get') {
                 $invokeResult = Invoke-DscResource @invokeSplatParams -Method $this.DscMethod
-            } catch {
-                # if an exception is thrown that means the resource is not in desired state
-                # due to a dependency not being in desired state
+            } else {
+                # checks if the resource is in target state
+                $isInDesiredState = Invoke-DscResource @invokeSplatParams -Method 'Test'
+    
+                # executes 'set' method only if state is not desired
+                if (-not $isInDesiredState.InDesiredState) {
+                    (Invoke-DscResource @invokeSplatParams -Method $this.DscMethod) | Out-Null
+                }
+            }
+        } catch {
+            if ($this.DscMethod -eq 'Test') {
                 $invokeResult = [PSCustomObject]@{
                     InDesiredState = $false
                 }
             }
-        } elseif ($this.DscMethod -eq 'Get') {
-            try {
-                $invokeResult = Invoke-DscResource @invokeSplatParams -Method $this.DscMethod
-            } catch {
-                # if an exception is thrown that means the resource is not in desired state
-                # due to a dependency not being in desired state
-                $invokeResult = $null
-            }
-        } else {
-            # checks if the resource is in target state
-            $isInDesiredState = Invoke-DscResource @invokeSplatParams -Method 'Test'
-
-            # executes 'set' method only if state is not desired
-            if (-not $isInDesiredState.InDesiredState) {
-                (Invoke-DscResource @invokeSplatParams -Method $this.DscMethod) | Out-Null
-            }
+        } finally {
+            $this.HandleStreamOutputFromDscResources($DscResource)
         }
 
+        # revert progresspreference
         Set-Variable -Name 'ProgressPreference' -Value $oldProgressPref -Scope 'Global'
 
         return $invokeResult
+    }
+
+    <#
+    .DESCRIPTION
+    Prints the output from the execution of a DSC Resource via the Invoke-DscResource cmdlet.
+    The logs are extracted from a file, located in the Temp directory of the OS, where the execution occurred.
+    This extraction and printing is required, because the streams are not available during the execution of the DSC Resource.
+    #>
+    hidden [void] HandleStreamOutputFromDscResources([VmwDscResource] $DscResource) {
+        # The Temp folder is not available when executing the build procedure with Travis CI.
+        if ($null -eq $env:TEMP) {
+            return
+        }
+
+        $logsToExtract = @('Warning', 'Verbose')
+
+        foreach ($logType in $logsToExtract) {
+            # get stream preference
+            # note: preference 
+            $logPreference = (Get-Variable -Name ($logType + 'Preference')).Value
+
+            if ($logPreference -ne 'Continue') {
+                continue
+            }
+
+            $connectionName = [string]::Empty
+
+            if ($DscResource.Property.ContainsKey('Connection')) {
+                $connectionName = $DscResource.Property['Connection'].Name
+            } elseif ($DscResource.Property.ContainsKey('Server')) {
+                $connectionName = $DscResource.Property['Server']
+            }
+
+            $resourceName = $DscResource.ResourceType
+            
+            # attempt to retrieve stream data if file exists
+            $logPath = Join-Path -Path $env:TEMP -ChildPath "__VMware.vSphereDSC_$($connectionName)_$($resourceName)_$($logType).TMP"
+
+            if (-not (Test-Path -Path $logPath -PathType 'Leaf')) {
+                continue
+            }
+        
+            $rows = Get-Content -Path $logPath -ErrorAction 'SilentlyContinue'
+        
+            foreach ($row in $rows) {
+                Invoke-Expression "Write-$LogType '$row'"
+            }
+        
+            # remove the temp file
+            Remove-Item -Path $logPath -ErrorAction 'SilentlyContinue' -Force
+        }
+    }
+
+    <#
+    .DESCRIPTION
+    Finds and validates DSC Resource key properties.
+    When two or more dsc resources of the same type have the same values for key properties an exception is thrown
+    #>
+    hidden [void] ValidateDscKeyProperties([VmwDscResource[]] $DscResources) {
+        $resourcesQueue = New-Object 'System.Collections.Queue'
+        $dscResourcesDuplicateChecker = New-Object 'System.Collections.Generic.HashSet[DscKeyPropertyResourceCheck]'
+
+        $resourcesQueue.Enqueue($DscResources)
+
+        while ($resourcesQueue.Count -gt 0) {
+            $currentResources = $resourcesQueue.Dequeue()
+
+            foreach ($currentResource in $currentResources) {
+                if ($currentResource.GetIsComposite()) {
+                    $resourcesQueue.Enqueue($currentResource.GetInnerResources())
+
+                    continue
+                }
+
+                $resourceCheck = $this.GetDscResouceKeyProperties($currentResource)
+
+                $isAdded = $dscResourcesDuplicateChecker.Add($resourceCheck)
+
+                if (-not $isAdded) {
+                    throw ($Script:DscResourcesWithDuplicateKeyPropertiesException -f $currentResource.ResourceType)
+                }
+            }
+        }
+    }
+
+    <#
+    .DESCRIPTION
+    Finds the key properties of a dsc resource and
+    wraps it in a DscKeyPropertyResourceCheck object with the resource type and key props array.
+    #>
+    hidden [DscKeyPropertyResourceCheck] GetDscResouceKeyProperties([VmwDscResource] $DscResource) {
+        $moduleName = $DscResource.ModuleName.Name
+        $moduleVersion = $DscResource.ModuleName.RequiredVersion.ToString()
+
+        # load resource module with 'using module'
+        # and find key properties via reflection
+        $sbText = @"
+                using module @{
+                    ModuleName = '$moduleName'
+                    RequiredVersion = '$moduleVersion'
+                }
+
+                `$dscProperties = [$($DscResource.ResourceType)].GetProperties()
+
+                `$dscKeyProperties = New-Object -TypeName 'System.Collections.ArrayList'
+
+                foreach (`$dscProperty in `$dscProperties) {
+                    `$dscPropertyAttr = `$dscProperty.CustomAttributes | Where-Object {
+                        `$_.AttributeType.ToString() -eq 'System.Management.Automation.DscPropertyAttribute'
+                    }
+
+                    # not a dsc property
+                    if (`$null -eq `$dscPropertyAttr) {
+                        continue
+                    }
+
+                    if (`$dscPropertyAttr.NamedArguments.MemberName -eq 'Key' -and `$dscPropertyAttr.NamedArguments.TypedValue.ToString() -eq '(Boolean)True') {
+                        `$dscKeyProperties.Add(`$dscProperty.Name) | Out-Null
+                    }
+                }
+
+                `$dscKeyProperties.ToArray()
+"@
+
+        $sb = [ScriptBlock]::Create($sbText)
+
+        $dscResourceKeyProperties = & $sb
+
+        $dscResourceKeyPropertiesHashTable = @{}
+
+        foreach ($dscKeyProp in $dscResourceKeyProperties) {
+            $dscResourceKeyPropertiesHashTable[$dscKeyProp] = $DscResource.Property[$dscKeyProp]
+        }
+
+        $resourceCheck = [DscKeyPropertyResourceCheck]::new(
+            $DscResource.ResourceType,
+            $dscResourceKeyPropertiesHashTable
+        )
+
+        return $resourceCheck
     }
 
     <#

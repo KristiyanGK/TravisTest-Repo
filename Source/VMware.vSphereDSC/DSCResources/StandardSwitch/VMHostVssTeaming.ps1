@@ -65,9 +65,22 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     [DscProperty()]
     [nullable[bool]] $RollingOrder
 
+    hidden [string] $PhysicalNicNotInBridgeMessage = "Physical network adapter {0} is not in the bridge with standard switch {1}."
+
     [void] Set() {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
@@ -83,6 +96,17 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     [bool] Test() {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
 
             $this.ConnectVIServer()
             $vmHost = $this.GetVMHost()
@@ -117,6 +141,17 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
         try {
             Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = "{0} Entering {1}"
+                Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
+
             $result = [VMHostVssTeaming]::new()
             $result.Server = $this.Server
 
@@ -144,6 +179,17 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     [bool] Equals($vss) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
 
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+
         $vssTeamingTest = @(
             $this.ShouldUpdateDscResourceSetting('CheckBeacon', $vss.Spec.Policy.NicTeaming.FailureCriteria.CheckBeacon, $this.CheckBeacon),
             $this.ShouldUpdateDscResourceSetting('NotifySwitches', $vss.Spec.Policy.NicTeaming.NotifySwitches, $this.NotifySwitches),
@@ -159,10 +205,41 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     <#
     .DESCRIPTION
 
+    Validates that all provided physical network adapters: (ActiveNic and StandbyNic) are in the bridge
+    with the specified standard switch.
+    #>
+    [void] ValidatePhysicalNetworkAdapters() {
+        $physicalNics = $this.ActiveNic + $this.StandbyNic
+
+        if ($physicalNics.Length -gt 0) {
+            $standardSwitch = $this.GetVss()
+            foreach ($physicalNic in $physicalNics) {
+                if (!($standardSwitch.Spec.Bridge.NicDevice -Contains $physicalNic)) {
+                    throw ($this.PhysicalNicNotInBridgeMessage -f $physicalNic, $standardSwitch.Name)
+                }
+            }
+        }
+    }
+
+    <#
+    .DESCRIPTION
+
     Updates the configuration of the virtual switch.
     #>
     [void] UpdateVssTeaming($vmHost) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
+        $this.ValidatePhysicalNetworkAdapters()
 
         $vssTeamingArgs = @{
             Name = $this.VssName
@@ -207,6 +284,17 @@ class VMHostVssTeaming : VMHostVssBaseDSC {
     #>
     [void] PopulateResult($vmHost, $vmHostVSSTeaming) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
         $currentVss = $this.GetVss()
 

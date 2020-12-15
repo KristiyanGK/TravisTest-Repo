@@ -1,6 +1,50 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## VMware.vSphereDSC 2.1.0.76 - 2020-12-14
+### Added
+- Added **IScsiName** property of **VMHostIScsiHba DSC Resource**.
+- Added Unit Tests for **IScsiName** property of **VMHostIScsiHba DSC Resource**.
+- Added Integration Tests for **IScsiName** property of **VMHostIScsiHba DSC Resource**.
+- Added Documentation and example Configuration for **IScsiName** property of **VMHostIScsiHba DSC Resource**.
+
+## VMware.vSphereDSC 2.1.0.75 - 2020-12-14
+### Changed
+- Moved name validation to **VmfsDatastore DSC Resource** due to not being applicable for **NfsDatastores**.
+
+## VMware.vSphereDSC 2.1.0.74 - 2020-12-09
+### Changed
+- Fixed bugs with physical network adapters when updating the teaming policy of the standard switch.
+
+## VMware.PSDesiredStateConfiguration 0.0.0.4 - 2020-12-07
+### Added
+- **ConnectionFilter** parameter was added to the **Start, Test and Get-VmwDscConfiguration** cmdlets, which gives the option to choose the **vSphere Nodes** on which the configuration will be executed.
+
+### Changed
+- Extend the **New-VmwDscConfiguration** cmdlet to have **Verbose** output.
+
+## VMware.PSDesiredStateConfiguration 0.0.0.3 - 2020-11-30
+### Changed
+- Extend ***-VmwDscConfiguration** cmdlets vaildation to check for **DSC Resources** with duplicate key properties.
+
+## VMware.PSDesiredStateConfiguration 0.0.0.2 - 2020-11-24
+### Added
+- Added a special **vSphereNode** dynamic keyword that represents a connection to a **VIServer** and allows reusing **vSphere** connections via the new execution engine.
+- Added documentation for new **vSphere Node** feature.
+
+### Changed
+- The **DSC Resources** in the **VMware.vSphereDSC** module now have the **Server** and **Credential** properties set as optional as they're not mandatory when using **vSphereNodes**.
+- **Test** and **Get-VmwDscConfiguration** cmdlets are extended with additional parameter sets to execute the latest applied configuration.
+
+## VMware.vSphereDSC 2.1.0.73 - 2020-11-24
+### Added
+- Added a special **vSphereNode** dynamic keyword that represents a connection to a **VIServer** and allows reusing **vSphere** connections via the new execution engine.
+- Added documentation for new **vSphere Node** feature.
+
+### Changed
+- The **DSC Resources** in the **VMware.vSphereDSC** module now have the **Server** and **Credential** properties set as optional as they're not mandatory when using **vSphereNodes**.
+- **Test** and **Get-VmwDscConfiguration** cmdlets are extended with additional parameter sets to execute the latest applied configuration.
+
 ## 2020-11-03
 ### Added
 - Added **BuildFlags** enumeration that tracks the steps which need to be performed during the build process.

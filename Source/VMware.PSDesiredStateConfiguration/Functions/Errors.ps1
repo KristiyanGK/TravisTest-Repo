@@ -24,11 +24,12 @@ $Script:DependsOnResourceNotFoundException = "DependsOn resource of {0} with nam
 $Script:DscResourceNotFoundException = "Resource of type: {0} was not found. Try importing it in the configuration file with Import-DscResource"
 $Script:ExperimentalFeatureNotEnabledInPsCoreException = 'This module depends on the Invoke-DscResource cmdlet and in order to use it must be enabled with "Enable-ExperimentalFeature PSDesiredStateConfiguration.InvokeDscResource"'
 $Script:NoVsphereConnectionsFoundException = "No active vSphere connection found. Please establish a connection first!"
-$Script:NestedMoreThanASingleLevelException = "Cannot nest more than a single level."
+$Script:NestedMoreThanASingleLevelException = "Nesting configurations, composite resources or regular dsc resources more than a single level of nesting is not supported"
 $Script:NestedNodesAreNotSupportedException = "Nesting nodes is not supported."
 $Script:TooManyConnectionOnASingleVCenterException = "More than 1 active connection found for '{0}'. Please establish only a single connection."
 $Script:VsphereNodesAreOnlySupportedOnPowerShellCoreException = "In order to be able to run vSphere Nodes please switch to a Core version of PowerShell"
 $Script:NoConfigurationDetectedForInvokeException = "No configuration has been found! Please supply a configuration via a parameter."
+$Script:DscResourcesWithDuplicateKeyPropertiesException = "The Dsc Resource of type '{0}' has multiple entries with the same key properties values. Please ensure all key properties have unique values."
 
 # configurationData exception
 $Script:ConfigurationDataDoesNotContainAllNodesException = "ConfigurationData parameter must contain an AllNodes key."

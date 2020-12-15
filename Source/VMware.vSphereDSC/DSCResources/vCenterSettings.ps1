@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 <#
 .NOTES
 vCenterSettings inherits BasevSphereConnection instead of BaseDSC because it is a specific case where
-the resource does not have it's own DSC key property. That's why were create a $Server property here in order to
+the resource does not have it's own DSC key property. That's why were define a $Server property here in order to
 use it as a key.
 #>
 [DscResource()]
@@ -25,7 +25,7 @@ class vCenterSettings : BasevSphereConnection {
     <#
     .DESCRIPTION
 
-    Name of the Server we are trying to connect to. The Server can be a vCenter or ESXi.
+    Name of the Server we are trying to connect to. The Server must be a vCenter.
     #>
     [DscProperty(Key)]
     [string] $Server
@@ -35,6 +35,7 @@ class vCenterSettings : BasevSphereConnection {
 
     Logging Level Advanced Setting value.
     #>
+    [DscProperty()]
     [LoggingLevel] $LoggingLevel = [LoggingLevel]::Unset
 
     <#
@@ -112,6 +113,17 @@ class vCenterSettings : BasevSphereConnection {
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $this.UpdatevCenterSettings($this.Connection)
@@ -119,12 +131,33 @@ class vCenterSettings : BasevSphereConnection {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
 
             $result = !$this.ShouldUpdatevCenterSettings()
@@ -136,12 +169,33 @@ class vCenterSettings : BasevSphereConnection {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [vCenterSettings] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [vCenterSettings]::new()
             $result.Server = $this.Server
 
@@ -153,6 +207,16 @@ class vCenterSettings : BasevSphereConnection {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
@@ -231,6 +295,17 @@ class vCenterSettings : BasevSphereConnection {
 
     [void] SetAdvancedSetting($advancedSettingName, $advancedSetting, $advancedSettingDesiredValue, $advancedSettingCurrentValue, $clearValue) {
         Write-VerboseLog -Message "{0} Entering {1}" -Arguments @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+
+        $writeToLogFilesplat = @{
+            Connection = $this.Connection.Name
+            ResourceName = $this.GetType().ToString()
+            LogType = 'Verbose'
+            Message = "{0} Entering {1}"
+            Arguments = @((Get-Date), (Get-PSCallStack)[0].FunctionName)
+        }
+
+        Write-LogToFile @writeToLogFilesplat
+
 
     	if ($clearValue) {
       	    if ($this.ShouldUpdateDscResourceSetting($advancedSettingName, $advancedSettingCurrentValue, [string]::Empty)) {

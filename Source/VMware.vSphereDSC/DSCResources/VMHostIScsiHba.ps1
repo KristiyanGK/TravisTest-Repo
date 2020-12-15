@@ -24,35 +24,79 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
     [DscProperty(Key)]
     [string] $Name
 
-    hidden [string] $ConfigureIScsiHbaChapMessage = "Configuring CHAP settings of iSCSI Host Bus Adapter {0} from VMHost {1}."
+    <#
+    .DESCRIPTION
 
-    hidden [string] $CouldNotConfigureIScsiHbaChapMessage = "Could not configure CHAP settings of iSCSI Host Bus Adapter {0} from VMHost {1}. For more information: {2}"
+    Specifies the name for the VMHost Host Bus Adapter device.
+    #>
+    [DscProperty()]
+    [string] $IScsiName
+
+    hidden [string] $ConfigureIScsiHbaMessage = "Configuring iSCSI Host Bus Adapter {0} from VMHost {1}."
+
+    hidden [string] $CouldNotConfigureIScsiHbaMessage = "Could not configure iSCSI Host Bus Adapter {0} from VMHost {1}. For more information: {2}"
 
     [void] Set() {
         try {
             Write-VerboseLog -Message $this.SetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
             $iScsiHba = $this.GetIScsiHba($this.Name)
 
-            $this.ConfigureIScsiHbaChap($iScsiHba)
+            $this.ConfigureIScsiHba($iScsiHba)
         }
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.SetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.SetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [bool] Test() {
         try {
             Write-VerboseLog -Message $this.TestMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $this.ConnectVIServer()
             $this.RetrieveVMHost()
 
             $iScsiHba = $this.GetIScsiHba($this.Name)
 
-            $result = !$this.ShouldModifyCHAPSettings($iScsiHba.AuthenticationProperties)
+            $shouldConfigureiScsiHba = @(
+                $this.ShouldModifyCHAPSettings($iScsiHba.AuthenticationProperties),
+                $this.ShouldUpdateDscResourceSetting('IScsiName', $iScsiHba.IScsiName, $this.IScsiName)
+            )
+            $result = !($shouldConfigureiScsiHba -Contains $true)
 
             $this.WriteDscResourceState($result)
 
@@ -61,12 +105,33 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.TestMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.TestMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     [VMHostIScsiHba] Get() {
         try {
             Write-VerboseLog -Message $this.GetMethodStartMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodStartMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             $result = [VMHostIScsiHba]::new()
 
             $this.ConnectVIServer()
@@ -81,15 +146,25 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         finally {
             $this.DisconnectVIServer()
             Write-VerboseLog -Message $this.GetMethodEndMessage -Arguments @($this.DscResourceName)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.GetMethodEndMessage
+                Arguments = @($this.DscResourceName)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
         }
     }
 
     <#
     .DESCRIPTION
 
-    Configures the CHAP properties of the specified iSCSI Host Bus Adapter.
+    Configures the CHAP properties and the iScsi name of the specified iSCSI Host Bus Adapter.
     #>
-    [void] ConfigureIScsiHbaChap($iScsiHba) {
+    [void] ConfigureIScsiHba($iScsiHba) {
         $setVMHostHbaParams = @{
             IScsiHba = $iScsiHba
             Confirm = $false
@@ -98,13 +173,25 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         }
 
         $this.PopulateCmdletParametersWithCHAPSettings($setVMHostHbaParams)
+        if (![string]::IsNullOrEmpty($this.IScsiName)) { $setVMHostHbaParams.IScsiName = $this.IScsiName }
 
         try {
-            Write-VerboseLog -Message $this.ConfigureIScsiHbaChapMessage -Arguments @($iScsiHba.Device, $this.VMHost.Name)
+            Write-VerboseLog -Message $this.ConfigureIScsiHbaMessage -Arguments @($iScsiHba.Device, $this.VMHost.Name)
+
+            $writeToLogFilesplat = @{
+                Connection = $this.Connection.Name
+                ResourceName = $this.GetType().ToString()
+                LogType = 'Verbose'
+                Message = $this.ConfigureIScsiHbaMessage
+                Arguments = @($iScsiHba.Device, $this.VMHost.Name)
+            }
+
+            Write-LogToFile @writeToLogFilesplat
+
             Set-VMHostHba @setVMHostHbaParams
         }
         catch {
-            throw ($this.CouldNotConfigureIScsiHbaChapMessage -f $iScsiHba.Device, $this.VMHost.Name, $_.Exception.Message)
+            throw ($this.CouldNotConfigureIScsiHbaMessage -f $iScsiHba.Device, $this.VMHost.Name, $_.Exception.Message)
         }
     }
 
@@ -117,6 +204,7 @@ class VMHostIScsiHba : VMHostIScsiHbaBaseDSC {
         $result.Server = $this.Connection.Name
         $result.VMHostName = $this.VMHost.Name
         $result.Name = $iScsiHba.Device
+        $result.IScsiName = $iScsiHba.IScsiName
         $result.ChapType = $iScsiHba.AuthenticationProperties.ChapType.ToString()
         $result.ChapName = [string] $iScsiHba.AuthenticationProperties.ChapName
         $result.MutualChapEnabled = $iScsiHba.AuthenticationProperties.MutualChapEnabled

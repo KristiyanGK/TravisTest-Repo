@@ -1,4 +1,6 @@
 <#
+Desired State Configuration Resources for VMware
+
 Copyright (c) 2018-2020 VMware, Inc.  All rights reserved
 
 The BSD-2 license (the "License") set forth below applies to all parts of the Desired State Configuration Resources for VMware project.  You may not use this file except in compliance with the License.
@@ -15,46 +17,56 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #>
 
 <#
-.NOTES
-The Unit tests for VMware.PSDesiredStateConfiguration get executed in a Ubuntu 18.04 build because
-they depend on PowerShell 7.0.
-#>
-
-<#
-.SYNOPSIS
-Runs the unit tests for the VMware.PSDesiredStateConfiguration module and returns code coverage percent.
 .DESCRIPTION
-Runs the unit tests for the VMware.PSDesiredStateConfiguration module and returns code coverage percent
-Before the tests are run it adds the required DSC resource to the PSModulePath
+Configuration with a single node that has many connections.
+Should generate multiple node objects.
 #>
-function Invoke-PsDesiredStateConfigurationTests {
-    $moduleName = 'VMware.PSDesiredStateConfiguration'
-    $moduleRoot = Join-Path $Script:SourceRoot $moduleName
-    $configPath = Join-Path (Join-Path (Join-Path $moduleRoot 'Tests') 'Required Dsc Resources') 'MyDscResource'
+Configuration Test
+{
+    Import-DscResource -ModuleName MyDscResource
 
-    # add the required DSC Resource for unit tests
-    $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$configPath"
-
-    # sets ProgressPreference to ignore text because it breaks the travisCI console output
-    $Global:ProgressPreference = 'SilentlyContinue'
-
-    # run unit tests
-    $coveragePercent = Invoke-UnitTests $moduleName
-
-    $Global:ProgressPreference = 'Continue'
-
-    $coveragePercent
+    vSphereNode @('MyNode', 'OtherNode') {
+        FileResource 'file'
+        {
+            Path = 'path'
+            SourcePath = 'path2'
+            Ensure = 'present'
+        }
+    }
 }
 
-# add common utilities
-. (Join-Path $PSScriptRoot 'common.ps1')
-
-$flagResult = Set-BuildFlags
-
-if (Test-Flag -InputFlag $flagResult -DesiredFlag Tests_PSDSC) {
-    $coveragePercent = Invoke-PsDesiredStateConfigurationTests
-
-    # save result in shared travis workspace file
-    $resultPath = Join-Path $env:TRAVIS_BUILD_DIR $env:PSDS_CODECOVERAGE_RESULTFILE
-    $coveragePercent | Out-File $resultPath
-}
+$Script:expectedCompiled = [VmwDscConfiguration]::new(
+    'Test',
+    @(
+        [VmwVsphereDscNode]::new(
+            'MyNode',
+            @(
+                [VmwDscResource]::new(
+                    'file',
+                    'FileResource',
+                    @{ ModuleName = 'MyDscResource'; RequiredVersion = '1.0' },
+                    @{ 
+                        Path = "path"
+                        SourcePath = "path2"
+                        Ensure = "present"
+                    }
+                )
+            )
+        ),
+        [VmwVsphereDscNode]::new(
+            'OtherNode',
+            @(
+                [VmwDscResource]::new(
+                    'file',
+                    'FileResource',
+                    @{ ModuleName = 'MyDscResource'; RequiredVersion = '1.0' },
+                    @{ 
+                        Path = "path"
+                        SourcePath = "path2"
+                        Ensure = "present"
+                    }
+                )
+            )
+        )
+    )
+)
