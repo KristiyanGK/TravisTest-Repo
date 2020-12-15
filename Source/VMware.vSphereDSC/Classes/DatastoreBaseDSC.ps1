@@ -120,17 +120,7 @@ class DatastoreBaseDSC : VMHostEntityBaseDSC {
         if (![string]::IsNullOrEmpty($this.FileSystemVersion)) { $newDatastoreParams.FileSystemVersion = $this.FileSystemVersion }
 
         try {
-            Write-VerboseLog -Message $this.CreateDatastoreMessage -Arguments @($this.Name, $this.VMHost.Name)
-
-            $writeToLogFilesplat = @{
-                Connection = $this.ConnectionName
-                ResourceName = $this.GetType().ToString()
-                LogType = 'Verbose'
-                Message = $this.CreateDatastoreMessage
-                Arguments = @($this.Name, $this.VMHost.Name)
-            }
-
-            Write-LogToFile @writeToLogFilesplat
+            $this.WriteLogUtil('Verbose', $this.CreateDatastoreMessage, @($this.Name, $this.VMHost.Name))
 
             $datastore = New-Datastore @newDatastoreParams
 
@@ -159,17 +149,7 @@ class DatastoreBaseDSC : VMHostEntityBaseDSC {
         if ($null -ne $this.CongestionThresholdMillisecond) { $setDatastoreParams.CongestionThresholdMillisecond = $this.CongestionThresholdMillisecond }
 
         try {
-            Write-VerboseLog -Message $this.ModifyDatastoreMessage -Arguments @($datastore.Name, $this.VMHost.Name)
-
-            $writeToLogFilesplat = @{
-                Connection = $this.ConnectionName
-                ResourceName = $this.GetType().ToString()
-                LogType = 'Verbose'
-                Message = $this.ModifyDatastoreMessage
-                Arguments = @($datastore.Name, $this.VMHost.Name)
-            }
-
-            Write-LogToFile @writeToLogFilesplat
+            $this.WriteLogUtil('Verbose', $this.ModifyDatastoreMessage, @($datastore.Name, $this.VMHost.Name))
 
             Set-Datastore @setDatastoreParams
         }
@@ -194,17 +174,7 @@ class DatastoreBaseDSC : VMHostEntityBaseDSC {
         }
 
         try {
-            Write-VerboseLog -Message $this.RemoveDatastoreMessage -Arguments @($datastore.Name, $this.VMHost.Name)
-
-            $writeToLogFilesplat = @{
-                Connection = $this.ConnectionName
-                ResourceName = $this.GetType().ToString()
-                LogType = 'Verbose'
-                Message = $this.RemoveDatastoreMessage
-                Arguments = @($datastore.Name, $this.VMHost.Name)
-            }
-
-            Write-LogToFile @writeToLogFilesplat
+            $this.WriteLogUtil('Verbose', $this.RemoveDatastoreMessage, @($datastore.Name, $this.VMHost.Name))
 
             Remove-Datastore @removeDatastoreParams
         }

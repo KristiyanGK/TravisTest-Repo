@@ -41,17 +41,7 @@ class VMHostEntityBaseDSC : BaseDSC {
     #>
     [void] RetrieveVMHost() {
         try {
-            Write-VerboseLog -Message $this.RetrieveVMHostMessage -Arguments @($this.VMHostName, $this.Connection.Name)
-
-            $writeToLogFilesplat = @{
-                Connection = $this.ConnectionName
-                ResourceName = $this.GetType().ToString()
-                LogType = 'Verbose'
-                Message = $this.RetrieveVMHostMessage
-                Arguments = @($this.VMHostName, $this.Connection.Name)
-            }
-
-            Write-LogToFile @writeToLogFilesplat
+            $this.WriteLogUtil('Verbose', $this.RetrieveVMHostMessage, @($this.VMHostName, $this.Connection.Name))
 
             $getVMHostParams = @{
                 Server = $this.Connection
