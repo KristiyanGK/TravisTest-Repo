@@ -276,6 +276,12 @@ class BasevSphereConnection {
             Write-WarningLog @writeLogSplat
         }
 
+        # this is a special case for the unit tests of BaseDSC\ShouldUpdateArraySetting
+        # because they do not set the Connection prop
+        if ($null -eq $this.Connection) {
+            return
+        }
+
         # write to log file
         $writeLogSplat['Connection'] = $this.Connection.Name
         $writeLogSplat['ResourceName'] = $this.GetType().ToString()
